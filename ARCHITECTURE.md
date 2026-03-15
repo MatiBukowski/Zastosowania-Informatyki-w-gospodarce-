@@ -9,10 +9,10 @@ flowchart TB
     end
 
     subgraph BE["Backend"]
-      API["FastAPI Backend<br/>API (REST/GraphQL TBD)"]
+      API["FastAPI"]
     end
 
-    DB[(Database<br/>Technology TBD)]
+    DB[(PostgreSQL)]
   end
 
   M -->|"HTTPS API calls"| API
