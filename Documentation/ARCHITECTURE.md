@@ -39,11 +39,12 @@ From what I see we can have four actors inside our app:
 backend/
 ├── src/
 │   ├── repositories/
-│   ├── models/           # Database models
-│   ├── controllers/      # API endpoints
-│   └── services/         # Complex business logic
-├── unit_tests/           # Test individual functions and services
-└── component_tests/      # Test API endpoints and service integration
+│   ├── models/               # Database models
+│   ├── controllers/          # API endpoints
+│   └── services/             # Complex business logic
+└── tests/
+    ├── unit_tests/           # Test individual functions and services
+    └── component_tests/      # Test API endpoints and service integration
 ```
 
 ### Flow example (TO BE DONE)
@@ -54,12 +55,9 @@ backend/
 
 ```
 frontend/
-├── src/
-│   ├── mobile/           # Mobile side
-│   ├── shared/           # Shared files for web and mobile versions
-│   └── web/              # Web side
-├── unit_tests/           # Test individual functions and services
-└── component_tests/      # Test API endpoints and service integration
+├── mobile/            # Mobile side
+├── shared/            # Shared files for web and mobile versions
+└── web/               # Web side
 ```
 
 ---
@@ -68,7 +66,6 @@ frontend/
 
 ```
 frontend/web/src/
-├── theme/               # Material UI theme configuration
 ├── views/              # Full page components (OrdersPage.tsx, etc)
 ├── components/         # Reusable UI components (OrderCard, Button, etc)
 ├── hooks/              # Custom hooks for API calls, should use frontend/shared/api/API.ts
@@ -86,6 +83,7 @@ frontend/shared/
 │   └── API.ts          # Single centralized API client
 ├── context/
 │   └── types.ts        # Shared TypeScript types/interfaces
+├── theme/              # Theme configuration (Material UI)
 └── README.md
 ```
 
