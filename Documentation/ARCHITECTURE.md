@@ -1,5 +1,7 @@
-# Projekt systemu
+# System Project
+
 ## System architecture diagram
+
 ```mermaid
 flowchart TB
   subgraph VPS["VPS (Docker)"]
@@ -20,24 +22,36 @@ flowchart TB
   API -->|"SQLModel"| DB
 ```
 
+## Actors
+
+From what I see we can have four actors inside our app:
+
+1. Customer - a person that can order some food, order a certain table etc.
+2. Waiter - a person that can pick up orders from customers.
+3. Data Manager - a person who can see the data display on web version of this system.
+4. Admin - a person with specified access to whole system.
+
 ## Backend design
+
 ### Folder structure
+
 ```
 backend/
 ├── src/
-│   ├── repositories/     
-│   ├── models/           # Database models 
+│   ├── repositories/
+│   ├── models/           # Database models
 │   ├── controllers/      # API endpoints
 │   └── services/         # Complex business logic
 ├── unit_tests/           # Test individual functions and services
 └── component_tests/      # Test API endpoints and service integration
 ```
-### Flow example (TO BE DONE)
 
+### Flow example (TO BE DONE)
 
 ## Frontend design
 
 ### Folder structure
+
 ```
 frontend/
 ├── src/
@@ -47,15 +61,17 @@ frontend/
 ├── unit_tests/           # Test individual functions and services
 └── component_tests/      # Test API endpoints and service integration
 ```
+
 ---
 
 #### Web
+
 ```
 frontend/web/src/
 ├── theme/               # Material UI theme configuration
 ├── views/              # Full page components (OrdersPage.tsx, etc)
 ├── components/         # Reusable UI components (OrderCard, Button, etc)
-├── hooks/              # Custom hooks for API calls, should use frontend/shared/api/API.ts 
+├── hooks/              # Custom hooks for API calls, should use frontend/shared/api/API.ts
 ├── services/           # Business logic combining multiple hooks
 └── App.tsx
 ```
@@ -63,6 +79,7 @@ frontend/web/src/
 ---
 
 #### Shared
+
 ```
 frontend/shared/
 ├── api/
@@ -76,7 +93,6 @@ frontend/shared/
 
 #### Mobile (TO BE SPECIFIED)
 
-
 ### Key Rules
 
 1. **One hook per domain**: `useOrderAPI`, `useUserAPI`, not `fetchOrder.ts`
@@ -89,6 +105,7 @@ frontend/shared/
 ---
 
 ### Abstraction level specification
+
 #### ❌ BAD: Too granular
 
 ```
@@ -109,6 +126,7 @@ hooks/
 ---
 
 ## Database design
+
 ### Physical Model
 
 ```mermaid
@@ -197,4 +215,4 @@ erDiagram
 
 ### ORM
 
-As for object relation mapper SQLModel will be used.
+As for object relational mapper SQLModel will be used.
