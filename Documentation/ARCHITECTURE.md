@@ -17,7 +17,7 @@ flowchart TB
 
   M -->|"HTTPS API calls"| API
   W -->|"HTTPS API calls"| API
-  API -->|"ORM/SQL queries"| DB
+  API -->|"SQLModel"| DB
 ```
 
 ## Backend design
@@ -111,4 +111,90 @@ hooks/
 ## Database design
 ### Physical Model
 
+```mermaid
+erDiagram
+  USER {
+    int user_id PK
+    varchar email
+    varchar password_hash
+    varchar first_name
+    varchar surname
+    varchar phone_number
+    boolean is_active
+  }
+
+  RESTAURANT {
+    int restaurant_id PK
+    varchar name
+    varchar address
+    boolean has_kiosk
+    boolean is_active
+  }
+
+  TABLE {
+    int table_id PK
+    int restaurant_id FK
+    int table_number
+    varchar qr_code_token
+    int capacity
+  }
+
+  MENU_ITEM {
+    int menu_item_id PK
+    int restaurant_id FK
+    varchar name
+    text description
+    decimal price
+    boolean is_available
+  }
+
+  "ORDER" {
+    int order_id PK
+    int restaurant_id FK
+    int user_id FK  "nullable"
+    int table_id FK "nullable"
+    int reservation_id FK "nullable"
+    enum order_source "KIOSK|WEB_APP|QR_TABLE"
+    enum status "NEW|PAID|IN_PREPARATION|READY|CANCELED"
+    decimal total_amount
+    datetime created_at
+  }
+
+  ORDER_ITEM {
+    int order_item_id PK
+    int order_id FK
+    int menu_item_id FK
+    int quantity
+    decimal unit_price
+    text customization_notes
+  }
+
+  RESERVATION {
+    int reservation_id PK
+    int user_id FK
+    int restaurant_id FK
+    int table_id FK
+    datetime reservation_time
+    varchar status
+  }
+
+  RESTAURANT ||--o{ TABLE : has
+  RESTAURANT ||--o{ MENU_ITEM : offers
+  RESTAURANT ||--o{ "ORDER" : receives
+  RESTAURANT ||--o{ RESERVATION : receives
+
+  USER ||--o{ RESERVATION : makes
+  USER ||--o{ "ORDER" : places
+
+  TABLE ||--o{ RESERVATION : reserved_for
+  TABLE ||--o{ "ORDER" : serves
+
+  RESERVATION ||--o{ "ORDER" : produces
+
+  "ORDER" ||--o{ ORDER_ITEM : contains
+  MENU_ITEM ||--o{ ORDER_ITEM : appears_in
+```
+
 ### ORM
+
+As for object relation mapper SQLModel will be used.
