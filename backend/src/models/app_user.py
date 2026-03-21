@@ -1,14 +1,15 @@
+from ..db import Base
 from typing import Optional
-from sqlalchemy import Column, String
-from sqlmodel import SQLModel, Field
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Boolean
 
-class AppUser(SQLModel, table=True):
+class AppUser(Base):
     __tablename__ = "app_user"
 
-    user_id: Optional[int] = Field(default=None, primary_key=True)
-    email: str = Field(sa_column=Column(String(255), nullable=False, unique=True))
-    password_hash: str = Field(sa_column=Column(String(255), nullable=False))
-    first_name: str = Field(sa_column=Column(String(100), nullable=False))
-    surname: str = Field(sa_column=Column(String(100), nullable=False))
-    phone_number: Optional[str] = Field(default=None, sa_column=Column(String(30), nullable=True))
-    is_active: bool = Field(default=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    surname: Mapped[str] = mapped_column(String(100), nullable=False)
+    phone_number: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False)

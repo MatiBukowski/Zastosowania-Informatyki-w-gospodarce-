@@ -1,12 +1,19 @@
+from ..db import Base
 from datetime import datetime
-from typing import Optional
-from sqlalchemy import Column, DateTime, ForeignKey, ForeignKeyConstraint, UniqueConstraint
-from sqlalchemy import Enum as SAEnum
-from sqlmodel import SQLModel, Field
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    ForeignKeyConstraint,
+    UniqueConstraint,
+    Enum as SAEnum,
+)
+
 
 from .enums import ReservationStatusEnum
 
-class Reservation(SQLModel, table=True):
+
+class Reservation(Base):
     __tablename__ = "reservation"
     __table_args__ = (
         ForeignKeyConstraint(
@@ -15,28 +22,14 @@ class Reservation(SQLModel, table=True):
             name="fk_reservation_table_same_restaurant",
             ondelete="RESTRICT",
         ),
-        UniqueConstraint("reservation_id", "restaurant_id", name="uq_reservation_id_restaurant"),
-    )
-
-    reservation_id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(
-        sa_column=Column(
-            ForeignKey("app_user.user_id", ondelete="CASCADE"),
-            nullable=False,
-        )
-    )
-    restaurant_id: int = Field(
-        sa_column=Column(
-            ForeignKey("restaurant.restaurant_id", ondelete="CASCADE"),
-            nullable=False,
-        )
-    )
-    table_id: int = Field(nullable=False)
-    reservation_time: datetime = Field(sa_column=Column(DateTime, nullable=False))
-    status: ReservationStatusEnum = Field(
-        default=ReservationStatusEnum.PENDING,
-        sa_column=Column(
-            SAEnum(ReservationStatusEnum, name="reservation_status_enum"),
-            nullable=False,
+        UniqueConstraint(
+            "reservation_id", "restaurant_id", name="uq_reservation_id_restaurant"
         ),
     )
+
+    reservation_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.user_id", ondelete="CASCADE"), nullable=False)
+    restaurant_id: Mapped[int] = mapped_column(ForeignKey("restaurant.restaurant_id", ondelete="CASCADE"), nullable=False)
+    table_id: Mapped[int] = mapped_column(nullable=False)
+    reservation_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    status: Mapped[ReservationStatusEnum] = mapped_column(SAEnum(ReservationStatusEnum, name="reservation_status_enum"), nullable=False, default=ReservationStatusEnum.PENDING)

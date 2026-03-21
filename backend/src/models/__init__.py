@@ -4,7 +4,7 @@ from .restaurant import Restaurant
 from .restaurant_table import RestaurantTable
 from .menu_item import MenuItem
 from .reservation import Reservation
-from .orders import Orders
+from .order import Order
 from .order_item import OrderItem
 
 __all__ = [
@@ -16,6 +16,6 @@ __all__ = [
     "RestaurantTable",
     "MenuItem",
     "Reservation",
-    "Orders",
+    "Order",
     "OrderItem",
 ]

@@ -1,6 +1,6 @@
-from sqlmodel import SQLModel, Session, create_engine
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, DeclarativeBase
 from .config import settings
-from .models import *
 
 engine = create_engine(
     settings.database_url,
@@ -8,8 +8,13 @@ engine = create_engine(
 )
 
 
+class Base(DeclarativeBase):
+    pass
+
+
 def create_db_and_tables() -> None:
-    SQLModel.metadata.create_all(engine)
+    from . import models  # noqa: F401
+    Base.metadata.create_all(engine)
 
 
 def get_session():

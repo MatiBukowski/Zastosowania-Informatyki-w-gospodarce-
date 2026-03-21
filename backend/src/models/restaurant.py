@@ -1,12 +1,13 @@
-from typing import Optional
-from sqlalchemy import Column, String
-from sqlmodel import SQLModel, Field
+from ..db import Base
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Boolean
 
-class Restaurant(SQLModel, table=True):
+
+class Restaurant(Base):
     __tablename__ = "restaurant"
 
-    restaurant_id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(sa_column=Column(String(255), nullable=False))
-    address: str = Field(sa_column=Column(String(500), nullable=False))
-    has_kiosk: bool = Field(default=False, nullable=False)
-    is_active: bool = Field(default=True, nullable=False)
+    restaurant_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    address: Mapped[str] = mapped_column(String(500), nullable=False)
+    has_kiosk: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

@@ -1,22 +1,22 @@
-from typing import Optional
-from sqlalchemy import Column, String, ForeignKey, UniqueConstraint, CheckConstraint
-from sqlmodel import SQLModel, Field
+from ..db import Base
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, ForeignKey, UniqueConstraint, CheckConstraint
 
-class RestaurantTable(SQLModel, table=True):
+
+class RestaurantTable(Base):
     __tablename__ = "restaurant_table"
     __table_args__ = (
-        UniqueConstraint("restaurant_id", "table_number", name="uq_restaurant_table_number"),
-        UniqueConstraint("table_id", "restaurant_id", name="uq_restaurant_table_id_restaurant"),
+        UniqueConstraint(
+            "restaurant_id", "table_number", name="uq_restaurant_table_number"
+        ),
+        UniqueConstraint(
+            "table_id", "restaurant_id", name="uq_restaurant_table_id_restaurant"
+        ),
         CheckConstraint("capacity > 0", name="chk_restaurant_table_capacity_positive"),
     )
 
-    table_id: Optional[int] = Field(default=None, primary_key=True)
-    restaurant_id: int = Field(
-        sa_column=Column(
-            ForeignKey("restaurant.restaurant_id", ondelete="CASCADE"),
-            nullable=False,
-        )
-    )
-    table_number: int = Field(nullable=False)
-    qr_code_token: str = Field(sa_column=Column(String(255), nullable=False, unique=True))
-    capacity: int = Field(nullable=False)
+    table_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    restaurant_id: Mapped[int] = mapped_column(ForeignKey("restaurant.restaurant_id", ondelete="CASCADE"), nullable=False)
+    table_number: Mapped[int] = mapped_column(nullable=False)
+    qr_code_token: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    capacity: Mapped[int] = mapped_column(nullable=False)
