@@ -12,3 +12,22 @@ class TableRepository:
         return self.db.execute(
             select(RestaurantTable).where(RestaurantTable.restaurant_id == restaurant_id)
         ).scalars().all()
+    
+    def get_table_by_id(self, table_id: int, restaurant_id: int) -> RestaurantTable | None:
+        query = select(RestaurantTable).where(
+            RestaurantTable.table_id == table_id,
+            RestaurantTable.restaurant_id == restaurant_id
+        )
+        
+        return self.db.execute(query).scalar_one_or_none()
+    
+    def create_table(self, table: RestaurantTable) -> RestaurantTable:
+        self.db.add(table) 
+        self.db.commit()           
+        self.db.refresh(table) 
+        return table
+    
+    def update_table(self, table: RestaurantTable) -> RestaurantTable:
+        self.db.commit()           
+        self.db.refresh(table) 
+        return table

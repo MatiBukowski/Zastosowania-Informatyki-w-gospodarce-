@@ -25,3 +25,10 @@ class TableStatusEnum(str, Enum):
     FREE = "FREE"
     OCCUPIED = "OCCUPIED"
     RESERVED = "RESERVED"
+
+
+class UserRoleEnum(str, Enum):
+    ADMIN = "ADMIN"
+    MANAGER = "MANAGER"
+    WAITER = "WAITER"
+    CUSTOMER = "CUSTOMER"
