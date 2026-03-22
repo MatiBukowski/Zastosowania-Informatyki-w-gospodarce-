@@ -1,6 +1,14 @@
 from ..db import Base
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, ForeignKey, UniqueConstraint, CheckConstraint
+from sqlalchemy import (
+    String,
+    ForeignKey,
+    UniqueConstraint,
+    CheckConstraint,
+    Enum as SAEnum
+)
+
+from .enums import TableStatusEnum
 
 
 class RestaurantTable(Base):
@@ -20,3 +28,4 @@ class RestaurantTable(Base):
     table_number: Mapped[int] = mapped_column(nullable=False)
     qr_code_token: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     capacity: Mapped[int] = mapped_column(nullable=False)
+    status: Mapped[TableStatusEnum] = mapped_column(SAEnum(TableStatusEnum, name="table_status_enum"), nullable=False, default=TableStatusEnum.FREE)
