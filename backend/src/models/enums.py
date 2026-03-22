@@ -19,3 +19,9 @@ class ReservationStatusEnum(str, Enum):
     CONFIRMED = "CONFIRMED"
     COMPLETED = "COMPLETED"
     CANCELED = "CANCELED"
+
+
+class TableStatusEnum(str, Enum):
+    FREE = "FREE"
+    OCCUPIED = "OCCUPIED"
+    RESERVED = "RESERVED"

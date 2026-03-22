@@ -1,4 +1,4 @@
-from .enums import OrderSourceEnum, OrderStatusEnum, ReservationStatusEnum
+from .enums import OrderSourceEnum, OrderStatusEnum, ReservationStatusEnum, TableStatusEnum
 from .app_user import AppUser
 from .restaurant import Restaurant
 from .restaurant_table import RestaurantTable
