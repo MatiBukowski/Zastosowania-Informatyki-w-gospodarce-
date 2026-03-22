@@ -19,7 +19,7 @@ flowchart TB
 
   M -->|"HTTPS API calls"| API
   W -->|"HTTPS API calls"| API
-  API -->|"SQLModel"| DB
+  API -->|"SQLAlchemy"| DB
 ```
 
 ## Actors
@@ -213,4 +213,4 @@ erDiagram
 
 ### ORM
 
-As for object relational mapper SQLModel will be used.
+As for object relational mapper SQLAlchemy will be used.
