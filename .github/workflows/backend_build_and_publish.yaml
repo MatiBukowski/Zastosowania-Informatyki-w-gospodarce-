@@ -28,3 +28,25 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/zig-backend:${{ github.event_name }}_${{ github.run_id }}
             ${{ github.ref_name == 'main' && format('{0}/zig-backend:latest', secrets.DOCKERHUB_USERNAME) || '' }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Update VPS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name 'Dawid Jabłoński'
+          git config --global user.email 'xederro@gmail.com'
+          git config --unset-all http.https://github.com/.extraheader
+          rm -rf .git
+          mkdir cicd
+          cd cicd
+          git clone "https://x-access-token:${{ secrets.TOKEN_VPS_REPO }}@github.com/xederro/CICD-VPS.git" --depth=1
+          cd CICD-VPS
+          sed -i 's|xederro/zig-backend:[a-zA-Z0-9_]+|xederro/zig-backend:${{ github.event_name }}_${{ github.run_id }}|g' docker-stack.yml
+          git add .
+          git commit -m"ZIG backend Update: $(date)"
+          git push
