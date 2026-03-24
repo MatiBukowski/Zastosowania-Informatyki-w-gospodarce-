@@ -43,7 +43,7 @@ jobs:
           cd CICD-VPS
           git config --global user.name 'Dawid Jabłoński'
           git config --global user.email 'xederro@gmail.com'
-          git config --unset-all http.https://github.com/.extraheader
+          git config --unset-all http.https://github.com/.extraheader || true
           sed -i 's|xederro/zig-backend:[a-zA-Z0-9_]+|xederro/zig-backend:${{ github.event_name }}_${{ github.run_id }}|g' docker-stack.yml
           git add .
           git commit -m"ZIG backend Update: $(date)"
