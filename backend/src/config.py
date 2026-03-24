@@ -11,6 +11,7 @@ class Settings:
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")
     POSTGRES_ECHO: bool = os.getenv("POSTGRES_ECHO", "false").lower() == "true"
+    PROD_ENV: bool = os.getenv("PROD_ENV", "false").lower() == "true"
 
     @property
     def database_url(self) -> str:
