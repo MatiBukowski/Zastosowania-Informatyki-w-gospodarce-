@@ -6,7 +6,7 @@ from src.controllers.health import router as health_router
 from src.controllers.restaurant import router as restaurant_router
 
 app = FastAPI(title="Restaurant Ordering API")
-prefix_router = APIRouter(prefix="" if settings.PROD_ENV else "/api")
+prefix_router = APIRouter(prefix="/api")
 
 @app.on_event("startup")
 def on_startup() -> None:
