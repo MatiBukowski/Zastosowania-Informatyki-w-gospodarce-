@@ -26,5 +26,5 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/zig-backend:${{ github.ref_name }}_${{ github.run_id }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/zig-backend:${{ github.event_name }}_${{ github.run_id }}
             ${{ github.ref_name == 'main' && format('{0}/zig-backend:latest', secrets.DOCKERHUB_USERNAME) || '' }}
