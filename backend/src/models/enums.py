@@ -34,7 +34,7 @@ class UserRoleEnum(str, Enum):
     CUSTOMER = "CUSTOMER"
 
 
-class CuisineTyupeEnum(str, Enum):
+class CuisineTypeEnum(str, Enum):
     ITALIAN = "ITALIAN"
     AMERICAN = "AMERICAN"
     POLISH = "POLISH"

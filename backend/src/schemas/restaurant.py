@@ -7,7 +7,7 @@ class RestaurantBase(BaseModel):
     name: str
     address: str
     has_kiosk: bool
-    cuisine_type: CuisineTypeEnum
+    cuisine: CuisineTypeEnum
     photo: Optional[str] = None
 
 
