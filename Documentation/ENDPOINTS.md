@@ -1,3 +1,3 @@
 1. **GET /restaurants**
-    * Zwraca listę: List[{"restaurant_id", "name", "address", "has_kiosk", "cuisine", "photo"}]
-        * Proponowana nazwa schematu:  **"RestaurantPublicResponse"**
+    * Returns a list: List[{"restaurant_id", "name", "address", "has_kiosk", "cuisine", "photo"}]
+        * Proposed schema name:  **"RestaurantPublicResponse"**
