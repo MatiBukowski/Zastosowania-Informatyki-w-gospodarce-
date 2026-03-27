@@ -16,5 +16,9 @@ class RestaurantPublicResponse(RestaurantBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class RestaurantAdminResponse(RestaurantPublicResponse):
+class SingleRestaurantPublicResponse(RestaurantPublicResponse):
+    description: str
+
+
+class RestaurantAdminResponse(SingleRestaurantPublicResponse):
     is_active: bool
