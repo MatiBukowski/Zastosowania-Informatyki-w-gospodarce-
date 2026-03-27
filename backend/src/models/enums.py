@@ -32,4 +32,21 @@ class UserRoleEnum(str, Enum):
     MANAGER = "MANAGER"
     WAITER = "WAITER"
     CUSTOMER = "CUSTOMER"
-    
+
+
+class CuisineTypeEnum(str, Enum):
+    ITALIAN = "ITALIAN"
+    AMERICAN = "AMERICAN"
+    POLISH = "POLISH"
+    MEDITERRANEAN = "MEDITERRANEAN"
+    GREEK = "GREEK"
+    FRENCH = "FRENCH"
+    SPANISH = "SPANISH"
+    ASIAN = "ASIAN"
+    JAPANESE = "JAPANESE"
+    INDIAN = "INDIAN"
+    KEBAB = "KEBAB"
+    MEXICAN = "MEXICAN"
+    VEGAN = "VEGAN"
+    FUSION = "FUSION"
+    OTHER = "OTHER"
