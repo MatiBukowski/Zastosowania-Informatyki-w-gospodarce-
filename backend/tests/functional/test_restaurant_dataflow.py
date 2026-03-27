@@ -6,7 +6,7 @@ class TestRestaurantDataflow:
     def test_get_all_restaurants_flow(self, client, db):
         create_restaurants(db)
 
-        response = client.get("/restaurants")
+        response = client.get("/api/restaurants")
 
         assert response.status_code == 200
         
