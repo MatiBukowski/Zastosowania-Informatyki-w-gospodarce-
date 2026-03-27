@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends
-from ..schemas import RestaurantPublicResponse
-from ..services import RestaurantService
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+from ..db import get_session
+from ..models import Restaurant
 
+router = APIRouter()
 
-router = APIRouter(prefix="/restaurants")
-
-@router.get("", response_model=list[RestaurantPublicResponse])
-def get_restaurants_endpoint(service: RestaurantService = Depends()):
-    return service.get_restaurants()
+@router.get("/restaurants")
+def get_restaurants(session: Session = Depends(get_session)):
+    restaurants = session.execute(select(Restaurant)).scalars().all()
+    return restaurants

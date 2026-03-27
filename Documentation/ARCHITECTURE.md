@@ -136,7 +136,6 @@ erDiagram
     varchar first_name
     varchar surname
     varchar phone_number
-    enum role "ADMIN|MANAGER|WAITER|CUSTOMER"
     boolean is_active
   }
 
@@ -145,8 +144,6 @@ erDiagram
     varchar name
     varchar address
     boolean has_kiosk
-    enum cuisine "ITALIAN|AMERICAN|POLISH|MEDITERRANEAN|GREEK|FRENCH|SPANISH|ASIAN|JAPANESE|INDIAN|KEBAB|MEXICAN|VEGAN|FUSION|OTHER"
-    varchar photo
     boolean is_active
   }
 
@@ -156,7 +153,6 @@ erDiagram
     int table_number
     varchar qr_code_token
     int capacity
-    enum status "FREE|OCCUPIED|RESERVED"
   }
 
   MENU_ITEM {
