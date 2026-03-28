@@ -17,7 +17,14 @@ async def lifespan(app: FastAPI):
         run_seed()
     yield
 
-app = FastAPI(title="Restaurant Ordering API", lifespan=lifespan)
+app = FastAPI(
+    title="Restaurant Ordering API",
+    lifespan=lifespan,
+    version="0.1.0",
+    openapi_url="/api/swagger.json",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc"
+)
 prefix_router = APIRouter(prefix="/api")
 
 prefix_router.include_router(health_router)
