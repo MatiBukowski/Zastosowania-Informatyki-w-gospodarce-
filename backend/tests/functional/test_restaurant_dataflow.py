@@ -15,7 +15,6 @@ class TestRestaurantDataflow:
 
         if len(data) > 0:
             first_restaurant = data[0]
-            print(first_restaurant)
             assert "restaurant_id" in first_restaurant
             assert "name" in first_restaurant
             assert "address" in first_restaurant
