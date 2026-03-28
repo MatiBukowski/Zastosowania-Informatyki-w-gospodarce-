@@ -21,5 +21,5 @@
     "strict": true,
     "types": ["vite/client"]
   },
-  "include": ["src", "../shared", "vite-env.d.ts"]
+  "include": ["src", "../shared", "vite-env.d.ts", "theme"]
 }

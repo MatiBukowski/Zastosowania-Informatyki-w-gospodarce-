@@ -1,6 +1,6 @@
 import { Container, Typography, Box, Button } from '@mui/material';
-import { getProjectInfo } from 'frontend-shared/context/constants';
-import { getRestaurants } from 'frontend-shared/api/API'; 
+import { getProjectInfo } from '../context/constants';
+import { getRestaurants } from '../api/API'; 
 import { useEffect } from 'react';
 
 export const HomePage = () => {
