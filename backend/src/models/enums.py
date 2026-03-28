@@ -19,3 +19,34 @@ class ReservationStatusEnum(str, Enum):
     CONFIRMED = "CONFIRMED"
     COMPLETED = "COMPLETED"
     CANCELED = "CANCELED"
+
+
+class TableStatusEnum(str, Enum):
+    FREE = "FREE"
+    OCCUPIED = "OCCUPIED"
+    RESERVED = "RESERVED"
+
+
+class UserRoleEnum(str, Enum):
+    ADMIN = "ADMIN"
+    MANAGER = "MANAGER"
+    WAITER = "WAITER"
+    CUSTOMER = "CUSTOMER"
+
+
+class CuisineTypeEnum(str, Enum):
+    ITALIAN = "ITALIAN"
+    AMERICAN = "AMERICAN"
+    POLISH = "POLISH"
+    MEDITERRANEAN = "MEDITERRANEAN"
+    GREEK = "GREEK"
+    FRENCH = "FRENCH"
+    SPANISH = "SPANISH"
+    ASIAN = "ASIAN"
+    JAPANESE = "JAPANESE"
+    INDIAN = "INDIAN"
+    KEBAB = "KEBAB"
+    MEXICAN = "MEXICAN"
+    VEGAN = "VEGAN"
+    FUSION = "FUSION"
+    OTHER = "OTHER"
