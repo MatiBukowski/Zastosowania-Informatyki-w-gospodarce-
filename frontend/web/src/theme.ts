@@ -1,27 +1,22 @@
 import { createTheme } from '@mui/material/styles';
-import { getProjectInfo } from 'frontend-shared/api/API';
-
-const info = getProjectInfo();
-const myColors = info.palette;
+import { colors } from 'frontend-shared/theme/palette';
 
 export const theme = createTheme({
   palette: {
     primary: {
-      main: myColors.strawberryRed, 
+      main: colors.strawberryRed, 
     },
     secondary: {
-      main: myColors.fern, 
+      main: colors.fern, 
     },
     background: {
-      default: myColors.seashell, 
+      default: colors.seashell, 
       paper: '#ffffff',          
     },
     text: {
-      primary: myColors.carbonBlack,
+      primary: colors.carbonBlack,
     }
   },
-
-  
   shape: {
     borderRadius: 16, 
   },
