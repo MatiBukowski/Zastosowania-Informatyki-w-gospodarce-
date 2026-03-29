@@ -28,3 +28,11 @@ Projekt z przedmiotu: Zastosowania Informatyki w gospodarce polegający na uspra
 - Zbieranie danych o liczbie zamówień na konkretny dzień, liczbę klientów w danej godzinie
 
 ### Tiktok jako marketing restauracji (ewentualnie specjalnie do reklamy jakiś ofert specjalnych) (TO BE SPECIFIED)
+
+---
+
+## Documentation
+
+- [Architecture](Documentation/ARCHITECTURE.md)
+- [Endpoints](Documentation/ENDPOINTS.md)
+- [Development Guide (Migrations, Tests, OpenAPI)](Documentation/DEVELOPMENT.md)
