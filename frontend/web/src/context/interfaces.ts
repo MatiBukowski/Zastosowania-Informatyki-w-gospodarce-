@@ -18,7 +18,7 @@ export enum CuisineType {
 }
 
 // base restaurant properties
-interface RestaurantBase {
+interface IRestaurantBase {
   name: string;
   address: string;
   has_kiosk: boolean;
@@ -27,6 +27,6 @@ interface RestaurantBase {
 }
 
 // restaurant data including identifier
-export interface Restaurant extends RestaurantBase {
+export interface IRestaurant extends IRestaurantBase {
   restaurant_id: number;
 }
