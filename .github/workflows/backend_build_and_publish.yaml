@@ -4,10 +4,11 @@ on:
     branches: [ main ]
     paths-ignore: [ '.github/**', 'README.md', '.gitignore', 'Documentation/**', 'frontend/**' ]
   pull_request:
+    paths-ignore: [ '.github/**', 'README.md', '.gitignore', 'Documentation/**', 'frontend/**' ]
   workflow_dispatch:
 
 jobs:
-  build_and_test:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -23,6 +24,13 @@ jobs:
           cd backend
           pip install -r requirements.txt
           pytest
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -42,7 +50,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build_and_test
+    needs: build
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code

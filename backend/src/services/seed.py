@@ -8,13 +8,6 @@ fake = Faker('pl_PL')
 
 RESTAURANTS_DATA = [
     {"name": "Abecadło z pieca spadło,O ziemię się hukło,Rozsypało się po kątach,Strasznie się potłukło:", "address": "ul. Włoska 1, Kraków", "cuisine": CuisineTypeEnum.ITALIAN, "has_kiosk": True, "description": "Authentic Italian cuisine with fresh ingredients."},
-    {"name": "Burger Joint", "address": "ul. Amerykańska 5, Warszawa", "cuisine": CuisineTypeEnum.AMERICAN, "has_kiosk": False, "description": "The best burgers in town, made with 100% beef."},
-    {"name": "Pierogarnia Staropolska", "address": "ul. Rynek 10, Wrocław", "cuisine": CuisineTypeEnum.POLISH, "has_kiosk": True, "description": "Traditional Polish dumplings with various fillings."},
-    {"name": "Sushi Zen", "address": "ul. Japońska 3, Poznań", "cuisine": CuisineTypeEnum.JAPANESE, "has_kiosk": False, "description": "Fresh and artfully prepared sushi and sashimi."},
-    {"name": "Taco Loco", "address": "ul. Meksykańska 7, Gdańsk", "cuisine": CuisineTypeEnum.MEXICAN, "has_kiosk": True, "description": "Spicy and delicious Mexican street food."},
-    {"name": "Greek Zorba", "address": "ul. Grecka 2, Łódź", "cuisine": CuisineTypeEnum.GREEK, "has_kiosk": False, "description": "Classic Greek dishes in a cozy atmosphere."},
-    {"name": "Kebab King", "address": "ul. Turecka 4, Szczecin", "cuisine": CuisineTypeEnum.KEBAB, "has_kiosk": True, "description": "Delicious and quick kebab for everyone."},
-    {"name": "Vegan Paradise", "address": "ul. Zielona 8, Lublin", "cuisine": CuisineTypeEnum.VEGAN, "has_kiosk": False, "description": "Healthy and tasty plant-based meals."},
 ]
 
 def generate_fake_restaurant() -> dict:
@@ -47,7 +40,9 @@ def generate_fake_restaurant() -> dict:
 
 def seed_restaurants(session: Session, count: int = 30):
     existing_count = session.query(Restaurant).count()
-    if existing_count > 0:
+    count = count - existing_count
+
+    if count <= 0:
         print(f"Database already contains {existing_count} restaurants. Skipping seeding.")
         return
 

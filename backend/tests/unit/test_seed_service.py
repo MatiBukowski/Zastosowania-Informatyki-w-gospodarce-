@@ -20,6 +20,9 @@ def test_seed_restaurants():
 
     seed_restaurants(session, count=25)
     assert session.query(Restaurant).count() == 25
+
+    seed_restaurants(session, count=30)
+    assert session.query(Restaurant).count() == 30
     
     session.close()
     Base.metadata.drop_all(bind=engine)
