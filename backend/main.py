@@ -1,6 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from contextlib import asynccontextmanager
-from src.db import create_db_and_tables
+from src.config import settings
+from src.services.seed import run_seed
 from src.controllers.health import router as health_router
 from src.controllers.restaurant import router as restaurant_router
 
@@ -8,11 +9,19 @@ from src.controllers.restaurant import router as restaurant_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up...")
-    create_db_and_tables()
-    print("Database and tables created!")
+    if settings.SEED_DATA:
+        print("Seeding data...")
+        run_seed()
     yield
 
-app = FastAPI(title="Restaurant Ordering API", lifespan=lifespan)
+app = FastAPI(
+    title="Restaurant Ordering API",
+    lifespan=lifespan,
+    version="0.1.0",
+    openapi_url="/api/swagger.json",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc"
+)
 prefix_router = APIRouter(prefix="/api")
 
 prefix_router.include_router(health_router)

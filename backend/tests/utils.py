@@ -1,4 +1,4 @@
-from backend.src.models import Restaurant
+from src.models import CuisineTypeEnum, Restaurant
 
 
 def create_restaurants(db):
@@ -6,7 +6,7 @@ def create_restaurants(db):
         name="Test Restaurant",
         address="Test Address",
         has_kiosk=True,
-        cuisine="ITALIAN",
+        cuisine=CuisineTypeEnum.ITALIAN,
         photo="test.jpg",
         description="restaurant description"
     )

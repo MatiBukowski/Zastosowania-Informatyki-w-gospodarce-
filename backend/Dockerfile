@@ -1,6 +1,8 @@
 FROM python:3.14-alpine3.23
 
-COPY . /app
+COPY ./src /app/src
+COPY ./main.py /app/main.py
+COPY ./requirements.txt /app/requirements.txt
 
 WORKDIR /app
 

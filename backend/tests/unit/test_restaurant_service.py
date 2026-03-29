@@ -20,21 +20,20 @@ class TestRestaurantService:
         assert result == test_data
         assert len(result) == 2
         assert result[0]["name"] == "Pizza Mario"
+        assert result[0]["description"] == "description1"
         mock_repo.get_restaurants_list.assert_called_once()
 
     def test_get_restaurant_success(self):
         mock_repo = MagicMock()
 
-        test_data = [
-            {"restaurant_id": 1, "name": "Pizza Mario", "address": "ul. Rynek 30, Wrocław", "has_kiosk": True, "cuisine": "ITALIAN", "photo": "photo1_url", "description": "description1"}
-        ]
+        test_data = {"restaurant_id": 1, "name": "Pizza Mario", "address": "ul. Rynek 30, Wrocław", "has_kiosk": True, "cuisine": "ITALIAN", "photo": "photo1_url", "description": "description1"}
         mock_repo.get_restaurant_by_id.return_value = test_data
         service = RestaurantService(repo=mock_repo)
         result = service.get_restaurant(restaurant_id=1)
 
         assert result == test_data
-        assert len(result) == 1
-        assert result[0]["name"] == "Pizza Mario"
+        assert result["name"] == "Pizza Mario"
+        assert result["description"] == "description1"
         mock_repo.get_restaurant_by_id.assert_called_once_with(1)
 
     def test_get_restaurant_error(self):
