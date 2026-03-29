@@ -7,7 +7,8 @@ def create_restaurants(db):
         address="Test Address",
         has_kiosk=True,
         cuisine=CuisineTypeEnum.ITALIAN,
-        photo="test.jpg"
+        photo="test.jpg",
+        description="restaurant description"
     )
     db.add(restaurant)
     db.commit()
