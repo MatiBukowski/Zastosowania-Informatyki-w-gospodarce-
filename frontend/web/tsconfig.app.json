@@ -6,14 +6,20 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
+    "baseUrl": ".",
+    "paths": {
+      "frontend-shared/*": ["../shared/*"]
+    },
+
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     "jsx": "react-jsx",
 
     "strict": true,
     "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["src", "../shared", "vite-env.d.ts", "theme"]
 }
