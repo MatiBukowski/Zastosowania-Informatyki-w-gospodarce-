@@ -147,6 +147,7 @@ erDiagram
     boolean has_kiosk
     enum cuisine "ITALIAN|AMERICAN|POLISH|MEDITERRANEAN|GREEK|FRENCH|SPANISH|ASIAN|JAPANESE|INDIAN|KEBAB|MEXICAN|VEGAN|FUSION|OTHER"
     varchar photo
+    text description
     boolean is_active
   }
 

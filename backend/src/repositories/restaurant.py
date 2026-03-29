@@ -11,3 +11,8 @@ class RestaurantRepository:
 
     def get_restaurants_list(self):
         return self.db.execute(select(Restaurant)).scalars().all()
+
+    def get_restaurant_by_id(self, restaurant_id: int) -> Restaurant | None:
+        return self.db.execute(
+            select(Restaurant).where(Restaurant.restaurant_id == restaurant_id)
+        ).scalar_one_or_none()
