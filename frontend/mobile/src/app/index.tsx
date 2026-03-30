@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, ActivityIndicator, SafeAreaView } from 'react-native';
-import { getRestaurants } from '../api/API';
+import { getRestaurants } from '../api/RestaurantAPI';
 import { theme } from '../theme/theme';
 
 export default function HomePageMobile() {
