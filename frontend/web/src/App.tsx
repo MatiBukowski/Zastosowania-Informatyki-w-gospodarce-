@@ -1,0 +1,14 @@
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import { theme } from '../theme/theme';
+import { HomePage } from './pages/HomePage';
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <HomePage />
+    </ThemeProvider>
+  );
+}
+
+export default App;
