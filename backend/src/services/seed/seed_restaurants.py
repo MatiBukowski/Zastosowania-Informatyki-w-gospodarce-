@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
-from ..models import Restaurant, CuisineTypeEnum
-from ..db import engine
+from ...models import Restaurant, CuisineTypeEnum
 from faker import Faker
 import random
 
@@ -59,7 +58,3 @@ def seed_restaurants(session: Session, count: int = 30):
     session.add_all(restaurants_to_add)
     session.commit()
     print(f"Successfully seeded {len(restaurants_to_add)} restaurants!")
-
-def run_seed():
-    with Session(engine) as session:
-        seed_restaurants(session)
