@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends
-from ..schemas import RestaurantPublicResponse, SingleRestaurantPublicResponse
-from ..services import RestaurantService
+from ..schemas import (
+    RestaurantPublicResponse,
+    SingleRestaurantPublicResponse,
+    MenuItemResponse
+)
+from ..services import RestaurantService, MenuService
 
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
@@ -15,6 +19,20 @@ router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 def get_restaurants_endpoint(service: RestaurantService = Depends()):
     return service.get_restaurants()
 
-@router.get("/{restaurant_id}", response_model=SingleRestaurantPublicResponse)
+@router.get(
+        "/{restaurant_id}",
+        summary="Get specific restaurant details",
+        description="Get information about specific restaurant",
+        response_model=SingleRestaurantPublicResponse
+        )
 def get_restaurant_endpoint(restaurant_id: int, service: RestaurantService = Depends()):
     return service.get_restaurant(restaurant_id)
+
+@router.get(
+        "/{restaurant_id}/menu",
+        summary="Get specific restaurant menu",
+        description="Retrieve a list of all available menu ites for specific restaurant",
+        response_model=list[MenuItemResponse]
+        )
+def get_menu_endpoint(restaurant_id: int, service: MenuService = Depends()):
+    return service.get_menu_for_restaurant(restaurant_id)
