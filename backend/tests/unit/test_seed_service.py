@@ -8,32 +8,34 @@ from src.db import Base
 engine = create_engine("sqlite:///:memory:")
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def test_seed_restaurants():
-    Base.metadata.create_all(bind=engine)
-    session = TestingSessionLocal()
+class TestSeedService:
 
-    assert session.query(Restaurant).count() == 0
+    def test_seed_restaurants(self):
+        Base.metadata.create_all(bind=engine)
+        session = TestingSessionLocal()
 
-    seed_restaurants(session, count=25)
-    assert session.query(Restaurant).count() == 25
+        assert session.query(Restaurant).count() == 0
 
-    seed_restaurants(session, count=30)
-    assert session.query(Restaurant).count() == 30
+        seed_restaurants(session, count=25)
+        assert session.query(Restaurant).count() == 25
 
-    session.close()
-    Base.metadata.drop_all(bind=engine)
+        seed_restaurants(session, count=30)
+        assert session.query(Restaurant).count() == 30
 
-def test_seed_menu_items():
-    Base.metadata.create_all(bind=engine)
-    session = TestingSessionLocal()
+        session.close()
+        Base.metadata.drop_all(bind=engine)
 
-    assert session.query(MenuItem).count() == 0
+    def test_seed_menu_items(self):
+        Base.metadata.create_all(bind=engine)
+        session = TestingSessionLocal()
 
-    seed_menu_items(session, count=25)
-    assert session.query(MenuItem).count() == 25
+        assert session.query(MenuItem).count() == 0
 
-    seed_menu_items(session, count=30)
-    assert session.query(MenuItem).count() == 30
+        seed_menu_items(session, count=10, number_of_restaurants=5)
+        assert session.query(MenuItem).count() == 50
 
-    session.close()
-    Base.metadata.drop_all(bind=engine)
+        seed_menu_items(session, count=20, number_of_restaurants=5)
+        assert session.query(MenuItem).count() == 100
+
+        session.close()
+        Base.metadata.drop_all(bind=engine)

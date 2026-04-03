@@ -20,8 +20,7 @@ def generate_fake_menu_item(restaurant_id: int = 1) -> dict:
         "is_available": random.choices([True, False], weights=[0.8, 0.2])[0]
     }
 
-def seed_menu_items(session: Session, count: int = 10):
-    number_of_restaurants = 5
+def seed_menu_items(session: Session, count: int = 10, number_of_restaurants: int = 5):
     existing_count = session.query(MenuItem).count()
     count = number_of_restaurants * count - existing_count
 
