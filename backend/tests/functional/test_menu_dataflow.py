@@ -3,7 +3,7 @@ from tests.utils import create_menu
 
 class TestMenuDataflow:
 
-    def test_get_menu_for_restauran_flow(self, client, db):
+    def test_get_menu_for_restaurant_flow(self, client, db):
         create_menu(db)
 
         response = client.get("/api/restaurants/1/menu")
@@ -22,7 +22,7 @@ class TestMenuDataflow:
             assert "price" in first_restaurant
             assert "is_available" in first_restaurant
 
-    def test_get_menu_for_restauran_not_found_flow(self, client, db):
+    def test_get_menu_for_restaurant_not_found_flow(self, client, db):
         create_menu(db)
 
         response = client.get("/api/restaurants/100/menu")

@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from src.models import Restaurant, MenuItem
 from src.services import seed_restaurants, seed_menu_items
 from src.db import Base
+from tests.utils import create_restaurants
 
 engine = create_engine("sqlite:///:memory:")
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -28,6 +29,7 @@ class TestSeedService:
     def test_seed_menu_items(self):
         Base.metadata.create_all(bind=engine)
         session = TestingSessionLocal()
+        create_restaurants(session)
 
         assert session.query(MenuItem).count() == 0
 

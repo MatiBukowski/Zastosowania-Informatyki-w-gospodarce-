@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from ...models import MenuItem
+from ...models import MenuItem, Restaurant
 from faker import Faker
 from faker_food import FoodProvider
 import random
@@ -21,6 +21,10 @@ def generate_fake_menu_item(restaurant_id: int = 1) -> dict:
     }
 
 def seed_menu_items(session: Session, count: int = 10, number_of_restaurants: int = 5):
+    restaurant_ids = [res_id[0] for res_id in session.query(Restaurant.restaurant_id).all()]
+    if not restaurant_ids:
+        raise ValueError("No restaurants in database. Seed restaurants first.")
+
     existing_count = session.query(MenuItem).count()
     count = number_of_restaurants * count - existing_count
 
@@ -34,11 +38,11 @@ def seed_menu_items(session: Session, count: int = 10, number_of_restaurants: in
         menu_items_to_add.append(MenuItem(**data))
 
     remaining = count - len(menu_items_to_add)
-    for idx in range(remaining):
-        i = idx // 10 + 1
-        data = generate_fake_menu_item(i)
+    for _ in range(remaining):
+        restaurant_id = random.choice(restaurant_ids[:number_of_restaurants])
+        data = generate_fake_menu_item(restaurant_id)
         menu_items_to_add.append(MenuItem(**data))
     
     session.add_all(menu_items_to_add)
     session.commit()
-    print(f"Successfully seeded {len(menu_items_to_add)} menu items!")
+    print(f"Successfully seeded {len(menu_items_to_add)} menu items for {number_of_restaurants} restaurants!")
