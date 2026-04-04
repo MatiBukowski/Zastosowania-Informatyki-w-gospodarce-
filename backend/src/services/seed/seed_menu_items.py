@@ -8,7 +8,7 @@ fake = Faker('pl_PL')
 fake.add_provider(FoodProvider)
 
 MENU_ITEMS_DATA = [
-    {"restaurant_id": 1, "name": "Pizza Margherita", "description": "Klasyczna pizza z sosem pomidorowym, mozzarellą i świeżą bazylią", "price": 29.99, "is_available": True}
+    {"name": "Pizza Margherita", "description": "Klasyczna pizza z sosem pomidorowym, mozzarellą i świeżą bazylią", "price": 29.99, "is_available": True}
 ]
 
 def generate_fake_menu_item(restaurant_id: int = 1) -> dict:
@@ -35,6 +35,8 @@ def seed_menu_items(session: Session, count: int = 10, number_of_restaurants: in
     menu_items_to_add = []
 
     for data in MENU_ITEMS_DATA[:count]:
+        restaurant_id = random.choice(restaurant_ids[:number_of_restaurants])
+        data["restaurant_id"] = restaurant_id
         menu_items_to_add.append(MenuItem(**data))
 
     remaining = count - len(menu_items_to_add)
