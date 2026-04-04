@@ -4,9 +4,12 @@ on:
   push:
     branches: [ main ]
     paths-ignore: [ '.github/**', 'README.md', '.gitignore', 'Documentation/**', 'backend/**', 'frontend/web/**' ]
-  pull_request:
-    paths-ignore: [ '.github/**', 'README.md', '.gitignore', 'Documentation/**', 'backend/**', 'frontend/web/**' ]
+#  pull_request:
+#    paths-ignore: [ '.github/**', 'README.md', '.gitignore', 'Documentation/**', 'backend/**', 'frontend/web/**' ]
   workflow_dispatch:
+
+env:
+  EXPO_PUBLIC_API_URL: https://xederro.tech
 
 jobs:
   build:
