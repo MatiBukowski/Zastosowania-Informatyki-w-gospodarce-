@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
 
 from src.config import settings
-from src.services.seed import run_seed
+from src.services import run_seed
 from src.controllers.health import router as health_router
 from src.controllers.restaurant import router as restaurant_router
 
