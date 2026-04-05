@@ -1,5 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from contextlib import asynccontextmanager
+from starlette.middleware.cors import CORSMiddleware
+
 from src.config import settings
 from src.services import run_seed
 from src.controllers.health import router as health_router
@@ -22,6 +24,15 @@ app = FastAPI(
     docs_url="/api/docs",
     redoc_url="/api/redoc"
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 prefix_router = APIRouter(prefix="/api")
 
 prefix_router.include_router(health_router)

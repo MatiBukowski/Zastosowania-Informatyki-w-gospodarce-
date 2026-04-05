@@ -6,11 +6,12 @@ import random
 fake = Faker('pl_PL')
 
 RESTAURANTS_DATA = [
-    {"name": "Abecadło z pieca spadło,O ziemię się hukło,Rozsypało się po kątach,Strasznie się potłukło:", "address": "ul. Włoska 1, Kraków", "cuisine": CuisineTypeEnum.ITALIAN, "has_kiosk": True, "description": "Authentic Italian cuisine with fresh ingredients."},
+    {"name": "Abecadło z pieca spadło,O ziemię się hukło,Rozsypało się po kątach,Strasznie się potłukło:", "address": "ul. Włoska 1, Kraków", "cuisine": CuisineTypeEnum.ITALIAN, "has_kiosk": True, "description": "Authentic Italian cuisine with fresh ingredients.", "photo": "https://minio.xederro.tech/prod/restaurant/0.jpg"},
 ]
 
 def generate_fake_restaurant() -> dict:
     cuisine = random.choice(list(CuisineTypeEnum))
+    photo_id = random.randint(0, 64)
 
     prefixes = {
         CuisineTypeEnum.ITALIAN: ["Trattoria", "Osteria", "Ristorante", "Pizzeria"],
@@ -34,6 +35,7 @@ def generate_fake_restaurant() -> dict:
         "cuisine": cuisine,
         "has_kiosk": random.choice([True, False]),
         "description": fake.sentence(nb_words=10),
+        "photo": f"https://minio.xederro.tech/prod/restaurant/{photo_id}.jpg",
         "is_active": True
     }
 
