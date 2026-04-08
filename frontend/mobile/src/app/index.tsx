@@ -1,47 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View, ActivityIndicator, SafeAreaView } from 'react-native';
-import { getRestaurants } from '../api/RestaurantAPI';
+import { FlatList, View, Text, ActivityIndicator, SafeAreaView } from 'react-native';
+import { useRestaurants } from '../hooks/useRestaurants';
+import { RestaurantCard } from '../components/RestaurantCard';
 import { theme } from '../theme/theme';
 
 export default function HomePageMobile() {
-  const [status, setStatus] = useState<string>('Waiting for database connection...');
-  const [loading, setLoading] = useState(true);
+    const { restaurants, loading, error } = useRestaurants();
 
-  useEffect(() => {
-    // testing connection
-    getRestaurants()
-      .then(data => {
-        // show the nr of restaurants to check connection
-        setStatus(`Working API! Restaurants: ${data?.length || 0}`);
-        setLoading(false);
-      })
-      .catch(err => {
-        setStatus(`API Error: ${err.message}`);
-        setLoading(false);
-      });
-  }, []);
+    return (
+        <SafeAreaView style={theme.common.screenContainer}>
+            {loading && (
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                </View>
+            )}
 
-  return (
-    <SafeAreaView style={theme.common.screenContainer}>
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            {error && (
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ color: 'red' }}>{error}</Text>
+                </View>
+            )}
 
-        <Text style={theme.typography.h4}>
-          Restaurant App 🍴
-        </Text>
-
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color={theme.colors.primary}
-            style={{ marginTop: 20 }}
-          />
-        ) : (
-          <Text style={[theme.typography.body, { marginTop: 20, color: theme.colors.text }]}>
-            {status}
-          </Text>
-        )}
-
-      </View>
-    </SafeAreaView>
-  );
+            {!loading && !error && (
+                <FlatList
+                    data={restaurants}
+                    keyExtractor={(item) => String(item.restaurant_id)}
+                    renderItem={({ item }) => <RestaurantCard restaurant={item} />}
+                    contentContainerStyle={{ padding: 16 }}
+                    ListHeaderComponent={
+                        <Text style={[theme.typography.h4, { marginBottom: 16 }]}>
+                            Restaurants 🍴
+                        </Text>
+                    }
+                    ListEmptyComponent={
+                        <Text style={theme.typography.body}>No restaurants found.</Text>
+                    }
+                />
+            )}
+        </SafeAreaView>
+    );
 }
