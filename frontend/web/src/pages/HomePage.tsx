@@ -1,31 +1,44 @@
-import { Container, Typography, Box, CircularProgress, Alert } from '@mui/material';
-import { useRestaurants } from '../hooks/useRestaurants';
-import { RestaurantCard } from '../components/RestaurantCard';
+import { Container, Typography, Box, Button } from '@mui/material';
+import { getProjectInfo } from '../context/constants';
+import { getRestaurants } from '../api/API'; 
+import { useEffect } from 'react';
 
 export const HomePage = () => {
-  const { restaurants, loading, error } = useRestaurants();
+  const info = getProjectInfo(); // name and version
+  
+
+  // console testing API connection 
+  useEffect(() => {
+    console.log("Connecting to API...");
+    getRestaurants()
+      .then(data => {
+        console.log("API data:", data);
+      })
+      .catch(err => {
+        console.error("Error connecting to API.", err);
+      });
+  }, []);
 
   return (
-      <Container maxWidth="sm" sx={{ mt: 4 }}>
+    <Container maxWidth="sm">
+      <Box sx={{ 
+        my: 4, 
+        textAlign: 'center', 
+        border: '1px solid', 
+        borderColor: 'divider', 
+        p: 3, 
+        borderRadius: 2 
+      }}>
         <Typography variant="h4" color="primary" gutterBottom>
-          Restaurants
+          {info.name}
         </Typography>
-
-        {loading && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <CircularProgress />
-            </Box>
-        )}
-
-        {error && <Alert severity="error">{error}</Alert>}
-
-        {!loading && !error && restaurants.map((r) => (
-            <RestaurantCard key={r.restaurant_id} restaurant={r} />
-        ))}
-
-        {!loading && !error && restaurants.length === 0 && (
-            <Typography color="text.secondary">No restaurants found.</Typography>
-        )}
-      </Container>
+        <Typography variant="body1">
+          <b>Version:</b> {info.version}
+        </Typography>
+        <Button variant="contained" sx={{ mt: 2 }}>
+          Button
+        </Button>
+      </Box>
+    </Container>
   );
 };
