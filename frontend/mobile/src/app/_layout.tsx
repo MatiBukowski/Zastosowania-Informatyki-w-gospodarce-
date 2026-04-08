@@ -23,8 +23,8 @@ export default function RootLayout() {
       }}
     >
       <Stack.Screen
-        name="index"
-
+        name="restaurants/[id]"
+        options={{ title: 'Restaurant Details' }}
       />
     </Stack>
 
