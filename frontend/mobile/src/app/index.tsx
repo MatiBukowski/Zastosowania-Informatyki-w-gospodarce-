@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View, ActivityIndicator, SafeAreaView } from 'react-native';
-import { getRestaurants } from '../api/RestaurantAPI';
+import { View, SafeAreaView } from 'react-native';
 import { theme } from '../theme/theme';
 import RestuarantView from '../views/RestaurantView';
 
