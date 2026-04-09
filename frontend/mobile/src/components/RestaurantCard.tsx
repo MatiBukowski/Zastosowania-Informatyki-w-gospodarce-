@@ -1,5 +1,6 @@
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 import { IRestaurant, CuisineType } from '@/context/interfaces';
 import { theme } from '../theme/theme';
@@ -37,14 +38,18 @@ function LocationBox({address}: {address: string}) {
 }
 
 function RestaurantCard({ restaurant }: { restaurant: IRestaurant }) {
+  const router = useRouter();
+
   return (
     <View style={theme.common.card}>
-      <PhotoBox photoUrl={restaurant.photo} />
-      <View style={{ flexDirection: 'column', padding: 8 }}>
-        <Text style={[theme.typography.h5, { color: theme.colors.secondary }]}>{restaurant.name}</Text>
-        <LocationBox address={restaurant.address} />
-        <CuisineBox cuisine={restaurant.cuisine} />
-      </View>
+      <TouchableOpacity onPress={() => router.push(`/restaurants/${restaurant.restaurant_id}` as any)}>
+        <PhotoBox photoUrl={restaurant.photo} />
+        <View style={{ flexDirection: 'column', padding: 8 }}>
+          <Text style={[theme.typography.h5, { color: theme.colors.secondary }]}>{restaurant.name}</Text>
+          <LocationBox address={restaurant.address} />
+          <CuisineBox cuisine={restaurant.cuisine} />
+        </View>
+      </TouchableOpacity>
     </View>
   )
 }

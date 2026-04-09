@@ -1,6 +1,4 @@
-import { FlatList, View, Text, ActivityIndicator, SafeAreaView } from 'react-native';
-import { useRestaurants } from '../hooks/useRestaurants';
-import { RestaurantCard } from '../components/RestaurantCard';
+import { View, SafeAreaView } from 'react-native';
 import { theme } from '../theme/theme';
 import RestuarantView from '../views/RestaurantView';
 
