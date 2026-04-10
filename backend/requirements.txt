@@ -8,4 +8,4 @@ pytest
 httpx
 faker
 faker-food
-PyJWT
+jwt
