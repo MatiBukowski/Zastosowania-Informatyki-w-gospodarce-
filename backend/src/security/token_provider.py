@@ -26,6 +26,19 @@ class TokenProvider:
         }
         return jwt.encode(payload, self.secret_key, algorithm="HS256")
     
+
+    def generate_access_token(self, refresh_token: str) -> str:
+        try:
+            payload = jwt.decode(refresh_token, self.secret_key, algorithms=["HS256"])
+            user_id = payload.get("user_id")
+            email = payload.get("email")
+            role = payload.get("role")
+            return self.generate_access_token(AppUser(user_id=user_id, email=email, role=role))
+        except jwt.ExpiredSignatureError:
+            raise Exception("Refresh token has expired")
+        except jwt.InvalidTokenError:
+            raise Exception("Invalid refresh token")
+        
     
     def generate_refresh_token(self, user: AppUser) -> str:
         payload = {
