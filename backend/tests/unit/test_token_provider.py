@@ -54,8 +54,8 @@ class TestTokenProvider:
       token_provider = self.token_provider
       test_user = self.test_user
 
-      # Create a refresh token that expires immediately
       token_provider.REFRESH_TOKEN_EXPIRE_DAYS = -1
       expired_refresh_token = token_provider.generate_refresh_token(test_user)
 
       with pytest.raises(Exception): token_provider.generate_access_token_from_refresh_token(expired_refresh_token)
+  

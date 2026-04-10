@@ -1,10 +1,8 @@
 import jwt, secrets, logging
 from datetime import datetime, timedelta, timezone
 
-
 from ..models.app_user import AppUser
 from ..models.enums import UserRoleEnum
-
 
 class TokenProvider:
     def __init__(self):
@@ -15,11 +13,9 @@ class TokenProvider:
         self.REFRESH_TOKEN_EXPIRE_DAYS = 30
         self.jwt_handler = jwt.JWT()
 
-
     @staticmethod
     def _generate_secret_key() -> str:
         return secrets.token_urlsafe(32)
-    
     
     def generate_access_token(self, user: AppUser) -> str:
         try:
@@ -38,7 +34,6 @@ class TokenProvider:
             self.logger.error(f"Error encoding access token: {str(e)}")
             raise Exception(f"Failed to generate access token: {str(e)}")
     
-
     def generate_access_token_from_refresh_token(self, refresh_token: str) -> str:
         try:
             self.logger.debug(f"Generating access token from refresh token for token={refresh_token}")
@@ -56,7 +51,6 @@ class TokenProvider:
             self.logger.error(f"Error decoding refresh token: {str(e)}")
             raise Exception(f"Invalid or expired refresh token: {str(e)}")
         
-    
     def generate_refresh_token(self, user: AppUser) -> str:
         try:
             self.logger.debug(f"Generating refresh token for user_id={user.user_id}, email={user.email}, role={user.role}")
