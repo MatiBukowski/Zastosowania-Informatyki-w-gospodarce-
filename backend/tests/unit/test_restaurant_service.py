@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 from fastapi import HTTPException, status
-from src.services.restaurant import RestaurantService
+from src.services import RestaurantService
 
 
 class TestRestaurantService:

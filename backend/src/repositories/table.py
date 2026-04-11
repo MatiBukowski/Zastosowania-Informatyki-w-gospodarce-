@@ -17,6 +17,14 @@ class TableRepository:
 
         return self.db.execute(query).scalar_one_or_none()
 
+    def get_table_by_number(self, table_number: int, restaurant_id: int) -> RestaurantTable | None:
+        query = select(RestaurantTable).where(
+            RestaurantTable.table_number == table_number,
+            RestaurantTable.restaurant_id == restaurant_id
+        )
+
+        return self.db.execute(query).scalar_one_or_none()
+
     def create_table(self, table: RestaurantTable) -> RestaurantTable:
         self.db.add(table) 
         self.db.commit()           

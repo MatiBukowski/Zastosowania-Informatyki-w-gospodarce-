@@ -10,7 +10,6 @@ class TableBase(BaseModel):
 
 
 class TableCreate(TableBase):
-    restaurant_id: int
     status: TableStatusEnum = TableStatusEnum.FREE
 
 
