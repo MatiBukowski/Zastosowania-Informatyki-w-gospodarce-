@@ -1,8 +1,12 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.models import Restaurant, MenuItem
-from src.services import seed_restaurants, seed_menu_items
+from src.models import Restaurant, MenuItem, AppUser
+from src.services import (
+    seed_restaurants,
+    seed_menu_items,
+    seed_users
+)
 from src.db import Base
 from tests.utils import create_restaurants
 
@@ -38,6 +42,21 @@ class TestSeedService:
 
         seed_menu_items(session, count=20, number_of_restaurants=5)
         assert session.query(MenuItem).count() == 100
+
+        session.close()
+        Base.metadata.drop_all(bind=engine)
+
+    def test_seed_users(self):
+        Base.metadata.create_all(bind=engine)
+        session = TestingSessionLocal()
+
+        assert session.query(AppUser).count() == 0
+
+        seed_users(session, count=5)
+        assert session.query(AppUser).count() == 5
+
+        seed_users(session, count=20)
+        assert session.query(AppUser).count() == 20
 
         session.close()
         Base.metadata.drop_all(bind=engine)

@@ -9,3 +9,5 @@ httpx
 faker
 faker-food
 jwt
+passlib
+bcrypt==4.0.1
