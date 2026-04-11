@@ -3,14 +3,15 @@ from datetime import datetime, timedelta, timezone
 
 from ..models.app_user import AppUser
 from ..models.enums import UserRoleEnum
+from ..config import settings
 
 class TokenProvider:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.secret_key = self._generate_secret_key()
+        self.secret_key = settings.JWT_SECRET
         self.jwt_key = jwt.jwk.OctetJWK(self.secret_key.encode())
-        self.ACCESS_TOKEN_EXPIRE_MINUTES = 30
-        self.REFRESH_TOKEN_EXPIRE_DAYS = 30
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        self.REFRESH_TOKEN_EXPIRE_DAYS = settings.REFRESH_TOKEN_EXPIRE_DAYS
         self.jwt_handler = jwt.JWT()
 
     @staticmethod
