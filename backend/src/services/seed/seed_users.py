@@ -1,10 +1,14 @@
 from passlib.context import CryptContext
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from ...models import AppUser, UserRoleEnum
 from faker import Faker
-import random
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__rounds=4
+)
 fake = Faker('pl_PL')
 
 def get_password_hash(password: str) -> str:
@@ -44,7 +48,11 @@ def seed_users(session: Session, count: int = 5):
     users_to_add = []
 
     for data in USERS_DATA[:count]:
-        users_to_add.append(AppUser(**data))
+        query = select(AppUser).where(AppUser.email == data["email"])
+        user_exists = session.scalars(query).first()
+
+        if not user_exists:
+            users_to_add.append(AppUser(**data))
 
     remaining = count - len(users_to_add)
     roles_to_assign = []
