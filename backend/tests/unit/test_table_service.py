@@ -127,3 +127,38 @@ class TestTableService:
         assert exc_info.value.detail == "Invalid or expired QR token"
         
         mock_repo.get_table_by_token.assert_called_once_with(test_token)
+
+    def test_regenerate_table_qr_code_success(self):
+        mock_repo = MagicMock()
+        mock_table = RestaurantTable(
+            table_id=1, 
+            restaurant_id=2, 
+            table_number=5, 
+            status=TableStatusEnum.FREE,
+            qr_code_token=uuid.uuid4()
+        )
+
+        mock_repo.update_qr_code_token.return_value = mock_table
+
+        service = TableService(repo=mock_repo)
+        result = service.regenerate_table_qr_code(table_id=1, restaurant_id=2)
+
+        assert result == mock_table
+        mock_repo.update_qr_code_token.assert_called_once()
+
+        called_args = mock_repo.update_qr_code_token.call_args[0]
+
+        assert called_args[0] == 1
+        assert called_args[1] == 2
+        assert isinstance(called_args[2], uuid.UUID)
+
+    def test_regenerate_table_qr_code_not_found_raises_404(self):
+        mock_repo = MagicMock()
+        mock_repo.update_qr_code_token.return_value = None
+
+        service = TableService(repo=mock_repo)
+        with pytest.raises(HTTPException) as exc_info:
+            service.regenerate_table_qr_code(table_id=1, restaurant_id=1)
+
+        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+        assert exc_info.value.detail == "Table with id 1 not found in restaurant 1"

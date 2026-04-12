@@ -43,3 +43,17 @@ class TableRepository:
         self.db.commit()           
         self.db.refresh(table) 
         return table
+
+    def update_qr_code_token(self, table_id: int, restaurant_id: int, new_token: UUID):
+        query = select(RestaurantTable).where(
+            RestaurantTable.restaurant_id == restaurant_id,
+            RestaurantTable.table_id == table_id
+        )
+        table = self.db.execute(query).scalar_one_or_none()
+        
+        if table:
+            table.qr_code_token = new_token
+            self.db.commit()
+            self.db.refresh(table)
+            
+        return table

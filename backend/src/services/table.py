@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from uuid import UUID
+import uuid
 from ..models import RestaurantTable, TableStatusEnum
 from ..schemas import TableCreate, TableUpdate
 from ..repositories import TableRepository
@@ -41,7 +41,7 @@ class TableService:
 
         return self.repo.update_table(db_table)
 
-    def resolve_table_by_token(self, token: UUID):
+    def resolve_table_by_token(self, token: uuid.UUID):
         db_table = self.repo.get_table_by_token(token)
 
         if not db_table:
@@ -51,3 +51,15 @@ class TableService:
             )
             
         return db_table
+
+    def regenerate_table_qr_code(self, table_id: int, restaurant_id: int):
+        new_token = uuid.uuid4()
+        updated_table = self.repo.update_qr_code_token(table_id, restaurant_id, new_token)
+
+        if not updated_table:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Table with id {table_id} not found in restaurant {restaurant_id}"
+            )
+
+        return updated_table
