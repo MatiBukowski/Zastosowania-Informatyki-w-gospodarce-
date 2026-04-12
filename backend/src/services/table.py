@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException, status
+from uuid import UUID
 from ..models import RestaurantTable, TableStatusEnum
 from ..schemas import TableCreate, TableUpdate
 from ..repositories import TableRepository
@@ -39,3 +40,14 @@ class TableService:
             setattr(db_table, key, value) 
 
         return self.repo.update_table(db_table)
+
+    def resolve_table_by_token(self, token: UUID):
+        db_table = self.repo.get_table_by_token(token)
+
+        if not db_table:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invalid or expired QR token"
+            )
+            
+        return db_table

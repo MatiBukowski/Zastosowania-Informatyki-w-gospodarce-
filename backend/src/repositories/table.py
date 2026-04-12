@@ -1,4 +1,5 @@
 from fastapi import Depends
+from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from ..db import get_session
@@ -21,6 +22,13 @@ class TableRepository:
         query = select(RestaurantTable).where(
             RestaurantTable.table_number == table_number,
             RestaurantTable.restaurant_id == restaurant_id
+        )
+
+        return self.db.execute(query).scalar_one_or_none()
+
+    def get_table_by_token(self, token: UUID) -> RestaurantTable | None:
+        query = select(RestaurantTable).where(
+            RestaurantTable.qr_code_token == token
         )
 
         return self.db.execute(query).scalar_one_or_none()
