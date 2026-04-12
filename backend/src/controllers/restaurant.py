@@ -54,4 +54,4 @@ def post_table_endpoint(restaurant_id: int, table_data: TableCreate, service: Ta
     response_model=TableResponse
 )
 def update_table_endpoint(table_id: int, restaurant_id: int, table_data: TableUpdate, service: TableService = Depends()):
-    return service.update_existing_table(restaurant_id, table_id, table_data)
+    return service.update_existing_table(table_id, restaurant_id, table_data)

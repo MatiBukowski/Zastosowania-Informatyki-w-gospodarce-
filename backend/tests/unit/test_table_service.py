@@ -1,4 +1,5 @@
 import pytest
+import uuid
 from unittest.mock import MagicMock
 from fastapi import HTTPException, status
 from src.services import TableService
@@ -90,3 +91,39 @@ class TestTableService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot update an occupied table" in exc_info.value.detail
         mock_repo.update_table.assert_not_called()
+
+    def test_resolve_table_by_token_success(self):
+        mock_repo = MagicMock()
+        test_token = uuid.uuid4()
+        mock_table = RestaurantTable(
+            table_id=1, 
+            restaurant_id=1, 
+            table_number=5, 
+            capacity=3,
+            status=TableStatusEnum.FREE,
+            qr_code_token=test_token
+        )
+
+        mock_repo.get_table_by_token.return_value = mock_table
+        
+        service = TableService(repo=mock_repo)
+        result = service.resolve_table_by_token(test_token)
+
+       
+        assert result == mock_table
+        mock_repo.get_table_by_token.assert_called_once_with(test_token)
+
+
+    def test_resolve_table_by_token_not_found_raises_404(self):
+        mock_repo = MagicMock()
+        test_token = uuid.uuid4()
+        mock_repo.get_table_by_token.return_value = None
+
+        service = TableService(repo=mock_repo)
+        with pytest.raises(HTTPException) as exc_info:
+            service.resolve_table_by_token(test_token)
+
+        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+        assert exc_info.value.detail == "Invalid or expired QR token"
+        
+        mock_repo.get_table_by_token.assert_called_once_with(test_token)
