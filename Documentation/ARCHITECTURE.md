@@ -155,7 +155,7 @@ erDiagram
     int table_id PK
     int restaurant_id FK
     int table_number
-    varchar qr_code_token
+    uuid qr_code_token
     int capacity
     enum status "FREE|OCCUPIED|RESERVED"
   }

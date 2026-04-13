@@ -9,3 +9,19 @@
 3. **GET /api/restaurant/{restaurant_id}/menu**
     * Returns: {"menu_item_id", "name", "description", "price", "is_available"}
         * Proposed schema name:  **"MenuItemResponse"**
+     
+4. **POST /api/restaurant/{restaurant_id}/tables**
+    * Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
+        * Proposed schema name:  **"TableResponse"**
+
+5. **PATCH /api/restaurant/{restaurant_id}/tables/{table_id}**
+    * Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
+        * Proposed schema name:  **"TableResponse"**
+     
+6. **PATCH /api/restaurant/{restaurant_id}/tables/{table_id}/regenerate-qr-code**
+    * Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
+        * Proposed schema name:  **"TableResponse"**
+     
+7. **GET /api/tables/resolve/{token}**
+   * Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
+        * Proposed schema name:  **"TableResponse"**
