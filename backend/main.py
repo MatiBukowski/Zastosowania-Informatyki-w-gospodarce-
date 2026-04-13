@@ -4,8 +4,11 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.config import settings
 from src.services import run_seed
-from src.controllers.health import router as health_router
-from src.controllers.restaurant import router as restaurant_router
+from src.controllers import (
+    health_router,
+    restaurant_router,
+    table_router
+)
 
 
 @asynccontextmanager
@@ -37,4 +40,5 @@ prefix_router = APIRouter(prefix="/api")
 
 prefix_router.include_router(health_router)
 prefix_router.include_router(restaurant_router)
+prefix_router.include_router(table_router)
 app.include_router(prefix_router)

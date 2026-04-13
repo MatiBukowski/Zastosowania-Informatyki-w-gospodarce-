@@ -1,7 +1,8 @@
+import uuid
 from ..db import Base
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import (
-    String,
+    Uuid,
     ForeignKey,
     UniqueConstraint,
     CheckConstraint,
@@ -26,6 +27,12 @@ class RestaurantTable(Base):
     table_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     restaurant_id: Mapped[int] = mapped_column(ForeignKey("restaurant.restaurant_id", ondelete="CASCADE"), nullable=False)
     table_number: Mapped[int] = mapped_column(nullable=False)
-    qr_code_token: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    qr_code_token: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        nullable=False,
+        unique=True,
+        index=True,
+        default=uuid.uuid4
+    )
     capacity: Mapped[int] = mapped_column(nullable=False)
     status: Mapped[TableStatusEnum] = mapped_column(SAEnum(TableStatusEnum, name="table_status_enum"), nullable=False, default=TableStatusEnum.FREE)
