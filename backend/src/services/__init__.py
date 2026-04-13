@@ -6,3 +6,5 @@ from .seed.seed_tables import seed_tables
 from .seed.seed_reservations import seed_reservations
 from .restaurant import RestaurantService
 from .menu import MenuService
+from .restaurant_table import RestaurantTableService
+from .reservation import ReservationService

@@ -1,2 +1,4 @@
 from .restaurant import RestaurantPublicResponse, SingleRestaurantPublicResponse , RestaurantAdminResponse
 from .menu import MenuItemResponse
+from .restaurant_table import RestaurantTableResponse
+from .reservation import ReservationPublicResponse
