@@ -8,7 +8,7 @@ def generate_fake_table(restaurant_id: int, table_number: int) -> dict:
     return {
         "restaurant_id": restaurant_id,
         "table_number": table_number,
-        "qr_code_token": str(uuid.uuid4())[:16],
+        "qr_code_token": uuid.uuid4(),
         "capacity": random.choice([2, 4, 6, 8]),
         "status": random.choice(list(TableStatusEnum)),
     }

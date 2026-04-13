@@ -1,4 +1,4 @@
 from .restaurant import RestaurantRepository
 from .menu import MenuRepository
-from .restaurant_table import RestaurantTableRepository
+from .table import TableRepository
 from .reservation import ReservationRepository
