@@ -2,5 +2,7 @@ from .seed.run_seeds import run_seed
 from .seed.seed_restaurants import seed_restaurants
 from .seed.seed_menu_items import seed_menu_items
 from .seed.seed_users import seed_users
+from .seed.seed_tables import seed_tables
+from .seed.seed_reservations import seed_reservations
 from .restaurant import RestaurantService
 from .menu import MenuService
