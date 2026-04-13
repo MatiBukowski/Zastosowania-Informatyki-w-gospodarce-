@@ -56,7 +56,7 @@ class TestTableService:
         service = TableService(repo=mock_repo)
         update_data = TableUpdate(capacity=5)
 
-        result = service.update_existing_table(table_id=1, restaurant_id=1, table_data=update_data)
+        result = service.update_existing_table(table_id=1, table_data=update_data)
 
         assert result.capacity == 5
         mock_repo.update_table.assert_called_once()
@@ -69,7 +69,7 @@ class TestTableService:
         update_data = TableUpdate(capacity=5)
 
         with pytest.raises(HTTPException) as exc_info:
-            service.update_existing_table(table_id=1, restaurant_id=1, table_data=update_data)
+            service.update_existing_table(table_id=1, table_data=update_data)
 
         assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
         mock_repo.update_table.assert_not_called()
@@ -86,7 +86,7 @@ class TestTableService:
         update_data = TableUpdate(capacity=5)
 
         with pytest.raises(HTTPException) as exc_info:
-            service.update_existing_table(table_id=1, restaurant_id=1, table_data=update_data)
+            service.update_existing_table(table_id=1, table_data=update_data)
 
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot update an occupied table" in exc_info.value.detail
@@ -141,7 +141,7 @@ class TestTableService:
         mock_repo.update_qr_code_token.return_value = mock_table
 
         service = TableService(repo=mock_repo)
-        result = service.regenerate_table_qr_code(table_id=1, restaurant_id=2)
+        result = service.regenerate_table_qr_code(table_id=1)
 
         assert result == mock_table
         mock_repo.update_qr_code_token.assert_called_once()
@@ -149,8 +149,7 @@ class TestTableService:
         called_args = mock_repo.update_qr_code_token.call_args[0]
 
         assert called_args[0] == 1
-        assert called_args[1] == 2
-        assert isinstance(called_args[2], uuid.UUID)
+        assert isinstance(called_args[1], uuid.UUID)
 
     def test_regenerate_table_qr_code_not_found_raises_404(self):
         mock_repo = MagicMock()
@@ -158,7 +157,7 @@ class TestTableService:
 
         service = TableService(repo=mock_repo)
         with pytest.raises(HTTPException) as exc_info:
-            service.regenerate_table_qr_code(table_id=1, restaurant_id=1)
+            service.regenerate_table_qr_code(table_id=1)
 
         assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
-        assert exc_info.value.detail == "Table with id 1 not found in restaurant 1"
+        assert exc_info.value.detail == "Table with id 1 not found"

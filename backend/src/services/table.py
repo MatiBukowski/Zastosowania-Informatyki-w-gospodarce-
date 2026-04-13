@@ -21,8 +21,8 @@ class TableService:
         new_table = RestaurantTable(restaurant_id=restaurant_id, **data_dict)
         return self.repo.create_table(new_table)
 
-    def update_existing_table(self, table_id: int, restaurant_id: int, table_data: TableUpdate):     
-        db_table = self.repo.get_table_by_id(table_id, restaurant_id)
+    def update_existing_table(self, table_id: int, table_data: TableUpdate):     
+        db_table = self.repo.get_table_by_id(table_id)
         if not db_table:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, 
@@ -52,14 +52,14 @@ class TableService:
             
         return db_table
 
-    def regenerate_table_qr_code(self, table_id: int, restaurant_id: int):
+    def regenerate_table_qr_code(self, table_id: int):
         new_token = uuid.uuid4()
-        updated_table = self.repo.update_qr_code_token(table_id, restaurant_id, new_token)
+        updated_table = self.repo.update_qr_code_token(table_id, new_token)
 
         if not updated_table:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Table with id {table_id} not found in restaurant {restaurant_id}"
+                detail=f"Table with id {table_id} not found"
             )
 
         return updated_table

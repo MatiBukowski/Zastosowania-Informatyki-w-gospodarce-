@@ -47,19 +47,3 @@ def get_menu_endpoint(restaurant_id: int, service: MenuService = Depends()):
 )
 def post_table_endpoint(restaurant_id: int, table_data: TableCreate, service: TableService = Depends()):
     return service.create_new_table(restaurant_id, table_data)
-
-@router.patch(
-    "/{restaurant_id}/tables/{table_id}",
-    summary="Update existing table",
-    response_model=TableResponse
-)
-def update_table_endpoint(table_id: int, restaurant_id: int, table_data: TableUpdate, service: TableService = Depends()):
-    return service.update_existing_table(table_id, restaurant_id, table_data)
-
-@router.patch(
-    "/{restaurant_id}/tables/{table_id}/regenerate-qr-code",
-    summary="Regenerate QR code for existing table",
-    response_model=TableResponse
-)
-def regenerate_qr_code_token(table_id: int, restaurant_id: int, service: TableService = Depends()):
-    return service.regenerate_table_qr_code(table_id, restaurant_id)

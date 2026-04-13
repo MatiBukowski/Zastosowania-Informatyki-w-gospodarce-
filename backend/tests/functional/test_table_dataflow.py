@@ -35,7 +35,7 @@ class TestTableDataflow:
             "table_number": 10,
             "capacity": 5
         }
-        update_response = client.patch(f"/api/restaurants/{restaurant_id}/tables/{table_id}", json=update_payload)
+        update_response = client.patch(f"/api/tables/{table_id}", json=update_payload)
 
         assert update_response.status_code == 200
 
@@ -61,7 +61,7 @@ class TestTableDataflow:
         table_id = created_data["table_id"]
         old_qr_code_token = created_data["qr_code_token"]
 
-        regenerate_response = client.patch(f"/api/restaurants/{restaurant_id}/tables/{table_id}/regenerate-qr-code")
+        regenerate_response = client.patch(f"/api/tables/{table_id}/regenerate-qr-code")
         assert regenerate_response.status_code == 200
 
         regenerated_data = regenerate_response.json()
