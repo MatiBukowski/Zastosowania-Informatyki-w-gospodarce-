@@ -33,14 +33,6 @@ def regenerate_qr_code_token(table_id: int, service: TableService = Depends()):
     return service.regenerate_table_qr_code(table_id)
 
 @router.get(
-    "/restaurant/{restaurant_id}",
-    summary="Get specific restaurant tables",
-    response_model=list[TableResponse]
-)
-def get_restaurant_tables_endpoint(restaurant_id: int, service: TableService = Depends()):
-    return service.get_tables_for_restaurant(restaurant_id)
-
-@router.get(
     "/{table_id}/reservation",
     summary="Get specific table reservations",
     response_model=list[ReservationPublicResponse]

@@ -18,15 +18,15 @@ def seed_tables(session: Session, tables_per_restaurant: int = 5, number_of_rest
     if not restaurant_ids:
         raise ValueError("No restaurants in database. Seed restaurants first.")
 
-    existing_count = session.query(RestaurantTable).count()
-    if existing_count > 0:
-        print(f"Database already contains {existing_count} tables. Skipping seeding.")
-        return
-
     tables_to_add = []
 
     for restaurant_id in restaurant_ids[:number_of_restaurants]:
-        for table_number in range(1, tables_per_restaurant + 1):
+        existing_tables_count = session.query(RestaurantTable).filter_by(restaurant_id=restaurant_id).count()
+        
+        if existing_tables_count >= tables_per_restaurant:
+            continue
+            
+        for table_number in range(existing_tables_count + 1, tables_per_restaurant + 1):
             data = generate_fake_table(restaurant_id, table_number)
             tables_to_add.append(RestaurantTable(**data))
 
