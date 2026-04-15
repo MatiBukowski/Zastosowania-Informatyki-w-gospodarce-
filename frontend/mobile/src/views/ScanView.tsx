@@ -2,6 +2,20 @@ import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  camera: {
+    ...StyleSheet.absoluteFill,
+  },
+  messageText: {
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+});
+
 export default function ScanView() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
@@ -29,15 +43,15 @@ export default function ScanView() {
   }
 
   return (
-    <View>
+    <View style={styles.container}>
       <CameraView
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{
           barcodeTypes: ["qr"],
         }}
-        style={StyleSheet.absoluteFill}
+        style={styles.camera}
       />
-      {scanned && <Text style={{ color: 'white', textAlign: 'center', marginTop: 20 }}>Tap to scan again</Text>}
+      {scanned && <Text style={styles.messageText}>Tap to scan again</Text>}
     </View>
   );
 }
