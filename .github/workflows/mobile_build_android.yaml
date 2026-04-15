@@ -50,12 +50,6 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build AsyncStorage native lib
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew publishToMavenLocal -p=../node_modules/@react-native-async-storage/async-storage/android
-
       - name: Build Android APK
         run: |
           cd android
