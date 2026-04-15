@@ -1,9 +1,10 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { usePostHog } from 'posthog-react-native';
 
 import { IRestaurant, CuisineType } from '@/context/interfaces';
-import { theme } from '../theme/theme';
+import { theme } from '@/theme/theme';
 
 function CuisineBox({cuisine}: {cuisine: CuisineType}) {
   return (
@@ -39,10 +40,20 @@ function LocationBox({address}: {address: string}) {
 
 function RestaurantCard({ restaurant }: { restaurant: IRestaurant }) {
   const router = useRouter();
+  const posthog = usePostHog();
+
+  const handlePress = () => {
+    posthog.capture('restaurant_card_clicked', {
+      restaurant_id: restaurant.restaurant_id,
+      restaurant_name: restaurant.name,
+      cuisine: restaurant.cuisine
+    });
+    router.push(`/restaurants/${restaurant.restaurant_id}` as any);
+  };
 
   return (
     <View style={theme.common.card}>
-      <TouchableOpacity onPress={() => router.push(`/restaurants/${restaurant.restaurant_id}` as any)}>
+      <TouchableOpacity onPress={handlePress}>
         <PhotoBox photoUrl={restaurant.photo} />
         <View style={{ flexDirection: 'column', padding: 8 }}>
           <Text style={[theme.typography.h5, { color: theme.colors.secondary }]}>{restaurant.name}</Text>

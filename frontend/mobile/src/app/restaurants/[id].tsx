@@ -1,12 +1,25 @@
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { usePostHog } from 'posthog-react-native';
+import { useEffect } from 'react';
 import { useGetRestaurantById } from '../../hooks/useRestaurants';
 import { theme } from '../../theme/theme';
 
 export default function RestaurantDetailsPage() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
+    const posthog = usePostHog();
     const { restaurant, loading, error } = useGetRestaurantById(Number(id));
+
+    useEffect(() => {
+        if (restaurant) {
+            posthog.capture('restaurant_details_viewed', {
+                restaurant_id: restaurant.restaurant_id,
+                restaurant_name: restaurant.name,
+                cuisine: restaurant.cuisine
+            });
+        }
+    }, [restaurant]);
 
     if (loading) {
         return (
@@ -48,14 +61,26 @@ export default function RestaurantDetailsPage() {
             {/* Primary CTAs — routes to be implemented in issues #19 and #20 */}
             <TouchableOpacity
                 style={styles.buttonPrimary}
-                onPress={() => router.push(`/restaurants/${restaurant.restaurant_id}/reservation`)}
+                onPress={() => {
+                    posthog.capture('reservation_button_clicked', {
+                        restaurant_id: restaurant.restaurant_id,
+                        restaurant_name: restaurant.name
+                    });
+                    router.push(`/restaurants/${restaurant.restaurant_id}/reservation`);
+                }}
             >
                 <Text style={styles.buttonTextPrimary}>Reserve a table</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
                 style={styles.buttonSecondary}
-                onPress={() => router.push(`/restaurants/${restaurant.restaurant_id}/menu`)}
+                onPress={() => {
+                    posthog.capture('menu_button_clicked', {
+                        restaurant_id: restaurant.restaurant_id,
+                        restaurant_name: restaurant.name
+                    });
+                    router.push(`/restaurants/${restaurant.restaurant_id}/menu`);
+                }}
             >
                 <Text style={styles.buttonTextSecondary}>See menu</Text>
             </TouchableOpacity>

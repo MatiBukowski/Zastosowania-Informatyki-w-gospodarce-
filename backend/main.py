@@ -40,19 +40,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.middleware("http")
 async def posthog_middleware(request: Request, call_next):
-    response = await call_next(request)
+    # Skip health checks for PostHog
+    if request.url.path == "/api/health":
+        return await call_next(request)
+        
     distinct_id = request.headers.get("x-posthog-distinct-id", "anonymous")
+    session_id = request.headers.get("x-posthog-session-id")
+    
+    response = await call_next(request)
+    
+    properties = {
+        "$current_url": str(request.url),
+        "method": request.method,
+        "status_code": response.status_code,
+    }
+    if session_id:
+        properties["$session_id"] = session_id
+        
     posthog.capture(
-        "$pageview",
+        "api_request",
         distinct_id=distinct_id,
-        properties={
-            "$current_url": str(request.url),
-            "method": request.method,
-            "status_code": response.status_code,
-        },
+        properties=properties,
     )
     return response
 
@@ -62,7 +72,6 @@ async def http_exception_handler(request, exc):
     return JSONResponse(status_code=500, content={'message': str(exc)})
 
 prefix_router = APIRouter(prefix="/api")
-
 prefix_router.include_router(health_router)
 prefix_router.include_router(restaurant_router)
 prefix_router.include_router(table_router)
