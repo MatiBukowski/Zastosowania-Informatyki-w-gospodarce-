@@ -7,23 +7,41 @@ export default function MenuScreen() {
   const { id } = useLocalSearchParams();
     const { menu, loading, error } = useGetRestaurantMenu(Number(id));
 
-    // Mock data - to be removed
-/*
-    // to view mock data, in line 8 replace 'const' with 'let' and uncomment the block below
-  if (!loading && (menu.length === 0 || error)) {
-    menu = [
-      { menu_item_id: 1, name: "Test Pizza", price: "45.00", description: "Delicious test pizza", is_available: true },
-      { menu_item_id: 2, name: "Test Burger", price: "32.50", description: "Juicy beef burger", is_available: true },
-      { menu_item_id: 3, name: "Caesar Salad", price: "28.00", description: "Classic Caesar salad", is_available: true }
-    ];
-  }
-*/
+    if (loading) {
+        return (
+          <View style={theme.common.screenContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        );
+      }
+
+      // If the menu is empty or an error occurred
+      if (!menu || menu.length === 0 || error) {
+        return (
+          <View style={theme.common.screenContainer}>
+            <Stack.Screen
+              options={{
+                headerStyle: { backgroundColor: theme.colors.background },
+                headerShadowVisible: false
+              }}
+            />
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 }}>
+              <Text style={[theme.typography.h5, { color: theme.colors.text }]}>
+                No menu available
+              </Text>
+              <Text style={[theme.typography.caption, { marginTop: 8 }]}>
+                Check back later!
+              </Text>
+            </View>
+          </View>
+        );
+      }
+
     return (
         <View style={{ flex: 1, padding: 20, paddingTop: 60, backgroundColor: theme.colors.background }}>
           <Stack.Screen
                 options={{
                   headerStyle: { backgroundColor:  theme.colors.background },
-                  headerTintColor: theme.colors.primary,
                   headerShadowVisible: false,
                 }}
               />

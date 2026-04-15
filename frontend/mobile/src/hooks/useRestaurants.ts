@@ -59,7 +59,7 @@ export function useGetRestaurantMenu(restaurantId: number) {
         setLoading(false);
       })
       .catch(err => {
-        console.error('useGetRestaurantMenu - error:', err);
+        //console.error('useGetRestaurantMenu - error:', err);
         setError(err.message);
         setLoading(false);
       });
