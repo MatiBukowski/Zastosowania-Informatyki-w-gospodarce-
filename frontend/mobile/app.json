@@ -36,7 +36,8 @@
           }
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-barcode-scanner"
     ],
     "experiments": {
       "typedRoutes": true,
