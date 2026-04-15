@@ -1,18 +1,15 @@
-from fastapi import FastAPI, APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, APIRouter
 from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
-from posthog import Posthog
 
 from src.config import settings
 from src.services import run_seed
+from src.middleware import posthog, posthog_middleware, http_exception_handler
 from src.controllers import (
     health_router,
     restaurant_router,
     table_router
 )
-
-posthog = Posthog(settings.POSTHOG_API_KEY, host=settings.POSTHOG_HOST)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -40,36 +37,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.middleware("http")
-async def posthog_middleware(request: Request, call_next):
-    # Skip health checks for PostHog
-    if request.url.path == "/api/health":
-        return await call_next(request)
-        
-    distinct_id = request.headers.get("x-posthog-distinct-id", "anonymous")
-    session_id = request.headers.get("x-posthog-session-id")
-    
-    response = await call_next(request)
-    
-    properties = {
-        "$current_url": str(request.url),
-        "method": request.method,
-        "status_code": response.status_code,
-    }
-    if session_id:
-        properties["$session_id"] = session_id
-        
-    posthog.capture(
-        "api_request",
-        distinct_id=distinct_id,
-        properties=properties,
-    )
-    return response
-
-@app.exception_handler(Exception)
-async def http_exception_handler(request, exc):
-    posthog.capture_exception(exc)
-    return JSONResponse(status_code=500, content={'message': str(exc)})
+app.middleware("http")(posthog_middleware)
+app.exception_handler(Exception)(http_exception_handler)
 
 prefix_router = APIRouter(prefix="/api")
 prefix_router.include_router(health_router)
