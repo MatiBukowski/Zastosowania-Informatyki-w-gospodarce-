@@ -1,13 +1,14 @@
-import { View, SafeAreaView } from 'react-native';
+import { View } from 'react-native';
 import { theme } from '../theme/theme';
-import RestuarantView from '../views/RestaurantView';
+
+import RestaurantView from '../views/RestaurantView';
+import ScanQrButton from '../components/buttons/ScanQrButton';
 
 export default function HomePageMobile() {
   return (
-    <SafeAreaView style={theme.common.screenContainer}>
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <RestuarantView />
-      </View>
-    </SafeAreaView>
+    <View style={theme.common.screenContainer}>
+      <ScanQrButton />
+      <RestaurantView />
+    </View>
   );
 }
