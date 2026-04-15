@@ -1,6 +1,8 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
+from posthog import Posthog
 
 from src.config import settings
 from src.services import run_seed
@@ -10,6 +12,7 @@ from src.controllers import (
     table_router
 )
 
+posthog = Posthog(settings.POSTHOG_API_KEY, host=settings.POSTHOG_HOST)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -18,6 +21,7 @@ async def lifespan(app: FastAPI):
         print("Seeding data...")
         run_seed()
     yield
+    posthog.shutdown()
 
 app = FastAPI(
     title="Restaurant Ordering API",
@@ -35,6 +39,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def posthog_middleware(request: Request, call_next):
+    response = await call_next(request)
+    distinct_id = request.headers.get("x-posthog-distinct-id", "anonymous")
+    posthog.capture(
+        "$pageview",
+        distinct_id=distinct_id,
+        properties={
+            "$current_url": str(request.url),
+            "method": request.method,
+            "status_code": response.status_code,
+        },
+    )
+    return response
+
+@app.exception_handler(Exception)
+async def http_exception_handler(request, exc):
+    posthog.capture_exception(exc)
+    return JSONResponse(status_code=500, content={'message': str(exc)})
 
 prefix_router = APIRouter(prefix="/api")
 
