@@ -42,8 +42,7 @@
         {
           "android": {
             "extraMavenRepos": [
-              "$rootDir/../node_modules/@react-native-async-storage/async-storage/android/build/host/outputs/repo",
-              "$rootDir/../node_modules/@react-native-async-storage/async-storage/android/libs"
+              "../node_modules/@react-native-async-storage/async-storage/android/local_repo"
             ]
           }
         }
