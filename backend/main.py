@@ -44,4 +44,5 @@ prefix_router = APIRouter(prefix="/api")
 prefix_router.include_router(health_router)
 prefix_router.include_router(restaurant_router)
 prefix_router.include_router(table_router)
+
 app.include_router(prefix_router)
