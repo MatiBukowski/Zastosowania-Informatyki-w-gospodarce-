@@ -30,3 +30,11 @@ interface IRestaurantBase {
 export interface IRestaurant extends IRestaurantBase {
   restaurant_id: number;
 }
+
+export interface IMenuItem {
+  name: string;
+  description: string | null;
+  price: string;
+  menu_item_id: number;
+  is_available: boolean;
+}
