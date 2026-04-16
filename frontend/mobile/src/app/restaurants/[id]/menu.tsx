@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useGetRestaurantMenu } from '../../../hooks/useRestaurants';
 import { theme } from '../../../theme/theme';
@@ -46,6 +46,11 @@ export default function MenuScreen() {
                 }}
               />
 
+        <ScrollView
+            contentContainerStyle={{ padding: 20, paddingTop: 60 }}
+            showsVerticalScrollIndicator={false}
+            >
+
           <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 20, color: theme.colors.text }}>
             Menu
           </Text>
@@ -66,6 +71,7 @@ export default function MenuScreen() {
               </Text>
             </View>
           ))}
-        </View>
-      );
+        </ScrollView>
+      </View>
+    );
 }
