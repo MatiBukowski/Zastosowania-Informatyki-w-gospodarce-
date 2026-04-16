@@ -36,19 +36,7 @@
           }
         }
       ],
-      "expo-localization",
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "extraMavenRepos": [
-              {
-                "url": "uri(project(\":react-native-async-storage_async-storage\").file(\"local_repo\"))"
-              }
-            ]
-          }
-        }
-      ]
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
