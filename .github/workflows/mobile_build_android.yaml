@@ -57,7 +57,9 @@ jobs:
 
       - name: Prebuild Android
         if: steps.cache-expo-prebuild.outputs.cache-hit != 'true'
-        run: npx expo prebuild --platform android
+        run: |
+          npx expo prebuild --platform android --clean
+          sed -i 's#mavenCentral()#mavenCentral()\n    maven { url = uri(project(":react-native-async-storage_async-storage").file("local_repo")) }#g' android/build.gradle
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
