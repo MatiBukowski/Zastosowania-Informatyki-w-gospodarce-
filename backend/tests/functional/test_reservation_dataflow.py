@@ -12,7 +12,7 @@ class TestReservationDataflow:
         
         table_id = 1
         user_id = 1
-        res_time = (datetime.now(UTC) + timedelta(days=2)).isoformat()
+        res_time = (datetime.now(UTC) + timedelta(days=40)).isoformat()
         
         payload = {
             "user_id": user_id,
@@ -51,7 +51,7 @@ class TestReservationDataflow:
         create_users(db)
         create_tables(db, restaurant_id=1)
         
-        base_time = datetime.now(UTC) + timedelta(days=3)
+        base_time = datetime.now(UTC) + timedelta(days=20)
         res_time_1 = base_time.isoformat()
         res_time_2 = (base_time + timedelta(hours=1)).isoformat()
         res_time_3 = (base_time + timedelta(hours=3)).isoformat()
@@ -80,7 +80,7 @@ class TestReservationDataflow:
         create_restaurants(db)
         create_users(db)
         create_tables(db, restaurant_id=1)
-        res_time = (datetime.now(UTC) + timedelta(days=4)).isoformat()
+        res_time = (datetime.now(UTC) + timedelta(days=30)).isoformat()
 
         payload = {
             "user_id": 1,
