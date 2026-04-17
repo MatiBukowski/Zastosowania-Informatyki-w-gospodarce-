@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from uuid import UUID
-from ..schemas import TableResponse, TableUpdate, ReservationPublicResponse
+from ..schemas import TableResponse, TableUpdate, ReservationResponse, ReservationCreate
 from ..services import TableService, ReservationService
 
 
@@ -35,7 +35,16 @@ def regenerate_qr_code_token(table_id: int, service: TableService = Depends()):
 @router.get(
     "/{table_id}/reservation",
     summary="Get specific table reservations",
-    response_model=list[ReservationPublicResponse]
+    response_model=list[ReservationResponse]
 )
 def get_table_reservations_endpoint(table_id: int, service: ReservationService = Depends()):
     return service.get_reservations_for_table(table_id)
+
+@router.post(
+    "/{table_id}/reservation",
+    summary="Create new reservation for table",
+    response_model=ReservationResponse
+)
+def post_reservation_endpoint(table_id: int, reservation_data: ReservationCreate, service: ReservationService = Depends()):
+    reservation_data.table_id = table_id
+    return service.create_new_reservation(reservation_data)
