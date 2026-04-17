@@ -26,10 +26,22 @@
    * Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
         * Proposed schema name:  **"TableResponse"**
 
-8. **GET /api/tables/restaurant/{restaurant_id}**
-    * Returns a list of tables for a specific restaurant.
+8. **GET /api/restaurants/{restaurant_id}/tables**
+    * Returns a list: List[{"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}]
         * Proposed schema name: **"TableResponse"**
 
 9. **GET /api/tables/{table_id}/reservation**
-    * Returns a list of reservations for a specific table.
-        * Proposed schema name: **"ReservationPublicResponse"**
+    * Returns a list: List[{"reservation_id", "restaurant_id", "table_id", "user_id", "reservation_time", "status"}]
+        * Proposed schema name: **"ReservationResponse"**
+
+10. **POST /api/tables/{table_id}/reservation**
+    * Returns: {"reservation_id", "restaurant_id", "table_id", "user_id", "reservation_time", "status"}
+        * Proposed schema name: **"ReservationResponse"**
+
+11. **GET /api/reservations/{reservation_id}**
+    * Returns: {"reservation_id", "restaurant_id", "table_id", "user_id", "reservation_time", "status"}
+        * Proposed schema name: **"ReservationResponse"**
+
+12. **PATCH /api/reservations/{reservation_id}**
+    * Returns: {"reservation_id", "restaurant_id", "table_id", "user_id", "reservation_time", "status"}
+        * Proposed schema name: **"ReservationResponse"**
