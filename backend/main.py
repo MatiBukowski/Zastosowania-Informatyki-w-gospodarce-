@@ -10,7 +10,6 @@ from src.controllers import (
     table_router
 )
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up...")
