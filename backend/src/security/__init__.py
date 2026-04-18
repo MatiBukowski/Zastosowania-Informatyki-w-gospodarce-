@@ -1,3 +1,2 @@
 from .token_provider import TokenProvider
-
-__all__ = ["TokenProvider"]
+from .password_handler import PasswordHandler
