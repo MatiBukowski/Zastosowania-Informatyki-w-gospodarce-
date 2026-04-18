@@ -34,6 +34,7 @@ def register_user(user: UserRegisterRequest, service: UserService = Depends(), t
 
     return response
 
+
 @router.post(
     "/login",
     summary="Login user",
@@ -61,6 +62,7 @@ def login_user(user: UserLoginRequest, service: UserService = Depends(), token_p
     )
 
     return response
+
 
 @router.post(
     "/refresh",

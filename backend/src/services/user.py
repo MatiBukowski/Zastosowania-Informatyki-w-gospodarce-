@@ -1,9 +1,9 @@
 from fastapi import Depends
 
-from src.schemas.user import UserRegisterRequest
+from src.schemas.user import UserLoginRequest, UserRegisterRequest
 from src.models import AppUser
 from src.repositories import UserRepository
-from src.exceptions import UserAlreadyExistsException, UserNotFoundException
+from src.exceptions import UserAlreadyExistsException, UserNotFoundException, InvalidCredentialsException
 from src.security import PasswordHandler
 
 class UserService:
@@ -27,12 +27,13 @@ class UserService:
         return new_user
 
     
-    def authenticate_user(self, email: str, password: str):
-        user = self.user_repository.get_by_email(email)
+    def authenticate_user(self, user: UserLoginRequest):
+        existing_user = self.user_repository.get_by_email(user.email)
 
-        if not user:
-            raise UserNotFoundException(f"User with email {email} not found")
-
-        if user and user.verify_password(password):
-            return user
-        return None
+        if not existing_user:
+            raise UserNotFoundException(f"User with email {user.email} not found")
+        
+        if PasswordHandler.verify_password(user.password, existing_user.password_hash):
+            return existing_user
+        else:
+            raise InvalidCredentialsException("Invalid email or password")
