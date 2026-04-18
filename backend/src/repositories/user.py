@@ -1,4 +1,4 @@
-from backend.src.models.app_user import AppUser
+from src.models.app_user import AppUser
 
 class UserRepository:
     def __init__(self, db_session):
