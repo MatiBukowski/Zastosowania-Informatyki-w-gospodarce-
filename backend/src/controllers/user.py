@@ -41,9 +41,7 @@ def register_user(user: UserRegisterRequest, service: UserService = Depends(), t
     description="Authenticate user and return tokens"
 )
 def login_user(user: UserLoginRequest, service: UserService = Depends(), token_provider: TokenProvider = Depends()):
-    authenticated_user = service.authenticate_user(user.email, user.password)
-    if not authenticated_user:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    authenticated_user = service.login_user(user)
 
     access_token = token_provider.generate_access_token(authenticated_user)
     refresh_token = token_provider.generate_refresh_token(authenticated_user)
@@ -77,10 +75,3 @@ def refresh_token(request: Request, token_provider: TokenProvider = Depends()):
     new_access_token = token_provider.refresh_access_token(refresh_token)
 
     return {"access_token": new_access_token}
-    
-
-# @router.post(
-#     "/logout",
-#     summary="Logout user",
-#     description="Invalidate the refresh token and log out the user"
-# )
