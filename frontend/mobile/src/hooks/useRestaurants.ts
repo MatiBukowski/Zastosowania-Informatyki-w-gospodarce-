@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getRestaurants, getRestaurantById } from '../api/RestaurantAPI';
 import { IRestaurant } from '@/context/interfaces';
+import { getTablesByRestaurantId } from "../api/RestaurantAPI";
+import { ITable } from '@/context/interfaces'
 
 export function useGetRestaurants() {
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
@@ -42,4 +44,25 @@ export function useGetRestaurantById(restaurantId: number) {
   }, [restaurantId]);
 
   return { restaurant, loading, error };
+}
+
+export function useGetTablesByRestaurantId(restaurantId: number) {
+  const [tables, setTables] = useState<ITable[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getTablesByRestaurantId(restaurantId)
+        .then(data => {
+          setTables(data);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error('useGetTablesByRestaurantId - error:', err);
+          setError(err.message);
+          setLoading(false);
+        });
+  }, [restaurantId]);
+
+  return { tables, loading, error };
 }
