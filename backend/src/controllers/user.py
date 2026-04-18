@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
-from backend.src.security import TokenProvider
-from backend.src.services import UserService
-from backend.src.schemas import UserRegister
-from backend.src.config import settings
+from src.security import TokenProvider
+from src.services import UserService
+from src.schemas import UserRegister
+from src.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 

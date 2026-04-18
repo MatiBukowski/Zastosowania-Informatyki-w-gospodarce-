@@ -23,5 +23,8 @@
         * Proposed schema name:  **"TableResponse"**
      
 7. **GET /api/tables/resolve/{token}**
-   * Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
+    * Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
         * Proposed schema name:  **"TableResponse"**
+
+8. **POST /api/auth/register/{user}**
+    * 

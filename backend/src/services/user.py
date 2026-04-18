@@ -1,9 +1,11 @@
-from backend.src.models import AppUser
-from backend.src.repositories import UserRepository
-from backend.src.exceptions import UserAlreadyExistsException
+from fastapi import Depends
+
+from src.models import AppUser
+from src.repositories import UserRepository
+from src.exceptions import UserAlreadyExistsException
 
 class UserService:
-    def __init__(self, user_repository: UserRepository):
+    def __init__(self, user_repository: UserRepository = Depends()):
         self.user_repository = user_repository
 
     def register_user(self, user: AppUser):

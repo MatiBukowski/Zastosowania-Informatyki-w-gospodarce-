@@ -5,3 +5,4 @@ from .seed.seed_users import seed_users
 from .restaurant import RestaurantService
 from .menu import MenuService
 from .table import TableService
+from .user import UserService
