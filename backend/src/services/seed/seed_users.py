@@ -1,22 +1,15 @@
-from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from ...models import AppUser, UserRoleEnum
 from faker import Faker
 
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-    bcrypt__rounds=4
-)
-fake = Faker('pl_PL')
+from src.models import AppUser, UserRoleEnum
+from src.security import PasswordHandler
 
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+fake = Faker('pl_PL')
 
 USERS_DATA = [{
     "email": "jan.kowalski@example.com",
-    "password_hash": get_password_hash("password"),
+    "password_hash": PasswordHandler.hash_password("password"),
     "first_name": "Jan",
     "surname": "Kowalski",
     "phone_number": "123456789",
@@ -25,7 +18,7 @@ USERS_DATA = [{
 }]
 
 def generate_fake_user(role: UserRoleEnum = UserRoleEnum.CUSTOMER) -> dict:
-    fake_password = get_password_hash("password")
+    fake_password = PasswordHandler.hash_password("password")
 
     return {
         "email": fake.email(),

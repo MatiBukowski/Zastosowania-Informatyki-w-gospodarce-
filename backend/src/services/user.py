@@ -1,18 +1,38 @@
 from fastapi import Depends
 
+from src.schemas.user import UserRegisterRequest
 from src.models import AppUser
 from src.repositories import UserRepository
-from src.exceptions import UserAlreadyExistsException
+from src.exceptions import UserAlreadyExistsException, UserNotFoundException
+from src.security import PasswordHandler
 
 class UserService:
     def __init__(self, user_repository: UserRepository = Depends()):
         self.user_repository = user_repository
 
-    def register_user(self, user: AppUser):
+
+    def register_user(self, user: UserRegisterRequest):
         existing_user = self.user_repository.get_by_email(user.email)
         if existing_user:
             raise UserAlreadyExistsException(f"User with email {user.email} already exists")
 
-        new_user = self.user_repository.create(user)
+        hashed_password = PasswordHandler.hash_password(user.password)
 
+        new_user = self.user_repository.create(AppUser(
+            email=user.email,
+            password_hash=hashed_password,
+            first_name=user.first_name,
+            surname=user.surname
+        ))
         return new_user
+
+    
+    def authenticate_user(self, email: str, password: str):
+        user = self.user_repository.get_by_email(email)
+
+        if not user:
+            raise UserNotFoundException(f"User with email {email} not found")
+
+        if user and user.verify_password(password):
+            return user
+        return None
