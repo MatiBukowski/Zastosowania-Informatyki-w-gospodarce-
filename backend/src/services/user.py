@@ -27,7 +27,7 @@ class UserService:
         return new_user
 
     
-    def authenticate_user(self, user: UserLoginRequest):
+    def login_user(self, user: UserLoginRequest):
         existing_user = self.user_repository.get_by_email(user.email)
 
         if not existing_user:
