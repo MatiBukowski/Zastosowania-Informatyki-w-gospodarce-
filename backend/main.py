@@ -7,7 +7,6 @@ from src.services import run_seed
 from src.controllers.health import router as health_router
 from src.controllers.restaurant import router as restaurant_router
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up...")
