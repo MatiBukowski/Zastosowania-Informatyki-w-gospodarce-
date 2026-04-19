@@ -1,6 +1,7 @@
-from fastapi import JSONResponse, Request
+from fastapi import Request
+from fastapi.responses import JSONResponse
 
-from backend.src.exceptions import (
+from src.exceptions import (
     InvalidCredentialsException,
     UserAlreadyExistsException,
     UserNotFoundException

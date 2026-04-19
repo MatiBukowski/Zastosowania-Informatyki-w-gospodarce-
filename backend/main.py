@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from src.config import settings
 from src.services import run_seed
 from src.middleware import posthog, posthog_middleware, http_exception_handler
+from src.exception_handler import register_exception_handlers
 from src.controllers import (
     health_router,
     restaurant_router,
@@ -30,6 +31,8 @@ app = FastAPI(
     docs_url="/api/docs",
     redoc_url="/api/redoc"
 )
+
+register_exception_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,

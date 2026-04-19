@@ -20,7 +20,8 @@ def register_user(user: UserRegisterRequest, service: UserService = Depends(), t
     refresh_token = token_provider.generate_refresh_token(new_user)
 
     response = JSONResponse(
-        content={"access_token": access_token}
+        content={"access_token": access_token},
+        status_code=201
     )
 
     response.set_cookie(
@@ -47,7 +48,8 @@ def login_user(user: UserLoginRequest, service: UserService = Depends(), token_p
     refresh_token = token_provider.generate_refresh_token(authenticated_user)
 
     response = JSONResponse(
-        content={"access_token": access_token}
+        content={"access_token": access_token},
+        status_code=200
     )
 
     response.set_cookie(
