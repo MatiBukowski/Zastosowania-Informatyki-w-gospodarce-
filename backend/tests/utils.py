@@ -1,4 +1,4 @@
-from src.models import CuisineTypeEnum, Restaurant, MenuItem
+from src.models import CuisineTypeEnum, Restaurant, MenuItem, AppUser, RestaurantTable
 
 
 def create_restaurants(db):
@@ -31,4 +31,25 @@ def create_menu(db):
         )
     ]
     db.add_all(menu)
+    db.commit()
+
+def create_users(db):
+    user = AppUser(
+        email="test@example.com",
+        first_name="Test",
+        surname="User",
+        password_hash="password",
+        is_active=True
+    )
+    db.add(user)
+    db.commit()
+
+def create_tables(db, restaurant_id: int = 1):
+    table = RestaurantTable(
+        restaurant_id=restaurant_id,
+        table_number=1,
+        capacity=4,
+        status="FREE"
+    )
+    db.add(table)
     db.commit()

@@ -8,7 +8,8 @@ from src.middleware import posthog, posthog_middleware, http_exception_handler
 from src.controllers import (
     health_router,
     restaurant_router,
-    table_router
+    table_router,
+    reservation_router
 )
 
 @asynccontextmanager
@@ -44,5 +45,5 @@ prefix_router = APIRouter(prefix="/api")
 prefix_router.include_router(health_router)
 prefix_router.include_router(restaurant_router)
 prefix_router.include_router(table_router)
-
+prefix_router.include_router(reservation_router)
 app.include_router(prefix_router)

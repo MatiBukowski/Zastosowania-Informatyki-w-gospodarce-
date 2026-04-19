@@ -47,3 +47,11 @@ def get_menu_endpoint(restaurant_id: int, service: MenuService = Depends()):
 )
 def post_table_endpoint(restaurant_id: int, table_data: TableCreate, service: TableService = Depends()):
     return service.create_new_table(restaurant_id, table_data)
+
+@router.get(
+    "/{restaurant_id}/tables",
+    summary="Get tables",
+    response_model=list[TableResponse]
+)
+def get_tables_endpoint(restaurant_id: int, service: TableService = Depends()):
+    return service.get_tables_for_restaurant(restaurant_id)
