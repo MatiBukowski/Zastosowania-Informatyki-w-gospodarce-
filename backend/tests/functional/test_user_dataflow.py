@@ -1,6 +1,5 @@
 from tests.utils import create_user
 
-
 class TestUserDataflow:
 
     def test_register_user_success_flow(self, client):
@@ -44,7 +43,7 @@ class TestUserDataflow:
         assert response.cookies.get("refresh_token") is not None
 
 
-    def test_login_user_not_found_flow(self, client, db):
+    def test_login_user_not_found_flow(self, client):
         response = client.post("/api/auth/login", json={
             "email": "nonexistent@example.com",
             "password": "password123"
@@ -66,3 +65,26 @@ class TestUserDataflow:
         assert response.status_code == 401
         assert "access_token" not in response.json()
         assert response.cookies.get("refresh_token") is None
+
+
+    def test_refresh_access_token_success_flow(self, client, db):
+        create_user(db)
+
+        login_response = client.post("/api/auth/login", json={
+            "email": "test@example.com",
+            "password": "password123"
+        })
+
+        refresh_token = login_response.cookies.get("refresh_token")
+
+        response = client.post("/api/auth/refresh", cookies={"refresh_token": refresh_token})
+
+        assert response.status_code == 200
+        assert "access_token" in response.json()
+
+    
+    def test_refresh_access_token_missing_token_flow(self, client):
+        response = client.post("/api/auth/refresh")
+
+        assert response.status_code == 401
+        assert "access_token" not in response.json()

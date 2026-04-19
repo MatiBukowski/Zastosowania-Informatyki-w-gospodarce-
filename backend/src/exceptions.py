@@ -9,3 +9,7 @@ class UserNotFoundException(Exception):
 class InvalidCredentialsException(Exception):
     """Exception raised when user authentication fails due to invalid credentials."""
     pass
+
+class JWTHandlingException(Exception):
+    """General exception for JWT handling errors."""
+    pass
