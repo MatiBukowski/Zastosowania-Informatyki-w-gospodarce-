@@ -4,7 +4,8 @@ from fastapi.responses import JSONResponse
 from src.exceptions import (
     InvalidCredentialsException,
     UserAlreadyExistsException,
-    UserNotFoundException
+    UserNotFoundException,
+    JWTHandlingException
 )
 
 def register_exception_handlers(app):
@@ -26,5 +27,12 @@ def register_exception_handlers(app):
     async def invalid_credentials_exception_handler(request: Request, exc: InvalidCredentialsException):
         return JSONResponse(
                 status_code=401,
+                content={"detail": str(exc)}
+        )
+    
+    @app.exception_handler(JWTHandlingException)
+    async def jwt_handling_exception_handler(request: Request, exc: JWTHandlingException):
+        return JSONResponse(
+                status_code=500,
                 content={"detail": str(exc)}
         )
