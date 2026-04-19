@@ -4,13 +4,13 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.config import settings
 from src.services import run_seed
+from src.middleware import posthog, posthog_middleware, http_exception_handler
 from src.controllers import (
     health_router,
     restaurant_router,
     table_router,
     reservation_router
 )
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -19,6 +19,7 @@ async def lifespan(app: FastAPI):
         print("Seeding data...")
         run_seed()
     yield
+    posthog.shutdown()
 
 app = FastAPI(
     title="Restaurant Ordering API",
@@ -37,8 +38,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-prefix_router = APIRouter(prefix="/api")
+app.middleware("http")(posthog_middleware)
+app.exception_handler(Exception)(http_exception_handler)
 
+prefix_router = APIRouter(prefix="/api")
 prefix_router.include_router(health_router)
 prefix_router.include_router(restaurant_router)
 prefix_router.include_router(table_router)

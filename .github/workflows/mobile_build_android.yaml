@@ -10,6 +10,9 @@ on:
 
 env:
   EXPO_PUBLIC_API_URL: https://xederro.tech
+  EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+  EXPO_PUBLIC_POSTHOG_HOST: https://eu.i.posthog.com
+
 
 jobs:
   build:
@@ -41,17 +44,36 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Cache Expo Prebuild
+        id: cache-expo-prebuild
+        uses: actions/cache@v4
+        with:
+          path: |
+            frontend/mobile/android
+            frontend/mobile/.expo
+          key: ${{ runner.os }}-expo-prebuild-${{ hashFiles('frontend/mobile/package-lock.json', 'frontend/mobile/app.json') }}
+          restore-keys: |
+            ${{ runner.os }}-expo-prebuild-
+
       - name: Prebuild Android
-        run: npx expo prebuild --platform android
+        if: steps.cache-expo-prebuild.outputs.cache-hit != 'true'
+        run: |
+          npx expo prebuild --platform android --clean
+          sed -i 's#mavenCentral()#mavenCentral()\n    maven { url = uri(project(":react-native-async-storage_async-storage").file("local_repo")) }#g' android/build.gradle
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
 
       - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease --build-cache
+        env:
+          GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true
+          NODE_ENV: production
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
