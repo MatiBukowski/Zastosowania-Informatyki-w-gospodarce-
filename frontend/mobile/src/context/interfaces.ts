@@ -32,7 +32,7 @@ export interface IRestaurant extends IRestaurantBase {
 }
 
 export enum TableStatus {
-  AVAILABLE = "AVAILABLE",
+  FREE = "FREE",
   OCCUPIED = "OCCUPIED",
   RESERVED = "RESERVED",
 }

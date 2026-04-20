@@ -13,7 +13,7 @@ import { theme } from '../../../theme/theme';
 
 function statusColor(status: TableStatus): string {
     switch (status) {
-        case TableStatus.AVAILABLE: return '#2e7d32';
+        case TableStatus.FREE: return '#2e7d32';
         case TableStatus.RESERVED:  return '#e65100';
         case TableStatus.OCCUPIED:  return '#c62828';
         default:                    return '#666';
@@ -22,7 +22,7 @@ function statusColor(status: TableStatus): string {
 
 function statusLabel(status: TableStatus): string {
     switch (status) {
-        case TableStatus.AVAILABLE: return 'Available';
+        case TableStatus.FREE: return 'Free';
         case TableStatus.RESERVED:  return 'Reserved';
         case TableStatus.OCCUPIED:  return 'Occupied';
         default:                    return status;
@@ -30,7 +30,7 @@ function statusLabel(status: TableStatus): string {
 }
 
 function TableCard({ table, onReserve }: { table: ITable; onReserve: () => void }) {
-    const isAvailable = table.status === TableStatus.AVAILABLE;
+    const isFree = table.status === TableStatus.FREE;
     return (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -45,12 +45,12 @@ function TableCard({ table, onReserve }: { table: ITable; onReserve: () => void 
             </Text>
 
             <TouchableOpacity
-                style={[styles.reserveBtn, !isAvailable && styles.reserveBtnDisabled]}
+                style={[styles.reserveBtn, !isFree && styles.reserveBtnDisabled]}
                 onPress={onReserve}
-                disabled={!isAvailable}
+                disabled={!isFree}
             >
                 <Text style={styles.reserveBtnText}>
-                    {isAvailable ? 'Reserve this table' : 'Not available'}
+                    {isFree ? 'Reserve this table' : 'Not free'}
                 </Text>
             </TouchableOpacity>
         </View>
