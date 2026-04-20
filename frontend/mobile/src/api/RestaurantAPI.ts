@@ -13,7 +13,7 @@ export const getRestaurantById = async (id: number): Promise<IRestaurant> => {
 };
 
 
-export const getMenuByRestaurantId = async (id: number) => {
+export const getMenuByRestaurantId = async (id: number): Promise<IMenuItem[]> => {
   try {
     const response = await apiClient.get(`/api/restaurants/${id}/menu`);
     return response.data;
@@ -22,4 +22,3 @@ export const getMenuByRestaurantId = async (id: number) => {
     throw error;
   }
 };
-
