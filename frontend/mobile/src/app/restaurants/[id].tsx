@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useGetRestaurantById } from '../../../hooks/useRestaurants';
-import { theme } from '../../../theme/theme';
+import { useGetRestaurantById } from '../../hooks/useRestaurants';
+import { theme } from '../../theme/theme';
 
 export default function RestaurantDetailsPage() {
     const { id } = useLocalSearchParams<{ id: string }>();
