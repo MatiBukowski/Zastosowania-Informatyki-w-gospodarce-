@@ -30,3 +30,18 @@ interface IRestaurantBase {
 export interface IRestaurant extends IRestaurantBase {
   restaurant_id: number;
 }
+
+export enum TableStatus {
+  FREE = "FREE",
+  OCCUPIED = "OCCUPIED",
+  RESERVED = "RESERVED",
+}
+
+export interface ITable {
+  table_id: number;
+  restaurant_id: number;
+  table_number: number;
+  capacity: number;
+  qr_code_token: string;
+  status: TableStatus;
+}
