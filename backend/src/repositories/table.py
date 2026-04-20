@@ -55,3 +55,8 @@ class TableRepository:
             self.db.refresh(table)
 
         return table
+
+    def get_tables_by_restaurant_id(self, restaurant_id: int):
+        return self.db.execute(
+            select(RestaurantTable).where(RestaurantTable.restaurant_id == restaurant_id)
+        ).scalars().all()

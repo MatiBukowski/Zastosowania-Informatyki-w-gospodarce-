@@ -1,11 +1,13 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.models import Restaurant, MenuItem, AppUser
+from src.models import Restaurant, MenuItem, AppUser, RestaurantTable, Reservation
 from src.services import (
     seed_restaurants,
     seed_menu_items,
-    seed_users
+    seed_users,
+    seed_tables,
+    seed_reservations
 )
 from src.db import Base
 from tests.utils import create_restaurants
@@ -57,6 +59,38 @@ class TestSeedService:
 
         seed_users(session, count=20)
         assert session.query(AppUser).count() == 20
+
+        session.close()
+        Base.metadata.drop_all(bind=engine)
+
+    def test_seed_tables(self):
+        Base.metadata.create_all(bind=engine)
+        session = TestingSessionLocal()
+        seed_restaurants(session, count=5)
+
+        assert session.query(RestaurantTable).count() == 0
+
+        seed_tables(session, tables_per_restaurant=5, number_of_restaurants=5)
+        assert session.query(RestaurantTable).count() == 25
+
+        session.close()
+        Base.metadata.drop_all(bind=engine)
+
+    def test_seed_reservations(self):
+        Base.metadata.create_all(bind=engine)
+        session = TestingSessionLocal()
+        
+        seed_restaurants(session, count=5)
+        seed_tables(session, tables_per_restaurant=5, number_of_restaurants=5)
+        seed_users(session, count=5)
+
+        assert session.query(Reservation).count() == 0
+
+        seed_reservations(session, max_sample_tables=5)
+        assert session.query(Reservation).count() == 5
+
+        seed_reservations(session, max_sample_tables=20)
+        assert session.query(Reservation).count() == 20
 
         session.close()
         Base.metadata.drop_all(bind=engine)

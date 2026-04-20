@@ -63,3 +63,15 @@ class TableService:
             )
 
         return updated_table
+
+    def get_tables_for_restaurant(self, restaurant_id: int):
+        return self.repo.get_tables_by_restaurant_id(restaurant_id)
+
+    def validate_table_exists(self, table_id: int):
+        table = self.repo.get_table_by_id(table_id)
+        if not table:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Table with id={table_id} not found"
+            )
+        return table

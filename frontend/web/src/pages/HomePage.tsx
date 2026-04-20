@@ -2,9 +2,11 @@ import { Container, Typography, Box, Button } from '@mui/material';
 import { getProjectInfo } from '../context/constants';
 import { getRestaurants } from '../api/API'; 
 import { useEffect } from 'react';
+import { usePostHog } from '@posthog/react';
 
 export const HomePage = () => {
   const info = getProjectInfo(); // name and version
+  const posthog = usePostHog();
   
 
   // console testing API connection 
@@ -13,9 +15,11 @@ export const HomePage = () => {
     getRestaurants()
       .then(data => {
         console.log("API data:", data);
+        posthog.capture('restaurants_fetched', { count: data.length });
       })
       .catch(err => {
         console.error("Error connecting to API.", err);
+        posthog.capture('restaurants_fetch_failed', { error: err.message });
       });
   }, []);
 
