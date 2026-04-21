@@ -10,10 +10,6 @@ services:
   frontend:
     build:
       context: ./frontend/web
-      args:
-        - VITE_API_URL=${VITE_API_URL}
-        - VITE_PUBLIC_POSTHOG_KEY=${VITE_PUBLIC_POSTHOG_KEY}
-        - VITE_PUBLIC_POSTHOG_HOST=${VITE_PUBLIC_POSTHOG_HOST}
     env_file:
       - ./frontend/web/.env
     ports:
