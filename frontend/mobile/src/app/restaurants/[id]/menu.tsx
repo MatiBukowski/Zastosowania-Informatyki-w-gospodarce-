@@ -38,7 +38,7 @@ export default function MenuScreen() {
       }
 
     return (
-        <View style={{ flex: 1, padding: 20, paddingTop: 60, backgroundColor: theme.colors.background }}>
+        <View style={{ flex: 1, padding: 20, backgroundColor: theme.colors.background }}>
           <Stack.Screen
                 options={{
                   headerStyle: { backgroundColor:  theme.colors.background },
@@ -47,7 +47,7 @@ export default function MenuScreen() {
               />
 
         <ScrollView
-            contentContainerStyle={{ padding: 20, paddingTop: 60 }}
+            contentContainerStyle={{ padding: 20, paddingTop: 30 }}
             showsVerticalScrollIndicator={false}
             >
 

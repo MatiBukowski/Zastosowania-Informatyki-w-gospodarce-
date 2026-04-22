@@ -7,6 +7,11 @@ on:
     paths-ignore: [ '.github/**', 'README.md', '.gitignore', 'Documentation/**', 'backend/**', 'frontend/mobile/**' ]
   workflow_dispatch:
 
+env:
+  VITE_API_URL: https://xederro.tech
+  VITE_PUBLIC_POSTHOG_KEY: ${{ secrets.POSTHOG_API_KEY }}
+  VITE_PUBLIC_POSTHOG_HOST: https://eu.i.posthog.com
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,6 +31,10 @@ jobs:
           context: ./frontend/web
           file: ./frontend/web/Dockerfile
           push: true
+          build-args: |
+            VITE_API_URL=https://xederro.tech
+            VITE_PUBLIC_POSTHOG_KEY=${{ secrets.POSTHOG_API_KEY }}
+            VITE_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/zig-frontend:${{ github.event_name }}_${{ github.run_id }}
             ${{ github.ref_name == 'main' && format('{0}/zig-frontend:latest', secrets.DOCKERHUB_USERNAME) || '' }}

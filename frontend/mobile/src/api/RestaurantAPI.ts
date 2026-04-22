@@ -22,3 +22,9 @@ export const getMenuByRestaurantId = async (id: number): Promise<IMenuItem[]> =>
     throw error;
   }
 };
+
+
+export const getTablesByRestaurantId = async (restaurantId: number): Promise<ITable[]> => {
+  const response = await apiClient.get<ITable[]>(`/api/restaurants/${restaurantId}/tables`);
+  return response.data;
+};

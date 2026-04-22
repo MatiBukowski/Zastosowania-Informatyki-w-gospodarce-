@@ -38,3 +38,18 @@ export interface IMenuItem {
   menu_item_id: number;
   is_available: boolean;
 }
+
+export enum TableStatus {
+  FREE = "FREE",
+  OCCUPIED = "OCCUPIED",
+  RESERVED = "RESERVED",
+}
+
+export interface ITable {
+  table_id: number;
+  restaurant_id: number;
+  table_number: number;
+  capacity: number;
+  qr_code_token: string;
+  status: TableStatus;
+}
