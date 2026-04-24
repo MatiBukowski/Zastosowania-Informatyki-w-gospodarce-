@@ -10,6 +10,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '../../../hooks/useRestaurants';
 import { ITable, TableStatus } from '../../../context/interfaces';
 import { theme } from '../../../theme/theme';
+import { MaterialIcons } from '@expo/vector-icons';
 
 function statusColor(status: TableStatus): string {
     switch (status) {
@@ -84,10 +85,23 @@ export default function RestaurantTablesPage() {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={theme.typography.h4}>Tables</Text>
-            <Text style={[theme.typography.caption, { marginBottom: 20 }]}>
-                {tables.length} {tables.length === 1 ? 'table' : 'tables'} total
-            </Text>
+        <View style={styles.headerContainer}>
+             <View>
+                <Text style={theme.typography.h4}>Tables</Text>
+                <Text style={[theme.typography.caption, { marginBottom: 20 }]}>
+                    {tables.length} {tables.length === 1 ? 'table' : 'tables'} total
+                </Text>
+            </View>
+
+            <TouchableOpacity
+                style={styles.adminIconButton}
+                    onPress={() => router.push(`/restaurants/${restaurantId}/add-table`)}
+                    activeOpacity={0.7}
+            >
+                <MaterialIcons name="admin-panel-settings" size={26} color={theme.colors.primary} />
+                <Text style={styles.adminLinkText}>Admin</Text>
+            </TouchableOpacity>
+        </View>
 
             {tables.length === 0 ? (
                 <Text style={theme.typography.body}>No tables found for this restaurant.</Text>
@@ -135,4 +149,25 @@ const styles = StyleSheet.create({
         backgroundColor: '#ccc',
     },
     reserveBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+
+    headerContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: 20,
+        },
+    adminIconButton: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 4,
+            backgroundColor: 'transparent',
+            borderWidth: 0,
+
+        },
+        adminLinkText: {
+            fontSize: 10,
+            fontWeight: 'bold',
+            color: theme.colors.primary,
+            marginTop: 0,
+        },
 });
