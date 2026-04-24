@@ -1,6 +1,6 @@
 import { Container, Typography, Box, Button } from '@mui/material';
 import { getProjectInfo } from '../context/constants';
-import { getRestaurants } from '../api/API'; 
+import { getRestaurants } from '../api/RestaurantAPI';
 import { useEffect } from 'react';
 import { usePostHog } from '@posthog/react';
 
