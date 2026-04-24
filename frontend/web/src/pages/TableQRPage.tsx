@@ -3,12 +3,14 @@ import { getRestaurants, getTablesByRestaurantId } from '../api/RestaurantAPI';
 import { TableQR } from '../components/TableQR';
 import { ITable, IRestaurant } from '../context/interfaces';
 import { Select, MenuItem, FormControl, InputLabel, Button, Box, Checkbox, FormControlLabel, Typography, Divider, Stack } from '@mui/material';
+import { usePostHog } from '@posthog/react';
 
 export const TableQRPage = () => {
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | ''>('');
   const [tables, setTables] = useState<ITable[]>([]);
   const [selectedTables, setSelectedTables] = useState<number[]>([]);
+  const posthog = usePostHog();
 
   useEffect(() => {
     getRestaurants().then(setRestaurants).catch(console.error);
@@ -17,10 +19,18 @@ export const TableQRPage = () => {
   useEffect(() => {
     if (selectedRestaurantId !== '') {
       getTablesByRestaurantId(selectedRestaurantId as number)
-        .then((data) => { setTables(data); setSelectedTables([]); })
-        .catch(console.error);
+        .then((data) => { setTables(data); setSelectedTables([]);
+        posthog.capture('tables_qr_generator_viewed', {
+          restaurant_id: selectedRestaurantId,
+          tables_count: data.length
+        });
+        })
+      .catch((err) => {
+        console.error(err);
+        posthog.capture('failed_tables_qr_generator_view', { restaurant_id: selectedRestaurantId });
+      });
     }
-  }, [selectedRestaurantId]);
+  }, [selectedRestaurantId, posthog]);
 
   const toggleTableSelection = (tableId: number) => {
     setSelectedTables((prev) =>
@@ -35,10 +45,15 @@ export const TableQRPage = () => {
   };
 
   const handleDownloadSelected = () => {
+    posthog.capture('qr_batch_download', {
+        restaurant_id: selectedRestaurantId,
+        selected_count: selectedTables.length
+    });
     const buttons = document.querySelectorAll('button');
     buttons.forEach((btn) => {
       if (btn.textContent?.includes('Save PNG')) (btn as HTMLButtonElement).click();
     });
+
   };
 
   return (
@@ -69,7 +84,10 @@ export const TableQRPage = () => {
         <>
           <Divider sx={{ mb: 3 }} />
           <Stack direction="row" spacing={2} sx={{ mb: 3, alignItems: 'center' }}>
-            <Typography variant="h6">Tables List</Typography>
+            <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+                Tables List ({selectedTables.length} selected)
+            </Typography>
+
             <Button variant="outlined" size="small" onClick={handleToggleSelectAll}>
               {areAllSelected ? "Deselect All" : "Select All"}
             </Button>
