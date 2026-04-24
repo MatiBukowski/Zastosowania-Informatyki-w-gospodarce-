@@ -3,6 +3,7 @@ import { getProjectInfo } from '../context/constants';
 import { getRestaurants } from '../api/RestaurantAPI';
 import { useEffect } from 'react';
 import { usePostHog } from '@posthog/react';
+import { Link } from 'react-router-dom';
 
 export const HomePage = () => {
   const info = getProjectInfo(); // name and version
@@ -39,8 +40,14 @@ export const HomePage = () => {
         <Typography variant="body1">
           <b>Version:</b> {info.version}
         </Typography>
-        <Button variant="contained" sx={{ mt: 2 }}>
-          Button
+        <Button variant="contained" component={Link} to="/qr" size="large"
+            sx={{
+                mt: 2,
+                fontWeight: 'bold',
+                px: 4
+              }}
+            >
+            Manage QR Code
         </Button>
       </Box>
     </Container>
