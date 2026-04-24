@@ -18,7 +18,7 @@ export const getTablesByRestaurantId = async (restaurantId: number): Promise<ITa
   return response.data;
 };
 
-export const createTable = async (restaurantId: number, tableData: ICreateTable): Promise<ITable> => {
+export const postTable = async (restaurantId: number, tableData: ICreateTable): Promise<ITable> => {
   const response = await apiClient.post<ITable>(`/api/restaurants/${restaurantId}/tables`, tableData);
   return response.data;
 };

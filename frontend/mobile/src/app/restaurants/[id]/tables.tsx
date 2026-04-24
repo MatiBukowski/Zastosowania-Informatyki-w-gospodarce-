@@ -95,7 +95,7 @@ export default function RestaurantTablesPage() {
 
             <TouchableOpacity
                 style={styles.adminIconButton}
-                    onPress={() => router.push(`/restaurants/${restaurantId}/add-table`)}
+                    onPress={() => router.push(`/restaurants/${restaurantId}/restaurant_admin/createTable`)}
                     activeOpacity={0.7}
             >
                 <MaterialIcons name="admin-panel-settings" size={26} color={theme.colors.primary} />
