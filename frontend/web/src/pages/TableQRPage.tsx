@@ -100,7 +100,18 @@ export const TableQRPage = () => {
             {tables.map((table) => {
               const isSelected = selectedTables.includes(table.table_id);
               return (
-                <Box key={table.table_id} sx={pageStyles.tableCard(isSelected)}>
+                <Box 
+                    key={table.table_id} 
+                    sx={pageStyles.tableCard(isSelected)}
+                    onClick={() => toggleTableSelection(table.table_id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        toggleTableSelection(table.table_id);
+                      }
+                    }}
+                >
                   <FormControlLabel
                     control={<Checkbox checked={isSelected} onChange={() => toggleTableSelection(table.table_id)} size="small" />}
                     label={<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Table #{table.table_number}</Typography>}
@@ -148,6 +159,7 @@ const pageStyles = {
     flexDirection: 'column',
     alignSelf: 'flex-start',
     transition: 'background-color 0.2s ease',
+    cursor: 'pointer',
   }),
   infoBox: (isSelected: boolean) => ({
     pl: 4,
