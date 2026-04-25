@@ -34,7 +34,8 @@ export interface IRestaurant extends IRestaurantBase {
 export enum ReservationStatus {
   PENDING = "PENDING",
   CONFIRMED = "CONFIRMED",
-  CANCELLED = "CANCELLED",
+  COMPLETED = "COMPLETED",
+  CANCELED = "CANCELED",
 }
 
 export interface IReservation {
