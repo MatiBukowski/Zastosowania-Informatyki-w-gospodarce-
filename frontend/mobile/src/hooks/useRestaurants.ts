@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId } from '../api/RestaurantAPI';
-import { IRestaurant, IMenuItem, ITable } from '@/context/interfaces';
+
+import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId, postTable } from '../api/RestaurantAPI';
+import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/context/interfaces';
 
 export function useGetRestaurants() {
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
@@ -87,4 +88,27 @@ export function useGetTablesByRestaurantId(restaurantId: number) {
   }, [restaurantId]);
 
   return { tables, loading, error };
+}
+
+export function usePostTable() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+
+  const handleCreateTable = async (restaurantId: number, tableData: ICreateTable) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await postTable(restaurantId, tableData);
+      setLoading(false);
+      return data;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail?.[0]?.msg || err.message;
+      setError(errorMessage);
+      setLoading(false);
+      throw err;
+    }
+  };
+
+  return { handleCreateTable, loading, error };
 }

@@ -53,3 +53,8 @@ export interface ITable {
   qr_code_token: string;
   status: TableStatus;
 }
+
+export interface ICreateTable {
+  table_number: number;
+  capacity: number;
+}
