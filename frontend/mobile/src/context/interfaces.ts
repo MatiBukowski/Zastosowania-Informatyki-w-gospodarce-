@@ -49,6 +49,8 @@ export interface IReservation {
 
 export interface ICreateReservation {
   reservation_time: string;
+}
+
 export enum TableStatus {
   FREE = "FREE",
   OCCUPIED = "OCCUPIED",
