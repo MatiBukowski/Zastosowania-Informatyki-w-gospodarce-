@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
-import { useResolveTableByQrToken } from '@/hooks/useTables';
+import { useResolveTableByToken } from '@/hooks/useTables';
 import { router } from 'expo-router/build/exports';
+
+const { width, height } = Dimensions.get('window');
+const SCAN_AREA_SIZE = Math.min(width, height) * 0.7;
+const CORNER_SIZE = 30;
+const CORNER_THICKNESS = 3;
 
 const styles = StyleSheet.create({
   container: {
@@ -16,13 +21,161 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlayDark: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  scanAreaContainer: {
+    position: 'absolute',
+    width: SCAN_AREA_SIZE,
+    height: SCAN_AREA_SIZE,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  corner: {
+    position: 'absolute',
+    width: CORNER_SIZE,
+    height: CORNER_SIZE,
+  },
+  cornerTopLeft: {
+    top: -CORNER_THICKNESS,
+    left: -CORNER_THICKNESS,
+    borderTopWidth: CORNER_THICKNESS,
+    borderLeftWidth: CORNER_THICKNESS,
+    borderTopColor: '#FFFFFF',
+    borderLeftColor: '#FFFFFF',
+  },
+  cornerTopRight: {
+    top: -CORNER_THICKNESS,
+    right: -CORNER_THICKNESS,
+    borderTopWidth: CORNER_THICKNESS,
+    borderRightWidth: CORNER_THICKNESS,
+    borderTopColor: '#FFFFFF',
+    borderRightColor: '#FFFFFF',
+  },
+  cornerBottomLeft: {
+    bottom: -CORNER_THICKNESS,
+    left: -CORNER_THICKNESS,
+    borderBottomWidth: CORNER_THICKNESS,
+    borderLeftWidth: CORNER_THICKNESS,
+    borderBottomColor: '#FFFFFF',
+    borderLeftColor: '#FFFFFF',
+  },
+  cornerBottomRight: {
+    bottom: -CORNER_THICKNESS,
+    right: -CORNER_THICKNESS,
+    borderBottomWidth: CORNER_THICKNESS,
+    borderRightWidth: CORNER_THICKNESS,
+    borderBottomColor: '#FFFFFF',
+    borderRightColor: '#FFFFFF',
+  },
+  statusContainer: {
+    position: 'absolute',
+    top: (height - SCAN_AREA_SIZE) / 2 + SCAN_AREA_SIZE + 60,
+    left: (width - SCAN_AREA_SIZE) / 2,
+    width: SCAN_AREA_SIZE,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 60,
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  statusDefault: {
+    color: '#333333',
+  },
+  statusLoading: {
+    color: '#1976D2',
+  },
+  statusError: {
+    color: '#D32F2F',
+  },
+  statusSubtext: {
+    fontSize: 12,
+    marginTop: 4,
+    color: '#666666',
+  },
 });
+
+const ScanOverlay = () => (
+  <View style={styles.overlay}>
+    <View style={styles.overlayDark} />
+    <View
+      style={[
+        styles.scanAreaContainer,
+        {
+          top: (height - SCAN_AREA_SIZE) / 2,
+          left: (width - SCAN_AREA_SIZE) / 2,
+        },
+      ]}
+    >
+      <View style={[styles.corner, styles.cornerTopLeft]} />
+      <View style={[styles.corner, styles.cornerTopRight]} />
+      <View style={[styles.corner, styles.cornerBottomLeft]} />
+      <View style={[styles.corner, styles.cornerBottomRight]} />
+    </View>
+  </View>
+);
+
+type ScanStatus = 'default' | 'loading' | 'error';
+
+interface StatusDisplayProps {
+  status: ScanStatus;
+  error?: string;
+}
+
+const StatusDisplay = ({ status, error }: StatusDisplayProps) => {
+  const getStatusConfig = () => {
+    switch (status) {
+      case 'loading':
+        return {
+          title: 'Processing QR Code...',
+          subtitle: 'Please wait',
+          textStyle: styles.statusLoading,
+        };
+      case 'error':
+        return {
+          title: 'Error',
+          subtitle: error || 'Failed to scan QR code. Please try again.',
+          textStyle: styles.statusError,
+        };
+      default:
+        return {
+          title: 'Scan QR Code',
+          subtitle: 'Position code within the corners',
+          textStyle: styles.statusDefault,
+        };
+    }
+  };
+
+  const config = getStatusConfig();
+
+  return (
+    <View style={styles.statusContainer}>
+      <Text style={[styles.statusText, config.textStyle]}>{config.title}</Text>
+      <Text style={styles.statusSubtext}>{config.subtitle}</Text>
+    </View>
+  );
+};
 
 export default function ScanView() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
   const [qrToken, setQrToken] = useState<string | null>(null);
-  const { table, loading, error } = useResolveTableByQrToken(qrToken || '');
+  const [scanStatus, setScanStatus] = useState<ScanStatus>('default');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const { table, loading, error } = useResolveTableByToken(qrToken || '');
 
   useEffect(() => {
     const getCameraPermissions = async () => {
@@ -35,14 +188,30 @@ export default function ScanView() {
 
   useEffect(() => {
     if (qrToken) {
+      setScanStatus('loading');
       if (table?.restaurant_id) {
         router.push(`/restaurants/${table.restaurant_id}/menu`);
       }
     }
   }, [qrToken]);
 
+  useEffect(() => {
+    if (error) {
+      setScanStatus('error');
+      setErrorMessage(error);
+      // Reset error after 3 seconds
+      const timer = setTimeout(() => {
+        setScanStatus('default');
+        setErrorMessage('');
+        setScanned(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
+    setScanStatus('loading');
     try {
       const url = new URL(data);
       const token = url.searchParams.get('token');
@@ -50,10 +219,20 @@ export default function ScanView() {
       if (token) {
         setQrToken(token);
       } else {
-        console.error("No token found in QR code data");
+        setScanStatus('error');
+        setErrorMessage('No token found in QR code');
+        setTimeout(() => {
+          setScanStatus('default');
+          setScanned(false);
+        }, 2000);
       }
     } catch (error) {
-      console.error("Invalid URL format:", error);
+      setScanStatus('error');
+      setErrorMessage('Invalid QR code format');
+      setTimeout(() => {
+        setScanStatus('default');
+        setScanned(false);
+      }, 2000);
     }
   };
 
@@ -74,6 +253,8 @@ export default function ScanView() {
         }}
         style={styles.camera}
       />
+      <ScanOverlay />
+      <StatusDisplay status={scanStatus} error={errorMessage} />
       {scanned && <Text style={styles.messageText}>Tap to scan again</Text>}
     </View>
   );
