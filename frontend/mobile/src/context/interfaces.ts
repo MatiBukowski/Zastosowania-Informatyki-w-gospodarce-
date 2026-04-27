@@ -31,6 +31,26 @@ export interface IRestaurant extends IRestaurantBase {
   restaurant_id: number;
 }
 
+export enum ReservationStatus {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  COMPLETED = "COMPLETED",
+  CANCELED = "CANCELED",
+}
+
+export interface IReservation {
+  reservation_id: number;
+  restaurant_id: number;
+  table_id: number;
+  user_id: number;
+  reservation_time: string;
+  status: ReservationStatus;
+}
+
+export interface ICreateReservation {
+  reservation_time: string;
+}
+
 export interface IMenuItem {
   name: string;
   description: string | null;
