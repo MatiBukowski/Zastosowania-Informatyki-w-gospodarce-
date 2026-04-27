@@ -1,26 +1,32 @@
 import { useState, useEffect } from 'react';
 import { getReservationsByTableId, createReservation, getReservationById, updateReservation } from '../api/ReservationAPI';
-import { IReservation, ICreateReservation } from '../context/interfaces';
+import { IReservation, ICreateReservation, IUpdateReservation } from '../context/interfaces';
 
 export function useGetReservationsByTableId(tableId: number) {
     const [reservations, setReservations] = useState<IReservation[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        getReservationsByTableId(tableId)
-            .then(data => {
+    const fetchReservations = useCallback(async () => {
+            setLoading(true);
+            try {
+                const data = await getReservationsByTableId(tableId);
                 setReservations(data);
-                setLoading(false);
-            })
-            .catch(err => {
+                setError(null);
+            } catch (err: any) {
                 console.error('useGetReservationsByTableId - error:', err);
-                setError(err.message);
+            } finally {
                 setLoading(false);
-            });
+            }
     }, [tableId]);
 
-    return { reservations, loading, error };
+    useEffect(() => {
+            if (tableId) {
+                fetchReservations();
+            }
+    }, [fetchReservations]);
+
+    return { reservations, loading, error, refresh: fetchReservations };
 }
 
 export function useCreateReservation() {
@@ -50,27 +56,34 @@ export function useGetReservationById(reservationId: number) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        getReservationById(reservationId)
-            .then(data => {
+    const fetchById = useCallback(async () => {
+        if (!reservationId) return;
+        setLoading(true);
+
+        try {
+                const data = await getReservationById(reservationId);
                 setReservation(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('useGetReservationById - error:', err);
+                setError(null);
+            } catch (err: any) {
                 setError(err.message);
+                console.error('useGetReservationById - error:', err);
+            } finally {
                 setLoading(false);
-            });
+            }
     }, [reservationId]);
 
-    return { reservation, loading, error };
+    useEffect(() => {
+            fetchById();
+    }, [fetchById]);
+
+    return { reservation, loading, error, refresh: fetchById };
 }
 
 export function useUpdateReservation() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const update = async (reservationId: number, data: Partial<ICreateReservation>): Promise<IReservation | null> => {
+    const update = async (reservationId: number, data: IUpdateReservation): Promise<IReservation | null> => {
         setLoading(true);
         setError(null);
         try {
