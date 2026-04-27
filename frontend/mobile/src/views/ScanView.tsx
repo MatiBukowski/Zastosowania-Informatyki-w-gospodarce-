@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
+import { useResolveTableByQrToken } from '@/hooks/useTables';
+import { router } from 'expo-router/build/exports';
 
 const styles = StyleSheet.create({
   container: {
@@ -19,6 +21,8 @@ const styles = StyleSheet.create({
 export default function ScanView() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
+  const [qrToken, setQrToken] = useState<string | null>(null);
+  const { table, loading, error } = useResolveTableByQrToken(qrToken || '');
 
   useEffect(() => {
     const getCameraPermissions = async () => {
@@ -29,10 +33,29 @@ export default function ScanView() {
     getCameraPermissions();
   }, []);
 
+  useEffect(() => {
+    if (qrToken) {
+      if (table?.restaurant_id) {
+        router.push(`/restaurants/${table.restaurant_id}/menu`);
+      }
+    }
+  }, [qrToken]);
+
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-  }
+    try {
+      const url = new URL(data);
+      const token = url.searchParams.get('token');
+
+      if (token) {
+        setQrToken(token);
+      } else {
+        console.error("No token found in QR code data");
+      }
+    } catch (error) {
+      console.error("Invalid URL format:", error);
+    }
+  };
 
   if (hasPermission === null) {
     return <Text>Requesting for camera permission...</Text>;

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { resolveTableByToken } from '../api/TablesAPI';
 import { ITable } from '@/context/interfaces';
 
-export function useResolveTablesByToken(token: string) {
+export function useResolveTableByToken(token: string) {
   const [table, setTable] = useState<ITable | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +15,7 @@ export function useResolveTablesByToken(token: string) {
         setLoading(false);
       })
       .catch(err => {
-        console.error('useResolveTablesByToken - error:', err);
+        console.error('useResolveTableByToken - error:', err);
         setError(err.message);
         setLoading(false);
       });
