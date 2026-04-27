@@ -36,10 +36,7 @@
           }
         }
       ],
-<<<<<<< HEAD
       "expo-localization",
-=======
->>>>>>> 448bbd5eb86fba9d5e7a9855b5b99088de29b14b
       "expo-barcode-scanner"
     ],
     "experiments": {
