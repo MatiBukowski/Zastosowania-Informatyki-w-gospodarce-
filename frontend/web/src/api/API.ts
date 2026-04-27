@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { IRestaurant } from '../context/interfaces';
 import posthog from "posthog-js";
 
 // Use one Axios API for all request's.
@@ -16,13 +15,3 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// Add restaurants API client functions: getRestaurants(), getRestaurantById(id).
-export const getRestaurants = async (): Promise<IRestaurant[]> => {
-  const response = await apiClient.get<IRestaurant[]>('/api/restaurants');
-  return response.data;
-};
-
-export const getRestaurantById = async (id: number): Promise<IRestaurant> => {
-  const response = await apiClient.get<IRestaurant>(`/api/restaurants/${id}`);
-  return response.data;
-};

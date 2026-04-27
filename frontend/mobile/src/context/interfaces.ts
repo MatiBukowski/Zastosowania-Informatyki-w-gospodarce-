@@ -51,6 +51,14 @@ export interface ICreateReservation {
   reservation_time: string;
 }
 
+export interface IMenuItem {
+  name: string;
+  description: string | null;
+  price: string;
+  menu_item_id: number;
+  is_available: boolean;
+}
+
 export enum TableStatus {
   FREE = "FREE",
   OCCUPIED = "OCCUPIED",
@@ -64,4 +72,9 @@ export interface ITable {
   capacity: number;
   qr_code_token: string;
   status: TableStatus;
+}
+
+export interface ICreateTable {
+  table_number: number;
+  capacity: number;
 }
