@@ -37,7 +37,10 @@
         }
       ],
       "expo-localization",
-      "expo-barcode-scanner"
+      "expo-camera",
+      "expo-build-properties",
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
