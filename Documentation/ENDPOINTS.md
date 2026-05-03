@@ -41,5 +41,9 @@
 12. **PATCH /api/reservations/{reservation_id}**
     - Returns: {"reservation_id", "restaurant_id", "table_id", "user_id", "reservation_time", "status"}
       - Proposed schema name: **"ReservationResponse"**
-13. **POST /api/auth/register/{user}**
+13. ## **POST /api/auth/register/{user}**
+    - Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
+      - Proposed schema name: **"TableResponse"**
+
+14. **POST /api/auth/register/{user}**
     -
