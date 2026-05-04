@@ -11,6 +11,8 @@ from src.controllers import (
     restaurant_router,
     table_router,
     reservation_router,
+    forecast_router,
+    reservation_router,
     user_router
 )
 
@@ -51,4 +53,5 @@ prefix_router.include_router(restaurant_router)
 prefix_router.include_router(table_router)
 prefix_router.include_router(reservation_router)
 prefix_router.include_router(user_router)
+prefix_router.include_router(forecast_router)
 app.include_router(prefix_router)
