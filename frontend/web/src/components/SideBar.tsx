@@ -39,7 +39,7 @@ interface SideBarMenuItemProps {
 const SideBarMenuItem = ({ href, icon, label, collapsed = false, isActive = false, onClick }: SideBarMenuItemProps) => {
   return (
     <IconButton 
-      href={href} 
+      {...(href ? { href } : {})}
       onClick={onClick}
       sx={{ 
         color: isActive ? colors.strawberryRed : 'text.primary', 
