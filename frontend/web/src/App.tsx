@@ -6,6 +6,7 @@ import Root from './Root';
 import { LoginPage } from './pages/LoginPage';
 import { AuthProvider } from './services/AuthProvider';
 import { theme } from '../theme/theme';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
           <Route path="/auth" element={<LoginPage/>}/>
           <Route element={<Root/>}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/qr" element={<TableQRPage />} />
+            <Route path="/qr" element={<ProtectedRoute requiredRole="admin"><TableQRPage /></ProtectedRoute>} />
           </Route>
         </Routes>
       </AuthProvider>

@@ -1,7 +1,9 @@
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
 import { colors } from '../../../theme/palette';
+import { useAuth } from '../../services/AuthProvider';
 
 const dividerTextStyle = {
   textAlign: 'left',
@@ -58,6 +60,8 @@ const SideBarMenuItem = ({ href, icon, label }: SideBarMenuItemProps) => {
 };
 
 const SideBar = () => {
+  const { accessToken } = useAuth();
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '250px', backgroundColor: '#ece0dd', borderRight: '1px solid', borderColor: 'divider' }}>
 
@@ -75,7 +79,11 @@ const SideBar = () => {
       <Box sx={{ padding: '10px', borderTop: '1px solid', borderColor: 'divider' }}>
         <DividerText label='ACCOUNT'/>
         <Stack spacing={1}>
-          <SideBarMenuItem href='/auth' icon={<LogoutIcon sx={{ fontSize: '28px' }} />} label='Log out' />
+          {accessToken ? (
+            <SideBarMenuItem href='/auth' icon={<LogoutIcon sx={{ fontSize: '28px' }} />} label='Log out' />
+          ) : (
+            <SideBarMenuItem href='/auth' icon={<LoginIcon sx={{ fontSize: '28px' }} />} label='Log in' />
+          )}
         </Stack>
       </Box>
 
