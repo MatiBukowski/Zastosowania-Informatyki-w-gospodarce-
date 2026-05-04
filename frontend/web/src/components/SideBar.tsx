@@ -6,7 +6,6 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { colors } from '../../theme/palette';
 import { useAuth } from '../services/AuthProvider';
-import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import BarChartIcon from '@mui/icons-material/BarChart';
 
@@ -29,17 +28,19 @@ const DividerText = ({ label, hidden = false }: { label: string; hidden?: boolea
 };
 
 interface SideBarMenuItemProps {
-  href: string;
+  href?: string;
   icon: React.ReactNode;
   label: string;
   collapsed?: boolean;
   isActive?: boolean;
+  onClick?: () => void;
 }
 
-const SideBarMenuItem = ({ href, icon, label, collapsed = false, isActive = false }: SideBarMenuItemProps) => {
+const SideBarMenuItem = ({ href, icon, label, collapsed = false, isActive = false, onClick }: SideBarMenuItemProps) => {
   return (
     <IconButton 
       href={href} 
+      onClick={onClick}
       sx={{ 
         color: isActive ? colors.strawberryRed : 'text.primary', 
         justifyContent: collapsed ? 'center' : 'flex-start', 
@@ -67,9 +68,13 @@ const SideBarMenuItem = ({ href, icon, label, collapsed = false, isActive = fals
   );
 };
 
-const SideBar = () => {
-  const { accessToken, role, firstName, surname } = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+interface SideBarProps {
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
+}
+
+const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
+  const { accessToken, role, firstName, surname, logout } = useAuth();
   const location = useLocation();
 
   const displayName = firstName && surname ? `${firstName} ${surname}` : "User";
@@ -77,7 +82,7 @@ const SideBar = () => {
   const isQrActive = location.pathname === '/qr';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', width: isCollapsed ? '80px' : '250px', backgroundColor: '#ece0dd', borderRight: '1px solid', borderColor: 'divider', transition: 'width 0.3s ease' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0, height: '100vh', width: isCollapsed ? '80px' : '250px', backgroundColor: '#ece0dd', borderRight: '1px solid', borderColor: 'divider', transition: 'width 0.3s ease', zIndex: 1000 }}>
 
       <Box sx={{ padding: '15px', borderTop: '1px solid', borderColor: 'divider'}}>
         <Stack direction='row' alignItems='center' spacing={1} sx={{ justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
@@ -110,7 +115,7 @@ const SideBar = () => {
         <DividerText label='ACCOUNT' hidden={isCollapsed} />
         <Stack spacing={1}>
           {accessToken ? (
-            <SideBarMenuItem href='/auth' icon={<LogoutIcon sx={{ fontSize: '28px' }} />} label='Log out' collapsed={isCollapsed} />
+            <SideBarMenuItem icon={<LogoutIcon sx={{ fontSize: '28px' }} />} label='Log out' collapsed={isCollapsed} onClick={logout} />
           ) : (
             <SideBarMenuItem href='/auth' icon={<LoginIcon sx={{ fontSize: '28px' }} />} label='Log in' collapsed={isCollapsed} />
           )}

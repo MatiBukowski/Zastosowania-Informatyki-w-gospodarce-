@@ -1,4 +1,4 @@
-import {createContext, ReactNode, useContext, useEffect, useState} from "react";
+import {createContext, ReactNode, useContext, useEffect, useState, useRef} from "react";
 import {useNavigate} from "react-router-dom";
 import {apiClient} from "../api/API"
 import {jwtDecode} from "jwt-decode";
@@ -36,6 +36,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     const [firstName, setFirstName] = useState<string | null>(null);
     const [surname, setSurname] = useState<string | null>(null);
     const navigate = useNavigate();
+    const initRef = useRef(false);
     const [isAxiosReady, setIsAxiosReady] = useState(false);
     let refreshPromise: Promise<string> | null = null;
 
@@ -144,6 +145,32 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             setIsAxiosReady(true);
         }
     }, [accessToken]);
+
+    useEffect(() => {
+        const initializeAuth = async () => {
+            if (initRef.current) return;
+            initRef.current = true;
+
+            try {
+                console.log("Attempting to restore auth state from refresh token...");
+                const response = await apiClient.post('/api/auth/refresh', null, {
+                    withCredentials: true,
+                });
+                const token = response.data.access_token;
+                console.log("Token refreshed successfully");
+                setAccessToken(token);
+                decodeAndSetTokenData(token);
+            } catch (error) {
+                console.log("No valid refresh token or refresh failed:", error);
+                setAccessToken(null);
+                setRole(null);
+                setFirstName(null);
+                setSurname(null);
+            }
+        };
+
+        initializeAuth();
+    }, []);
 
     return (
         <AuthContext.Provider

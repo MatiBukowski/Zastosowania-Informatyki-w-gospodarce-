@@ -51,9 +51,11 @@ class TokenProvider:
             user_id = payload.get("user_id")
             email = payload.get("email")
             role_str = payload.get("role")
+            first_name = payload.get("first_name")
+            surname = payload.get("surname")
             role = UserRoleEnum(role_str)
 
-            return self.generate_access_token(AppUser(user_id=user_id, email=email, role=role))
+            return self.generate_access_token(AppUser(user_id=user_id, email=email, role=role, first_name=first_name, surname=surname))
         except jwt.exceptions.JWTDecodeError as e:
             self.logger.error(f"Error decoding refresh token: {str(e)}")
             raise JWTHandlingException(f"Invalid or expired refresh token: {str(e)}")
