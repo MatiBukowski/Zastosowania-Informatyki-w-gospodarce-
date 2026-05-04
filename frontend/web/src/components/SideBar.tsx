@@ -7,6 +7,8 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { colors } from '../../theme/palette';
 import { useAuth } from '../services/AuthProvider';
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 const dividerTextStyle = {
   textAlign: 'left',
@@ -31,21 +33,22 @@ interface SideBarMenuItemProps {
   icon: React.ReactNode;
   label: string;
   collapsed?: boolean;
+  isActive?: boolean;
 }
 
-const SideBarMenuItem = ({ href, icon, label, collapsed = false }: SideBarMenuItemProps) => {
+const SideBarMenuItem = ({ href, icon, label, collapsed = false, isActive = false }: SideBarMenuItemProps) => {
   return (
     <IconButton 
       href={href} 
       sx={{ 
-        color: 'text.primary', 
+        color: isActive ? colors.strawberryRed : 'text.primary', 
         justifyContent: collapsed ? 'center' : 'flex-start', 
         padding: '12px',
         borderRadius: '8px',
-        backgroundColor: 'transparent',
+        backgroundColor: isActive ? `rgba(229, 75, 75, 0.08)` : 'transparent',
         transition: 'background-color 0.2s ease, color 0.2s ease',
         '& svg': {
-          color: 'gray',
+          color: isActive ? colors.strawberryRed : 'gray',
           transition: 'color 0.2s ease'
         },
         '&:hover': { 
@@ -67,9 +70,11 @@ const SideBarMenuItem = ({ href, icon, label, collapsed = false }: SideBarMenuIt
 const SideBar = () => {
   const { accessToken, role, firstName, surname } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
 
   const displayName = firstName && surname ? `${firstName} ${surname}` : "User";
   const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Role";
+  const isQrActive = location.pathname === '/qr';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: isCollapsed ? '80px' : '250px', backgroundColor: '#ece0dd', borderRight: '1px solid', borderColor: 'divider', transition: 'width 0.3s ease' }}>
@@ -95,7 +100,8 @@ const SideBar = () => {
       <Box sx={{ padding: '10px', borderTop: '1px solid', borderColor: 'divider', flexGrow: 1 }}>
         <DividerText label='OVERVIEW' hidden={isCollapsed} />
         <Stack spacing={1}>
-          <SideBarMenuItem href='/qr' icon={<QrCodeIcon sx={{ fontSize: '28px' }} />} label='QR Codes' collapsed={isCollapsed} />
+          <SideBarMenuItem href='/qr' icon={<QrCodeIcon sx={{ fontSize: '28px' }} />} label='QR Codes' collapsed={isCollapsed} isActive={isQrActive} />
+          <SideBarMenuItem href='/' icon={<BarChartIcon sx={{ fontSize: '28px' }} />} label='Statistics' collapsed={isCollapsed} isActive={location.pathname === '/dashboard'} />
         </Stack>
       </Box>
 
