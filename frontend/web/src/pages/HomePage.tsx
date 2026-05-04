@@ -40,15 +40,6 @@ export const HomePage = () => {
         <Typography variant="body1">
           <b>Version:</b> {info.version}
         </Typography>
-        <Button variant="contained" component={Link} to="/qr" size="large"
-            sx={{
-                mt: 2,
-                fontWeight: 'bold',
-                px: 4
-              }}
-            >
-            Manage QR Code
-        </Button>
       </Box>
     </Container>
   );
