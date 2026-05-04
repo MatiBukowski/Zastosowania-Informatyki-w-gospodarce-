@@ -2,4 +2,4 @@ from .restaurant import RestaurantPublicResponse, SingleRestaurantPublicResponse
 from .menu import MenuItemResponse
 from .table import TableResponse, TableCreate, TableUpdate
 from .reservation import ReservationResponse, ReservationCreate, ReservationUpdate
-from .user import UserRegister
+from .user import UserRegisterRequest, UserLoginRequest
