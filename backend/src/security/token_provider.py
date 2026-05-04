@@ -30,6 +30,8 @@ class TokenProvider:
                 "user_id": user.user_id,
                 "email": user.email,
                 "role": user.role.value,
+                "first_name": user.first_name,
+                "surname": user.surname,
                 "exp": int(expiry_date.timestamp())
             }
 
@@ -66,6 +68,8 @@ class TokenProvider:
                 "user_id": user.user_id,
                 "email": user.email,
                 "role": user.role.value,
+                "first_name": user.first_name,
+                "surname": user.surname,
                 "exp": int(expiry_date.timestamp())
             }
             

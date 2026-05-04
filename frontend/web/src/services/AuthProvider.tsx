@@ -6,11 +6,15 @@ import {jwtDecode} from "jwt-decode";
 interface JwtPayload {
     role: string;
     sub: string;
+    first_name: string;
+    surname: string;
 }
 
 interface AuthContextType {
     accessToken: string | null;
     role: string | null;
+    firstName: string | null;
+    surname: string | null;
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
     isAxiosReady: boolean;
@@ -29,6 +33,8 @@ export const useAuth = () => {
 export const AuthProvider = ({children}: { children: ReactNode }) => {
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [role, setRole] = useState<string | null>(null);
+    const [firstName, setFirstName] = useState<string | null>(null);
+    const [surname, setSurname] = useState<string | null>(null);
     const navigate = useNavigate();
     const [isAxiosReady, setIsAxiosReady] = useState(false);
     let refreshPromise: Promise<string> | null = null;
@@ -36,6 +42,8 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     const decodeAndSetTokenData = (token: string) => {
         const decoded: JwtPayload = jwtDecode(token);
         setRole(decoded.role);
+        setFirstName(decoded.first_name);
+        setSurname(decoded.surname);
     };
 
     const login = async (email: string, password: string) => {
@@ -65,6 +73,8 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
         } finally {
             setAccessToken(null);
             setRole(null);
+            setFirstName(null);
+            setSurname(null);
             navigate("/auth");
         }
     }
@@ -137,7 +147,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
     return (
         <AuthContext.Provider
-            value={{accessToken, role, login, logout, isAxiosReady}}>
+            value={{accessToken, role, firstName, surname, login, logout, isAxiosReady}}>
             {children}
         </AuthContext.Provider>
     );
