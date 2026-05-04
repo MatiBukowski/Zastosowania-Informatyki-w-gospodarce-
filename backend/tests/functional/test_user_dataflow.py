@@ -88,3 +88,21 @@ class TestUserDataflow:
 
         assert response.status_code == 401
         assert "access_token" not in response.json()
+
+
+    def test_logout_user_success_flow(self, client, db):
+        create_user(db)
+
+        login_response = client.post("/api/auth/login", json={
+            "email": "test@example.com",
+            "password": "password123"
+        })
+
+        refresh_token = login_response.cookies.get("refresh_token")
+        assert refresh_token is not None
+
+        response = client.post("/api/auth/logout", cookies={"refresh_token": refresh_token})
+
+        assert response.status_code == 200
+        assert response.json()["message"] == "Logged out successfully"
+        assert response.cookies.get("refresh_token", "") == ""

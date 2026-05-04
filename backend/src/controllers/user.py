@@ -78,3 +78,14 @@ def refresh_token(request: Request, token_provider: TokenProvider = Depends()):
     new_access_token = token_provider.generate_access_token_from_refresh_token(refresh_token)
 
     return {"access_token": new_access_token}
+
+
+@router.post(
+    "/logout",
+    summary="Logout user",
+    description="Clear the refresh token cookie to log out the user"
+)
+def logout_user():
+    response = JSONResponse(content={"message": "Logged out successfully"}, status_code=200)
+    response.delete_cookie(key="refresh_token")
+    return response

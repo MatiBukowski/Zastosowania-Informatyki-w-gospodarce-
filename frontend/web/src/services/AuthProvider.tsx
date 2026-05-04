@@ -41,7 +41,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     const login = async (email: string, password: string) => {
         try {
             const response = await apiClient.post(
-                "/auth/login",
+                "/api/auth/login",
                 {email, password},
                 {withCredentials: true}
             );
@@ -57,7 +57,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 
     const logout = async () => {
         try {
-            await apiClient.post("/auth/logout", null, {
+            await apiClient.post("/api/auth/logout", null, {
                 withCredentials: true
             });
         } catch (error) {
@@ -97,7 +97,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
                 if (error.response?.status === 401) {
                     try {
                         if (!refreshPromise) {
-                            refreshPromise = apiClient.post('/auth/refresh', null, {
+                            refreshPromise = apiClient.post('/api/auth/refresh', null, {
                                 withCredentials: true,
                             }).then(res => {
                                 const newToken = res.data.access_token;
