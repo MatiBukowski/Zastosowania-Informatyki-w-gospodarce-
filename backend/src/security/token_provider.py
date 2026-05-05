@@ -2,7 +2,6 @@ import jwt, secrets, logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 
 from src.models import AppUser
 from src.models import UserRoleEnum
@@ -11,8 +10,6 @@ from src.exceptions import JWTHandlingException
 from src.db import get_session
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 class TokenProvider:
     def __init__(self):
@@ -88,12 +85,10 @@ class TokenProvider:
             self.logger.error(f"Error encoding refresh token: {str(e)}")
             raise JWTHandlingException(f"Failed to generate refresh token: {str(e)}")
 
-    def get_current_user(
-            self,
-            token: str = Depends(oauth2_scheme)
-    ) -> AppUser:
+
+    def get_current_user(self, access_token: str) -> AppUser:
         try:
-            payload = self.jwt_handler.decode(token, self.jwt_key, algorithms=["HS256"])
+            payload = self.jwt_handler.decode(access_token, self.jwt_key, algorithms=["HS256"])
             user_id: int = payload.get("user_id")
             email: str = payload.get("email")
             role_str: str = payload.get("role")
@@ -104,7 +99,7 @@ class TokenProvider:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Could not validate credentials",
-                    headers={"WWW-Authenticate": "Bearer"},
+                    headers={"Authenticate": "Bearer"},
                 )
 
             return AppUser(
@@ -118,14 +113,11 @@ class TokenProvider:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Could not validate credentials: {str(e)}",
-                headers={"WWW-Authenticate": "Bearer"},
+                headers={"Authenticate": "Bearer"},
             )
 
-    def get_current_active_user(
-            self,
-            db: Session = Depends(get_session)
-    ) -> AppUser:
-        user = db.execute(select(AppUser).where(AppUser.user_id == self.get_current_user().user_id)).scalar_one_or_none()
+    def get_current_active_user(self, access_token: str, db: Session = Depends(get_session)) -> AppUser:
+        user = db.execute(select(AppUser).where(AppUser.user_id == self.get_current_user(access_token).user_id)).scalar_one_or_none()
         if user is None:
             raise HTTPException(status_code=404, detail="User not found")
         return user
