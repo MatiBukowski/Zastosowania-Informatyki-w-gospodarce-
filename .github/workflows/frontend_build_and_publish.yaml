@@ -45,9 +45,6 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Update VPS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
