@@ -8,7 +8,6 @@ RUN git clone https://github.com/google-research/timesfm.git
 
 FROM pytorch/pytorch:2.2.2-cuda12.1-cudnn8-runtime
 
-
 WORKDIR /timesfm
 
 COPY --from=build /timesfm/timesfm .
