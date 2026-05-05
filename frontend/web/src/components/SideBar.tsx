@@ -82,6 +82,7 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
   const displayName = firstName && surname ? `${firstName} ${surname}` : "User";
   const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Role";
   const isQrActive = location.pathname === '/qr';
+  const isForecastActive = location.pathname === '/forecast';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0, height: '100vh', width: isCollapsed ? '80px' : '250px', backgroundColor: '#ece0dd', borderRight: '1px solid', borderColor: 'divider', transition: 'width 0.3s ease', zIndex: 1000 }}>
@@ -114,6 +115,14 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
             collapsed={isCollapsed} 
             isActive={isQrActive} 
             onClick={() => posthog.capture('sidebar_nav_clicked', { destination: '/qr' })}
+          />
+          <SideBarMenuItem 
+            href='/forecast' 
+            icon={<BarChartIcon sx={{ fontSize: '28px' }} />} 
+            label='Forecast' 
+            collapsed={isCollapsed} 
+            isActive={isForecastActive} 
+            onClick={() => posthog.capture('sidebar_nav_clicked', { destination: '/forecast' })}
           />
           <SideBarMenuItem 
             href='/' 
