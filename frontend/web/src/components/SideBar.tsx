@@ -88,7 +88,7 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
     <Box sx={{ display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0, height: '100vh', width: isCollapsed ? '80px' : '250px', backgroundColor: '#ece0dd', borderRight: '1px solid', borderColor: 'divider', transition: 'width 0.3s ease', zIndex: 1000 }}>
 
       <Box sx={{ padding: '15px', borderTop: '1px solid', borderColor: 'divider'}}>
-        <Stack direction='row' alignItems='center' spacing={1} sx={{ justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
+        <Stack direction='row' spacing={1} sx={{ alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
           {!isCollapsed && (
             <Stack direction='row' sx={{ flexGrow: 1 }}>
               <Box sx={{ border: '1px solid', borderRadius: '12px', width: '48px', height: '48px', borderColor: colors.strawberryRed }} />
