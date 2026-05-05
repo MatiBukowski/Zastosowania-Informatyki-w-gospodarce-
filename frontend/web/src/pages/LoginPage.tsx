@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { usePostHog } from '@posthog/react';
 import {
     Paper,
     TextField,
@@ -21,6 +22,7 @@ export const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const { login } = useAuth();
+    const posthog = usePostHog();
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
@@ -37,8 +39,11 @@ export const LoginPage = () => {
 
         try {
             await login(email, password);
+            posthog.capture('login_success', { email });
         } catch (err: any) {
             console.error('Login error:', err);
+            const errorMessage = err.response?.data?.detail || (err.response?.status === 401 ? 'Invalid email or password' : 'Login failed. Please try again.');
+            posthog.capture('login_failed', { email, error: errorMessage });
             if (err.response?.data?.detail) {
                 setError(err.response.data.detail);
             } else if (err.response?.status === 401) {

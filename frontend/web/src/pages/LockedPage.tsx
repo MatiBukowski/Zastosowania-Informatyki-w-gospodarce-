@@ -1,8 +1,16 @@
 import { Box, Typography } from "@mui/material";
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { Link } from 'react-router-dom';
+import { usePostHog } from "@posthog/react";
+import { useEffect } from "react";
 
 export const LockedPage = () => {
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog.capture('locked_page_viewed');
+  }, [posthog]);
+
   return (
     <Box sx={{
       display: 'flex',
