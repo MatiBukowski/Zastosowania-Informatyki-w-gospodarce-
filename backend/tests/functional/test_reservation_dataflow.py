@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime, timedelta, timezone
-from tests.utils import create_restaurants, create_users, create_tables
+from tests.utils import create_restaurants, create_user, create_tables
 from src.models import ReservationStatusEnum
 
 class TestReservationDataflow:
