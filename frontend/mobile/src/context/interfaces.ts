@@ -38,13 +38,10 @@ export enum ReservationStatus {
   CANCELED = "CANCELED",
 }
 
-// base
-interface IReservationBase {
-  reservation_time: string;
-}
 
 // post
-export interface ICreateReservation extends IReservationBase {
+export interface ICreateReservation {
+  reservation_time: string;
   restaurant_id: number;
   table_id: number;
   user_id: number;
@@ -57,7 +54,7 @@ export interface IReservation extends ICreateReservation {
 }
 
 // patch
-export interface IUpdateReservation extends Partial<IReservationBase> {
+export interface IUpdateReservation extends Partial<ICreateReservation> {
   status?: ReservationStatus;
 }
 

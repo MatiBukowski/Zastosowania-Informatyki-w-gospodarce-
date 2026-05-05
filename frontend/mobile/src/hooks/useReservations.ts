@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getReservationsByTableId, createReservation, getReservationById, updateReservation } from '../api/ReservationAPI';
 import { IReservation, ICreateReservation, IUpdateReservation } from '../context/interfaces';
 
@@ -8,6 +8,7 @@ export function useGetReservationsByTableId(tableId: number) {
     const [error, setError] = useState<string | null>(null);
 
     const fetchReservations = useCallback(async () => {
+            if (!tableId) return;
             setLoading(true);
             try {
                 const data = await getReservationsByTableId(tableId);
@@ -15,15 +16,14 @@ export function useGetReservationsByTableId(tableId: number) {
                 setError(null);
             } catch (err: any) {
                 console.error('useGetReservationsByTableId - error:', err);
+                setError(err.message || 'Failed to fetch table reservations');
             } finally {
                 setLoading(false);
             }
     }, [tableId]);
 
     useEffect(() => {
-            if (tableId) {
-                fetchReservations();
-            }
+        fetchReservations();
     }, [fetchReservations]);
 
     return { reservations, loading, error, refresh: fetchReservations };
@@ -42,7 +42,7 @@ export function useCreateReservation() {
             return result;
         } catch (err: any) {
             console.error('useCreateReservation - error:', err);
-            setError(err.message);
+            setError(err.message || 'Failed to create reservation');
             setLoading(false);
             return null;
         }
@@ -61,19 +61,20 @@ export function useGetReservationById(reservationId: number) {
         setLoading(true);
 
         try {
-                const data = await getReservationById(reservationId);
-                setReservation(data);
-                setError(null);
-            } catch (err: any) {
-                setError(err.message);
-                console.error('useGetReservationById - error:', err);
-            } finally {
-                setLoading(false);
-            }
+            const data = await getReservationById(reservationId);
+            setReservation(data);
+            setError(null);
+        } catch (err: any) {
+            setError(err.message);
+            console.error('useGetReservationById - error:', err);
+            setError(err.message || 'Failed to fetch reservation');
+        } finally {
+            setLoading(false);
+        }
     }, [reservationId]);
 
     useEffect(() => {
-            fetchById();
+        fetchById();
     }, [fetchById]);
 
     return { reservation, loading, error, refresh: fetchById };
@@ -92,7 +93,7 @@ export function useUpdateReservation() {
             return result;
         } catch (err: any) {
             console.error('useUpdateReservation - error:', err);
-            setError(err.message);
+            setError(err.message || 'Failed to update reservation');
             setLoading(false);
             return null;
         }
