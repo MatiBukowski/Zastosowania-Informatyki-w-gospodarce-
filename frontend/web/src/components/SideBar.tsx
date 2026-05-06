@@ -124,14 +124,6 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
             isActive={isForecastActive} 
             onClick={() => posthog.capture('sidebar_nav_clicked', { destination: '/forecast' })}
           />
-          <SideBarMenuItem 
-            href='/' 
-            icon={<BarChartIcon sx={{ fontSize: '28px' }} />} 
-            label='Statistics' 
-            collapsed={isCollapsed} 
-            isActive={location.pathname === '/dashboard'} 
-            onClick={() => posthog.capture('sidebar_nav_clicked', { destination: '/' })}
-          />
         </Stack>
       </Box>
 

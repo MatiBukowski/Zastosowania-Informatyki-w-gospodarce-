@@ -1,16 +1,37 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { getRestaurants } from '../api/RestaurantAPI';
 import { getForecast, IForecastData } from '../api/ForecastAPI';
 import { IRestaurant } from '../context/interfaces';
-import { Select, MenuItem, FormControl, InputLabel, Box, Typography, CircularProgress, Paper, Stack, Divider } from '@mui/material';
+import {
+  Select, MenuItem, FormControl, InputLabel,
+  Box, Typography, CircularProgress, Paper, Stack, Divider,
+} from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { usePostHog } from '@posthog/react';
+
+/** Returns the pixel width of a DOM element, updating on resize. */
+function useElementWidth(ref: React.RefObject<HTMLElement>) {
+  const [width, setWidth] = useState(800);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const ro = new ResizeObserver(([entry]) => {
+      setWidth(entry.contentRect.width);
+    });
+    ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, [ref]);
+
+  return width;
+}
 
 export const ForecastPage = () => {
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | ''>('');
   const [forecastData, setForecastData] = useState<IForecastData | null>(null);
   const [loading, setLoading] = useState(false);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartWidth = useElementWidth(chartContainerRef);
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -30,7 +51,9 @@ export const ForecastPage = () => {
         })
         .catch((err) => {
           console.error(err);
-          posthog.capture('failed_restaurant_forecast_view', { restaurant_id: selectedRestaurantId });
+          posthog.capture('failed_restaurant_forecast_view', {
+            restaurant_id: selectedRestaurantId,
+          });
         })
         .finally(() => setLoading(false));
     }
@@ -39,16 +62,15 @@ export const ForecastPage = () => {
   const chartData = useMemo(() => {
     if (!forecastData) return { xAxis: [], series: [] };
 
-    // Historical data: last 30 points for better visibility
+    // Historical: last 30 points
     const historicalPoints = forecastData.historical.slice(-30);
-    const historicalX = historicalPoints.map(p => new Date(p[0]));
-    const historicalY = historicalPoints.map(p => p[1]);
+    const historicalX = historicalPoints.map((p) => new Date(p[0]));
+    const historicalY = historicalPoints.map((p) => p[1]);
 
-    // Forecast data
+    // Forecast mean
     const forecastY = forecastData.forecast[0];
-    
-    // Combine X axis
-    // Forecast starts after the last historical point. We assume daily intervals as per historical data.
+
+    // Generate forecast X dates (daily intervals after last historical point)
     const lastDate = historicalX[historicalX.length - 1];
     const forecastX = forecastY.map((_, i) => {
       const d = new Date(lastDate);
@@ -57,17 +79,34 @@ export const ForecastPage = () => {
     });
 
     const combinedX = [...historicalX, ...forecastX];
+    const nullPad = (arr: (number | null)[]) => arr;
 
-    // Prepare series
-    // Historical series: values for historical dates, null for forecast dates
-    const historicalSeries = [...historicalY, ...forecastX.map(() => null)];
-    
-    // Forecast series: last historical value then forecast values
-    // To make it continuous, we start from the last historical point
-    const forecastSeries = [
-        ...historicalY.map((_, i) => i === historicalY.length - 1 ? historicalY[i] : null),
-        ...forecastY
-    ];
+    // Historical series — null for forecast range
+    const historicalSeries = nullPad([
+      ...historicalY,
+      ...forecastX.map(() => null),
+    ]);
+
+    // Forecast mean series — connect from last historical value
+    const forecastMeanSeries = nullPad([
+      ...historicalY.map((v, i) => (i === historicalY.length - 1 ? v : null)),
+      ...forecastY,
+    ]);
+
+    // 90th percentile band:
+    // quantile_forecast[0] has 12 time steps; each step has 10 quantile levels.
+    // Index 0 = p5 (lower bound), Index 9 = p95 (upper bound) → ~90% interval.
+    const qSteps = forecastData.quantile_forecast[0]; // length = 12
+
+    const forecastP5Series = nullPad([
+      ...historicalY.map((v, i) => (i === historicalY.length - 1 ? v : null)),
+      ...qSteps.map((step) => step[0]),   // p5
+    ]);
+
+    const forecastP95Series = nullPad([
+      ...historicalY.map((v, i) => (i === historicalY.length - 1 ? v : null)),
+      ...qSteps.map((step) => step[9]),   // p95
+    ]);
 
     return {
       xAxis: combinedX,
@@ -76,15 +115,37 @@ export const ForecastPage = () => {
           data: historicalSeries,
           label: 'Historical',
           color: '#1976d2',
-          showMark: true,
+          showMark: false,
+          curve: 'linear' as const,
         },
         {
-          data: forecastSeries,
-          label: 'Forecast',
+          data: forecastP95Series,
+          label: 'p95 (upper)',
+          color: 'rgba(46,125,50,0.20)',
+          showMark: false,
+          curve: 'linear' as const,
+          area: true,
+          // Hide from legend — it's visual context, not a primary series
+          hideLegend: true,
+        },
+        {
+          data: forecastP5Series,
+          label: 'p5 (lower)',
+          color: 'rgba(255,255,255,0)',  // transparent fill cancels out upper area
+          showMark: false,
+          curve: 'linear' as const,
+          area: true,
+          hideLegend: true,
+          baseline: 'min' as const,
+        },
+        {
+          data: forecastMeanSeries,
+          label: 'Forecast (mean)',
           color: '#2e7d32',
-          showMark: true,
-        }
-      ]
+          showMark: false,
+          curve: 'linear' as const,
+        },
+      ],
     };
   }, [forecastData]);
 
@@ -103,7 +164,9 @@ export const ForecastPage = () => {
           onChange={(e) => setSelectedRestaurantId(e.target.value as number)}
         >
           {restaurants.map((r) => (
-            <MenuItem key={r.restaurant_id} value={r.restaurant_id}>{r.name}</MenuItem>
+            <MenuItem key={r.restaurant_id} value={r.restaurant_id}>
+              {r.name}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -119,20 +182,25 @@ export const ForecastPage = () => {
           <Divider sx={{ mb: 3 }} />
           <Stack direction="row" spacing={2} sx={{ mb: 3, alignItems: 'center' }}>
             <Typography variant="h6" sx={{ color: 'text.secondary' }}>
-                Forecast Visualization
+              Forecast Visualization
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.disabled' }}>
+              Shaded area = 90% confidence interval (p5–p95)
             </Typography>
           </Stack>
           <Paper elevation={3} sx={{ p: 3 }}>
-            <Box sx={{ width: '100%', height: 400 }}>
+            {/* ref container fills Paper width; chart reads it */}
+            <Box ref={chartContainerRef} sx={{ width: '100%' }}>
               <LineChart
-                xAxis={[{ 
-                  data: chartData.xAxis, 
+                xAxis={[{
+                  data: chartData.xAxis,
                   scaleType: 'time',
-                  valueFormatter: (value) => value.toLocaleDateString(),
+                  valueFormatter: (value) => (value as Date).toLocaleDateString(),
                 }]}
                 series={chartData.series}
-                height={400}
-                margin={{ left: 50, right: 50, top: 50, bottom: 50 }}
+                height={420}
+                width={chartWidth}
+                margin={{ left: 60, right: 40, top: 50, bottom: 60 }}
               />
             </Box>
           </Paper>
@@ -140,7 +208,9 @@ export const ForecastPage = () => {
       )}
 
       {!loading && selectedRestaurantId !== '' && !forecastData && (
-        <Typography sx={{ mt: 2, color: 'text.secondary' }}>No forecast data available for this restaurant.</Typography>
+        <Typography sx={{ mt: 2, color: 'text.secondary' }}>
+          No forecast data available for this restaurant.
+        </Typography>
       )}
     </Box>
   );
