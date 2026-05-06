@@ -2,6 +2,7 @@ import {createContext, ReactNode, useContext, useEffect, useState, useRef} from 
 import {useNavigate} from "react-router-dom";
 import {apiClient} from "../api/API"
 import {jwtDecode} from "jwt-decode";
+import {usePostHog} from "@posthog/react";
 
 interface JwtPayload {
     role: string;
@@ -36,6 +37,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     const [firstName, setFirstName] = useState<string | null>(null);
     const [surname, setSurname] = useState<string | null>(null);
     const navigate = useNavigate();
+    const posthog = usePostHog();
     const initRef = useRef(false);
     const [isAxiosReady, setIsAxiosReady] = useState(false);
     let refreshPromise: Promise<string> | null = null;
@@ -45,6 +47,11 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
         setRole(decoded.role);
         setFirstName(decoded.first_name);
         setSurname(decoded.surname);
+        
+        // Store in localStorage for persistence and to prevent flickering
+        localStorage.setItem('user_role', decoded.role);
+        localStorage.setItem('user_firstName', decoded.first_name);
+        localStorage.setItem('user_surname', decoded.surname);
     };
 
     const login = async (email: string, password: string) => {
@@ -57,6 +64,15 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             const token = response.data.access_token;
             setAccessToken(token);
             decodeAndSetTokenData(token);
+            
+            // Identify user in PostHog for better error tracking
+            posthog.identify(email, {
+                email: email,
+                firstName: firstName,
+                surname: surname,
+                role: role
+            });
+            
             navigate("/");
         } catch (error) {
             console.error("Login failed:", error);
@@ -76,6 +92,15 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             setRole(null);
             setFirstName(null);
             setSurname(null);
+            
+            // Clear user info from localStorage
+            localStorage.removeItem('user_role');
+            localStorage.removeItem('user_firstName');
+            localStorage.removeItem('user_surname');
+            
+            // Reset PostHog user
+            posthog.reset();
+            
             navigate("/auth");
         }
     }
@@ -112,8 +137,8 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
                                 withCredentials: true,
                             }).then(res => {
                                 const newToken = res.data.access_token;
+                                // Only update the token, user info stays the same (cached in localStorage)
                                 setAccessToken(newToken);
-                                decodeAndSetTokenData(newToken);
                                 return newToken;
                             }).finally(() => {
                                 refreshPromise = null;
@@ -151,21 +176,33 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             if (initRef.current) return;
             initRef.current = true;
 
-            try {
-                console.log("Attempting to restore auth state from refresh token...");
-                const response = await apiClient.post('/api/auth/refresh', null, {
-                    withCredentials: true,
-                });
-                const token = response.data.access_token;
-                console.log("Token refreshed successfully");
-                setAccessToken(token);
-                decodeAndSetTokenData(token);
-            } catch (error) {
-                console.log("No valid refresh token or refresh failed:", error);
-                setAccessToken(null);
-                setRole(null);
-                setFirstName(null);
-                setSurname(null);
+            const cachedRole = localStorage.getItem('user_role');
+            const cachedFirstName = localStorage.getItem('user_firstName');
+            const cachedSurname = localStorage.getItem('user_surname');
+            
+            if (cachedRole) setRole(cachedRole);
+            if (cachedFirstName) setFirstName(cachedFirstName);
+            if (cachedSurname) setSurname(cachedSurname);
+
+            if (!cachedRole) {
+                try {
+                    const response = await apiClient.post('/api/auth/refresh', null, {
+                        withCredentials: true,
+                    });
+                    const token = response.data.access_token;
+                    setAccessToken(token);
+                    decodeAndSetTokenData(token);
+                } catch (error) {
+                    setAccessToken(null);
+                    setRole(null);
+                    setFirstName(null);
+                    setSurname(null);
+                    
+                    // Clear localStorage on auth failure
+                    localStorage.removeItem('user_role');
+                    localStorage.removeItem('user_firstName');
+                    localStorage.removeItem('user_surname');
+                }
             }
         };
 

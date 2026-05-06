@@ -11,7 +11,7 @@ export const theme = createTheme({
     },
     background: {
       default: colors.seashell, 
-      paper: '#ffffff'    
+      paper: '#ffffff',          
     },
     text: {
       primary: colors.carbonBlack,
