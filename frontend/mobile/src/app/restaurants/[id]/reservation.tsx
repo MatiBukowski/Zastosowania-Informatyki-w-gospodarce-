@@ -45,7 +45,7 @@ const ReservationScreen = () => {
     const today = new Date().toISOString().split('T')[0];
 
     // states
-    const [selectedDate, setSelectedDate] = useState(today);
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [guests, setGuests] = useState<number | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [allRelevantReservations, setAllRelevantReservations] = useState<IReservation[]>([]);
@@ -115,7 +115,12 @@ return (
                         onPress={() => setActiveSection('calendar')}
                     >
                         <Ionicons name="calendar-outline" size={18} color={activeSection === 'calendar' ? theme.colors.primary : theme.colors.text} />
-                        <Text style={[styles.selectorText, activeSection === 'calendar' && { color: theme.colors.primary }]}>{new Date(selectedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</Text>
+                    <Text style={[styles.selectorText, activeSection === 'calendar' && { color: theme.colors.primary }]}>
+                        {selectedDate
+                            ? new Date(selectedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+                            : "DATE"
+                        }
+                    </Text>
                     </TouchableOpacity>
 
 
@@ -161,7 +166,10 @@ return (
                         current={selectedDate || today}
                         minDate={today}
 
-                        onDayPress={day => setSelectedDate(day.dateString)}
+                        onDayPress={day => {
+                            setSelectedDate(day.dateString);
+                            setActiveSection('guests');
+                        }}
                         markedDates={{
                             [selectedDate]: { selected: true, selectedColor: theme.colors.primary }
                         }}
@@ -179,7 +187,12 @@ return (
 
                             return (
                                 <TouchableOpacity
-                                    onPress={() => !isDisabled && setSelectedDate(date.dateString)}
+                                    onPress={() => {
+                                        if (!isDisabled && date) {
+                                            !isDisabled && setSelectedDate(date.dateString);
+                                            setActiveSection('guests');
+                                        }
+                                    }}
                                     style={[
                                         styles.dayTile,
                                         {
