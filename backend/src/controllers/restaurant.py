@@ -8,7 +8,8 @@ from ..schemas import (
     TableUpdate
 )
 from ..services import RestaurantService, MenuService, TableService
-
+from ..models import AppUser
+from ..auth import get_current_user
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
@@ -21,6 +22,15 @@ router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 )
 def get_restaurants_endpoint(service: RestaurantService = Depends()):
     return service.get_restaurants()
+
+@router.get(
+    "/my",
+    response_model=list[RestaurantPublicResponse],
+    summary="Get restaurants managed by specific user",
+    description="Retrieve a list of available restaurants managed by specific user"
+)
+def get_restaurants_endpoint(service: RestaurantService = Depends(), current_user: AppUser = Depends(get_current_user)):
+    return service.get_restaurants_for_user(current_user.user_id)
 
 @router.get(
     "/{restaurant_id}",

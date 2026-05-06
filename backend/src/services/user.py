@@ -6,10 +6,11 @@ from src.repositories import UserRepository
 from src.exceptions import UserAlreadyExistsException, UserNotFoundException, InvalidCredentialsException
 from src.security import PasswordHandler
 
+
 class UserService:
+
     def __init__(self, user_repository: UserRepository = Depends()):
         self.user_repository = user_repository
-
 
     def register_user(self, user: UserRegisterRequest):
         existing_user = self.user_repository.get_by_email(user.email)
@@ -26,7 +27,6 @@ class UserService:
         ))
         return new_user
 
-    
     def login_user(self, user: UserLoginRequest):
         existing_user = self.user_repository.get_by_email(user.email)
 

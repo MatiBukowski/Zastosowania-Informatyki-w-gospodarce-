@@ -13,6 +13,7 @@ from .menu_item import MenuItem
 from .reservation import Reservation
 from .order import Order
 from .order_item import OrderItem
+from .restaurant_user import RestaurantUser
 
 __all__ = [
     "OrderSourceEnum",
@@ -28,4 +29,5 @@ __all__ = [
     "Reservation",
     "Order",
     "OrderItem",
+    "RestaurantUser"
 ]
