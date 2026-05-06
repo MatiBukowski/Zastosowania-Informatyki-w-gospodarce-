@@ -11,6 +11,9 @@ class UserRepository:
     def get_by_email(self, email):
         return self.db.query(AppUser).filter_by(email=email).first()
 
+    def get_by_id(self, user_id: int):
+        return self.db.query(AppUser).filter(AppUser.user_id == user_id).first()
+
     def create(self, user: AppUser):
         self.db.add(user)
         self.db.commit()
