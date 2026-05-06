@@ -17,7 +17,7 @@ class RestaurantRepository:
             select(Restaurant).where(Restaurant.restaurant_id == restaurant_id)
         ).scalar_one_or_none()
 
-    def get_restaurant_by_user_id(self, user_id: int):
+    def get_restaurants_by_user_id(self, user_id: int):
         user = self.db.execute(
             select(AppUser).where(AppUser.user_id == user_id)
         ).scalar_one_or_none()
