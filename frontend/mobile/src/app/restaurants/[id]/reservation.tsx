@@ -110,36 +110,61 @@ return (
                 </View>
 
                 <View style={styles.segmentedSelector}>
-                    <TouchableOpacity style={styles.selectorTab}>
-                        <Ionicons name="calendar-outline" size={18} color={theme.colors.text} />
-                        <Text style={styles.selectorText}>{new Date(selectedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</Text>
-                        <Ionicons name="chevron-down" size={14} color={theme.colors.text} />
+                    <TouchableOpacity
+                        style={[styles.selectorTab, activeSection === 'calendar' && styles.activeTab]}
+                        onPress={() => setActiveSection('calendar')}
+                    >
+                        <Ionicons name="calendar-outline" size={18} color={activeSection === 'calendar' ? theme.colors.primary : theme.colors.text} />
+                        <Text style={[styles.selectorText, activeSection === 'calendar' && { color: theme.colors.primary }]}>{new Date(selectedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</Text>
                     </TouchableOpacity>
-
 
 
                     <View style={styles.divider} />
 
-                    <TouchableOpacity style={styles.selectorTab}>
-                        <Ionicons name="people-outline" size={18} color={theme.colors.text} />
-                        <Text style={styles.selectorText}>{guests} Pers.</Text>
-                        <Ionicons name="chevron-down" size={14} color={theme.colors.text} />
+
+                    {/*People*/}
+
+                    <TouchableOpacity
+                        disabled={!selectedDate}
+                        style={[
+                            styles.selectorTab,
+                            activeSection === 'guests' && styles.activeTab,
+                            !selectedDate && { opacity: 0.3 }
+                        ]}
+                        onPress={() => setActiveSection('guests')}
+                    >
+                        <Ionicons name="people-outline" size={18} color={activeSection === 'guests' ? theme.colors.primary : theme.colors.text} />
+                        <Text style={[styles.selectorText, activeSection === 'guests' && { color: theme.colors.primary }]}>{guests ? `${guests} Pers.` : "Pers."}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.divider} />
 
-                    <TouchableOpacity style={styles.selectorTab}>
-                        <Ionicons name="time-outline" size={18} color={theme.colors.text} />
-                        <Text style={styles.selectorText}>Time</Text>
+                    {/*Time*/}
+                    <TouchableOpacity
+                        disabled={!selectedDate || !guests}
+                        style={[
+                            styles.selectorTab,
+                            activeSection === 'time' && styles.activeTab,
+                            (!selectedDate || !guests) && { opacity: 0.3 }
+                        ]}
+                        onPress={() => setActiveSection('time')}
+                    >
+                        <Ionicons name="time-outline" size={18} color={activeSection === 'time' ? theme.colors.primary : theme.colors.text} />
+                        <Text style={[styles.selectorText, activeSection === 'time' && { color: theme.colors.primary }]}>{selectedTime || "Time"}</Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* Date */}
+                {/* Calendar */}
+                {activeSection === 'calendar' && (
                 <View style={[theme.common.card, { padding: 10 }]}>
                     <Calendar
-                        current={selectedDate}
+                        current={selectedDate || today}
                         minDate={today}
+
                         onDayPress={day => setSelectedDate(day.dateString)}
+                        markedDates={{
+                            [selectedDate]: { selected: true, selectedColor: theme.colors.primary }
+                        }}
                         renderArrow={(direction) => (
                             <Ionicons
                                 name={direction === 'left' ? 'chevron-back' : 'chevron-forward'}
@@ -181,53 +206,56 @@ return (
                             monthTextColor: theme.colors.text,
                             textMonthFontWeight: '800',
                             textMonthFontSize: 18,
-                            arrowColor: theme.colors.primary,
-                            'stylesheet.calendar.header': {
-                                week: {
-                                    marginTop: 10,
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-around',
-                                }
-                            }
+                            arrowColor: theme.colors.primary
                         }}
                     />
                 </View>
+            )}
 
-                {/* Hour */}
-                <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
-                    <Text style={styles.sectionTitle}>Select Time</Text>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ gap: 10, paddingBottom: 20 }}
-                    >
-                        {timeSlots.map(time => {
-                            const isAvailable = checkIsAnyTableFree(time);
-                            const isSelected = selectedTime === time;
-                            return (
+                {activeSection === 'guests' && selectedDate && (
+                    <View style={styles.gridContainer}>
+                        <View style={styles.gridWrapper}>
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
                                 <TouchableOpacity
-                                    key={time}
-                                    disabled={!isAvailable}
-                                    onPress={() => setSelectedTime(time)}
-                                    style={[
-                                        styles.timeSlot,
-                                        isSelected && styles.selectedTimeSlot,
-                                        !isAvailable && styles.disabledTimeSlot
-                                    ]}
+                                    key={num}
+                                    style={[styles.gridItem, guests === num && styles.selectedItem]}
+                                    onPress={() => setActiveSection('time') || setGuests(num)}
                                 >
-                                    <Text style={[
-                                        styles.timeText,
-                                        isSelected && { color: '#fff' },
-                                        !isAvailable && { color: '#ccc' }
-                                    ]}>
-                                        {time}
-                                    </Text>
+                                    <Text style={[styles.gridItemText, guests === num && { color: theme.colors.primary }]}>{num}</Text>
                                 </TouchableOpacity>
-                            );
-                        })}
-                    </ScrollView>
-                </View>
+                            ))}
+                        </View>
+                    </View>
+                )}
 
+
+{/* SECTION 3: TIME GRID */}
+                {activeSection === 'time' && selectedDate && guests && (
+                    <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
+                        <View style={styles.gridWrapper}>
+                            {timeSlots.map(time => {
+                                const isAvailable = checkIsAnyTableFree(time);
+                                const isSelected = selectedTime === time;
+                                return (
+                                    <TouchableOpacity
+                                        key={time}
+                                        disabled={!isAvailable}
+                                        onPress={() => setSelectedTime(time)}
+                                        style={[
+                                            styles.gridItem,
+                                            isSelected && styles.selectedItem,
+                                            !isAvailable && styles.disabledItem
+                                        ]}
+                                    >
+                                        <Text style={[styles.gridItemText, isSelected && { color: theme.colors.primary }, !isAvailable && { color: '#ccc' }]}>
+                                            {time}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                    </View>
+                )}
             </ScrollView>
         </SafeAreaView>
     );
@@ -258,26 +286,30 @@ const styles = StyleSheet.create({
     segmentedSelector: {
         flexDirection: 'row',
         backgroundColor: '#ffffff',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: 'rgba(34, 34, 23, 0.08)',
-        borderBottomWidth: 3,
-        borderBottomColor: 'rgba(34, 34, 23, 0.12)',
-        marginBottom: 24,
-        marginHorizontal: 2,
-        overflow: 'hidden',
+        borderRadius: 14,
+        marginHorizontal: 16,
+        padding: 4,
+        marginBottom: 20,
+        // shade
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
     },
     selectorTab: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 16,
-        gap: 8,
+        paddingVertical: 12,
+        gap: 6,
+        borderBottomWidth: 3,
+        borderBottomColor: 'transparent',
     },
     selectorText: {
         fontSize: 12,
-        fontWeight: '700',
+        fontWeight: '600',
         color: theme.colors.text,
         textTransform: 'uppercase',
     },
@@ -321,6 +353,38 @@ const styles = StyleSheet.create({
     },
     timeText: {
         fontWeight: '600',
+    },
+    activeTab: {
+        borderBottomColor: theme.colors.primary,
+    },
+
+    gridContainer: {
+        marginTop: 20,
+        paddingHorizontal: 16,
+        width: '100%',
+    },
+    gridWrapper: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-start',
+        width: '100%',
+    },
+    gridItem: {
+        width: '23%',
+        aspectRatio: 1.5,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        marginBottom: 10,
+        marginRight: '2%',
+    },
+    gridItemText: {
+        color: '#333',
+        fontSize: 14,
+        fontWeight: '700',
     }
 
 });
