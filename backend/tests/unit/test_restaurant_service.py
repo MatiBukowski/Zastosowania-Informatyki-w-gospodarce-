@@ -48,3 +48,22 @@ class TestRestaurantService:
         assert exception.value.status_code == status.HTTP_404_NOT_FOUND
         assert "Restaurant with id=1 not found" in exception.value.detail
         mock_repo.get_restaurant_by_id.assert_called_once_with(1)
+
+    def test_get_restaurants_for_user(self):
+        mock_repo = MagicMock()
+
+        test_data = [
+            {"restaurant_id": 1, "name": "Pizza Mario", "address": "ul. Rynek 30, Wrocław", "has_kiosk": True, "cuisine": "ITALIAN", "photo": "photo1_url", "description": "description1"},
+            {"restaurant_id": 2, "name": "Kebab King", "address": "ul. Rynek 10, Wrocław", "has_kiosk": False, "cuisine": "OTHER", "photo": None, "description": "description2"}
+        ]
+        mock_repo.get_restaurants_by_user_id.return_value = test_data
+        service = RestaurantService(repo=mock_repo)
+        user_id = 5
+
+        result = service.get_restaurants_for_user(user_id)
+
+        assert result == test_data
+        assert len(result) == 2
+        assert result[0]["name"] == "Pizza Mario"
+        assert result[0]["description"] == "description1"
+        mock_repo.get_restaurants_by_user_id.assert_called_once()

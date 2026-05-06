@@ -1,4 +1,11 @@
-from src.models import CuisineTypeEnum, Restaurant, MenuItem, AppUser, RestaurantTable
+from src.models import (
+    CuisineTypeEnum,
+    Restaurant,
+    MenuItem,
+    AppUser,
+    RestaurantTable,
+    RestaurantUser
+)
 from src.security import PasswordHandler
 
 def create_restaurants(db):
@@ -12,6 +19,8 @@ def create_restaurants(db):
     )
     db.add(restaurant)
     db.commit()
+    db.refresh(restaurant)
+    return restaurant
 
 def create_menu(db):
     menu = [
@@ -51,4 +60,11 @@ def create_user(db):
         surname="Doe"
     )
     db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+def assign_user_to_restaurant(db, user_id, restaurant_id):
+    restaurant_user = RestaurantUser(user_id=user_id, restaurant_id=restaurant_id)
+    db.add(restaurant_user)
     db.commit()
