@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { getRestaurants } from '../api/RestaurantAPI';
-import { getForecast, IForecastData } from '../api/ForecastAPI';
-import { IRestaurant } from '../context/interfaces';
+import { getForecast } from '../api/ForecastAPI';
+import { IRestaurant, IForecastData } from '../context/interfaces';
 import {
   Select, MenuItem, FormControl, InputLabel,
   Box, Typography, CircularProgress, Paper, Stack, Divider,

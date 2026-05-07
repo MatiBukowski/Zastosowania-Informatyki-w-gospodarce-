@@ -51,3 +51,9 @@ export interface ITableQRProps {
   token: string;
   table_number: number;
 }
+
+export interface IForecastData {
+  historical: [string, number][];
+  forecast: [number[]];
+  quantile_forecast: [[number[]]];
+}

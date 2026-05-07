@@ -1,10 +1,5 @@
 import { apiClient } from './API';
-
-export interface IForecastData {
-  historical: [string, number][];
-  forecast: [number[]];
-  quantile_forecast: [[number[]]];
-}
+import {IForecastData} from '../context/interfaces';
 
 const CACHE_KEY_PREFIX = 'forecast_cache_';
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour
