@@ -1,14 +1,13 @@
-import { View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { theme } from '../theme/theme';
 
-import RestaurantView from '../views/RestaurantView';
 import ScanQrButton from '../components/buttons/ScanQrButton';
 
 export default function HomePageMobile() {
   return (
-    <View style={theme.common.screenContainer}>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={theme.common.screenContainer}>
       <ScanQrButton />
-      <RestaurantView />
-    </View>
+      {/* Future content can be added here */}
+    </ScrollView>
   );
 }
