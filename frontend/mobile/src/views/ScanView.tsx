@@ -189,11 +189,14 @@ export default function ScanView() {
   useEffect(() => {
     if (qrToken) {
       setScanStatus('loading');
-      if (table?.restaurant_id) {
-        router.push(`/restaurants/${table.restaurant_id}/menu`);
-      }
     }
   }, [qrToken]);
+
+  useEffect(() => {
+    if (table?.restaurant_id && qrToken) {
+      router.push(`/restaurants/${table.restaurant_id}/menu`);
+    }
+  }, [table, qrToken]);
 
   useEffect(() => {
     if (error) {
