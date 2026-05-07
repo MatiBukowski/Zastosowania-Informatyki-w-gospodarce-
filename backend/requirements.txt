@@ -12,3 +12,4 @@ jwt
 passlib
 bcrypt==4.0.1
 posthog
+pydantic[email]

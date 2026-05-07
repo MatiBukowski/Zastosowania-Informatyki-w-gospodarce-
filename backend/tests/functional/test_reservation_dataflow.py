@@ -1,13 +1,13 @@
 import pytest
 from datetime import datetime, timedelta, UTC
-from tests.utils import create_restaurants, create_users, create_tables
+from tests.utils import create_restaurants, create_user, create_tables
 from src.models import ReservationStatusEnum
 
 class TestReservationDataflow:
 
     def test_reservation_lifecycle(self, client, db):
         create_restaurants(db)
-        create_users(db)
+        create_user(db)
         create_tables(db, restaurant_id=1)
         
         table_id = 1
@@ -48,7 +48,7 @@ class TestReservationDataflow:
 
     def test_reservation_window_collision_logic(self, client, db):
         create_restaurants(db)
-        create_users(db)
+        create_user(db)
         create_tables(db, restaurant_id=1)
         
         base_time = datetime.now(UTC) + timedelta(days=20)
@@ -78,7 +78,7 @@ class TestReservationDataflow:
 
     def test_canceled_reservation_does_not_block(self, client, db):
         create_restaurants(db)
-        create_users(db)
+        create_user(db)
         create_tables(db, restaurant_id=1)
         res_time = (datetime.now(UTC) + timedelta(days=30)).isoformat()
 

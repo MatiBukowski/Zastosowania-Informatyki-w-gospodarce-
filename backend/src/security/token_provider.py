@@ -1,9 +1,10 @@
 import jwt, secrets, logging
 from datetime import datetime, timedelta, timezone
 
-from ..models.app_user import AppUser
-from ..models.enums import UserRoleEnum
-from ..config import settings
+from src.models import AppUser
+from src.models import UserRoleEnum
+from src.config import settings
+from src.exceptions import JWTHandlingException
 
 class TokenProvider:
     def __init__(self):
@@ -14,10 +15,12 @@ class TokenProvider:
         self.REFRESH_TOKEN_EXPIRE_DAYS = settings.REFRESH_TOKEN_EXPIRE_DAYS
         self.jwt_handler = jwt.JWT()
 
+
     @staticmethod
     def _generate_secret_key() -> str:
         return secrets.token_urlsafe(32)
     
+
     def generate_access_token(self, user: AppUser) -> str:
         try:
             self.logger.debug(f"Generating access token for user_id={user.user_id}, email={user.email}, role={user.role}")
@@ -27,14 +30,17 @@ class TokenProvider:
                 "user_id": user.user_id,
                 "email": user.email,
                 "role": user.role.value,
+                "first_name": user.first_name,
+                "surname": user.surname,
                 "exp": int(expiry_date.timestamp())
             }
 
             return self.jwt_handler.encode(payload, self.jwt_key, alg="HS256")
         except jwt.exceptions.JWTEncodeError as e:
             self.logger.error(f"Error encoding access token: {str(e)}")
-            raise Exception(f"Failed to generate access token: {str(e)}")
+            raise JWTHandlingException(f"Failed to generate access token: {str(e)}")
     
+
     def generate_access_token_from_refresh_token(self, refresh_token: str) -> str:
         try:
             self.logger.debug(f"Generating access token from refresh token for token={refresh_token}")
@@ -45,12 +51,15 @@ class TokenProvider:
             user_id = payload.get("user_id")
             email = payload.get("email")
             role_str = payload.get("role")
+            first_name = payload.get("first_name")
+            surname = payload.get("surname")
             role = UserRoleEnum(role_str)
 
-            return self.generate_access_token(AppUser(user_id=user_id, email=email, role=role))
+            return self.generate_access_token(AppUser(user_id=user_id, email=email, role=role, first_name=first_name, surname=surname))
         except jwt.exceptions.JWTDecodeError as e:
             self.logger.error(f"Error decoding refresh token: {str(e)}")
-            raise Exception(f"Invalid or expired refresh token: {str(e)}")
+            raise JWTHandlingException(f"Invalid or expired refresh token: {str(e)}")
+        
         
     def generate_refresh_token(self, user: AppUser) -> str:
         try:
@@ -61,10 +70,12 @@ class TokenProvider:
                 "user_id": user.user_id,
                 "email": user.email,
                 "role": user.role.value,
+                "first_name": user.first_name,
+                "surname": user.surname,
                 "exp": int(expiry_date.timestamp())
             }
             
             return self.jwt_handler.encode(payload, self.jwt_key, alg="HS256")
         except jwt.exceptions.JWTEncodeError as e:
             self.logger.error(f"Error encoding refresh token: {str(e)}")
-            raise Exception(f"Failed to generate refresh token: {str(e)}")
+            raise JWTHandlingException(f"Failed to generate refresh token: {str(e)}")
