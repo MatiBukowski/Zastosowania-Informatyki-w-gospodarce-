@@ -2,12 +2,15 @@ import {createContext, ReactNode, useContext, useEffect, useState, useRef} from 
 import {useNavigate} from "react-router-dom";
 import {apiClient} from "../api/API"
 import {jwtDecode} from "jwt-decode";
+import {usePostHog} from "@posthog/react";
 
 interface JwtPayload {
     role: string;
     sub: string;
     first_name: string;
     surname: string;
+    email: string;
+    user_id: string;
 }
 
 interface AuthContextType {
@@ -38,6 +41,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     const navigate = useNavigate();
     const initRef = useRef(false);
     const [isAxiosReady, setIsAxiosReady] = useState(false);
+    const posthog = usePostHog();
     let refreshPromise: Promise<string> | null = null;
 
     const decodeAndSetTokenData = (token: string) => {
@@ -45,6 +49,10 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
         setRole(decoded.role);
         setFirstName(decoded.first_name);
         setSurname(decoded.surname);
+        posthog.identify(
+          decoded.user_id,
+          { email: decoded.email, name: `${decoded.first_name} ${decoded.surname}` }
+        );
     };
 
     const login = async (email: string, password: string) => {
@@ -57,7 +65,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             const token = response.data.access_token;
             setAccessToken(token);
             decodeAndSetTokenData(token);
-            navigate("/");
+            navigate("/", { viewTransition: true });
         } catch (error) {
             console.error("Login failed:", error);
             throw error;
@@ -72,11 +80,12 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
         } catch (error) {
             console.error("Logout failed", error);
         } finally {
+            posthog.reset()
             setAccessToken(null);
             setRole(null);
             setFirstName(null);
             setSurname(null);
-            navigate("/auth");
+            navigate("/auth", { viewTransition: true });
         }
     }
 

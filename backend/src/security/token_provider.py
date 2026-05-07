@@ -1,10 +1,15 @@
 import jwt, secrets, logging
 from datetime import datetime, timedelta, timezone
 
+from fastapi import Depends, HTTPException, status
+
 from src.models import AppUser
 from src.models import UserRoleEnum
 from src.config import settings
 from src.exceptions import JWTHandlingException
+from src.db import get_session
+from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 class TokenProvider:
     def __init__(self):
@@ -79,3 +84,40 @@ class TokenProvider:
         except jwt.exceptions.JWTEncodeError as e:
             self.logger.error(f"Error encoding refresh token: {str(e)}")
             raise JWTHandlingException(f"Failed to generate refresh token: {str(e)}")
+
+
+    def get_current_user(self, access_token: str) -> AppUser:
+        try:
+            payload = self.jwt_handler.decode(access_token, self.jwt_key, algorithms=["HS256"])
+            user_id: int = payload.get("user_id")
+            email: str = payload.get("email")
+            role_str: str = payload.get("role")
+            first_name: str = payload.get("first_name")
+            surname: str = payload.get("surname")
+
+            if user_id is None or email is None or role_str is None:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Could not validate credentials",
+                    headers={"Authenticate": "Bearer"},
+                )
+
+            return AppUser(
+                user_id=user_id,
+                email=email,
+                role=UserRoleEnum(role_str),
+                first_name=first_name,
+                surname=surname
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Could not validate credentials: {str(e)}",
+                headers={"Authenticate": "Bearer"},
+            )
+
+    def get_current_active_user(self, access_token: str, db: Session = Depends(get_session)) -> AppUser:
+        user = db.execute(select(AppUser).where(AppUser.user_id == self.get_current_user(access_token).user_id)).scalar_one_or_none()
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user

@@ -1,7 +1,15 @@
 import { Box, Typography } from "@mui/material";
 import BlockIcon from '@mui/icons-material/Block';
+import { usePostHog } from "@posthog/react";
+import { useEffect } from "react";
 
 export const UnauthorizedPage = () => {
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog.capture('unauthorized_page_viewed');
+  }, [posthog]);
+
   return (
     <Box sx={{
       display: 'flex',

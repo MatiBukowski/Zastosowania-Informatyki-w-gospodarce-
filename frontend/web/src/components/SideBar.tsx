@@ -6,7 +6,8 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { colors } from '../../theme/palette';
 import { useAuth } from '../services/AuthProvider';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
+import { usePostHog } from '@posthog/react';
 import BarChartIcon from '@mui/icons-material/BarChart';
 
 const dividerTextStyle = {
@@ -39,7 +40,7 @@ interface SideBarMenuItemProps {
 const SideBarMenuItem = ({ href, icon, label, collapsed = false, isActive = false, onClick }: SideBarMenuItemProps) => {
   return (
     <IconButton 
-      {...(href ? { href } : {})}
+      {...(href ? { component: Link, to: href, viewTransition: true } as any : {})}
       onClick={onClick}
       sx={{ 
         color: isActive ? colors.strawberryRed : 'text.primary', 
@@ -76,16 +77,18 @@ interface SideBarProps {
 const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
   const { accessToken, role, firstName, surname, logout } = useAuth();
   const location = useLocation();
+  const posthog = usePostHog();
 
   const displayName = firstName && surname ? `${firstName} ${surname}` : "User";
   const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Role";
   const isQrActive = location.pathname === '/qr';
+  const isForecastActive = location.pathname === '/forecast';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0, height: '100vh', width: isCollapsed ? '80px' : '250px', backgroundColor: '#ece0dd', borderRight: '1px solid', borderColor: 'divider', transition: 'width 0.3s ease', zIndex: 1000 }}>
 
       <Box sx={{ padding: '15px', borderTop: '1px solid', borderColor: 'divider'}}>
-        <Stack direction='row' alignItems='center' spacing={1} sx={{ justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
+        <Stack direction='row' spacing={1} sx={{ alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
           {!isCollapsed && (
             <Stack direction='row' sx={{ flexGrow: 1 }}>
               <Box sx={{ border: '1px solid', borderRadius: '12px', width: '48px', height: '48px', borderColor: colors.strawberryRed }} />
@@ -105,8 +108,22 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
       <Box sx={{ padding: '10px', borderTop: '1px solid', borderColor: 'divider', flexGrow: 1 }}>
         <DividerText label='OVERVIEW' hidden={isCollapsed} />
         <Stack spacing={1}>
-          <SideBarMenuItem href='/qr' icon={<QrCodeIcon sx={{ fontSize: '28px' }} />} label='QR Codes' collapsed={isCollapsed} isActive={isQrActive} />
-          <SideBarMenuItem href='/' icon={<BarChartIcon sx={{ fontSize: '28px' }} />} label='Statistics' collapsed={isCollapsed} isActive={location.pathname === '/dashboard'} />
+          <SideBarMenuItem 
+            href='/qr' 
+            icon={<QrCodeIcon sx={{ fontSize: '28px' }} />} 
+            label='QR Codes' 
+            collapsed={isCollapsed} 
+            isActive={isQrActive} 
+            onClick={() => posthog.capture('sidebar_nav_clicked', { destination: '/qr' })}
+          />
+          <SideBarMenuItem 
+            href='/forecast' 
+            icon={<BarChartIcon sx={{ fontSize: '28px' }} />} 
+            label='Forecast' 
+            collapsed={isCollapsed} 
+            isActive={isForecastActive} 
+            onClick={() => posthog.capture('sidebar_nav_clicked', { destination: '/forecast' })}
+          />
         </Stack>
       </Box>
 
@@ -115,9 +132,23 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
         <DividerText label='ACCOUNT' hidden={isCollapsed} />
         <Stack spacing={1}>
           {accessToken ? (
-            <SideBarMenuItem icon={<LogoutIcon sx={{ fontSize: '28px' }} />} label='Log out' collapsed={isCollapsed} onClick={logout} />
+            <SideBarMenuItem 
+              icon={<LogoutIcon sx={{ fontSize: '28px' }} />} 
+              label='Log out' 
+              collapsed={isCollapsed} 
+              onClick={() => {
+                posthog.capture('logout_clicked');
+                logout();
+              }} 
+            />
           ) : (
-            <SideBarMenuItem href='/auth' icon={<LoginIcon sx={{ fontSize: '28px' }} />} label='Log in' collapsed={isCollapsed} />
+            <SideBarMenuItem 
+              href='/auth' 
+              icon={<LoginIcon sx={{ fontSize: '28px' }} />} 
+              label='Log in' 
+              collapsed={isCollapsed} 
+              onClick={() => posthog.capture('sidebar_nav_clicked', { destination: '/auth' })}
+            />
           )}
         </Stack>
       </Box>
