@@ -5,10 +5,15 @@ import { ITable } from '@/context/interfaces';
 
 export function useResolveTableByToken(token: string) {
   const [table, setTable] = useState<ITable | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    setLoading(true);
     resolveTableByToken(token)
       .then(data => {
         setTable(data);
