@@ -77,8 +77,8 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
   const { accessToken, role, firstName, surname, logout } = useAuth();
   const location = useLocation();
 
-  const displayName = firstName && surname ? `${firstName} ${surname}` : "";
-  const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : "";
+  const displayName = firstName && surname ? `${firstName} ${surname}` : "User";
+  const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Role";
   const isQrActive = location.pathname === '/qr';
 
   return (
@@ -88,16 +88,14 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
         <Stack direction='row' alignItems='center' spacing={1} sx={{ justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
           {!isCollapsed && (
             <Stack direction='row' sx={{ flexGrow: 1 }}>
-              <Box sx={{ position: 'relative', width: '64px', height: '64px', borderRadius: '12px', overflow: 'hidden'}}>
-                <img src='/theme/Czapa_4.png' style={{marginLeft: '-20%', marginTop: '-10%', width: '170%', height: '140%'}} />
-              </Box>
+              <Box sx={{ border: '1px solid', borderRadius: '12px', width: '48px', height: '48px', borderColor: colors.strawberryRed }} />
               <Stack direction='column' sx={{ marginLeft: '10px', overflow: 'hidden' }}>
                 <Typography variant='subtitle1' sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</Typography>
                 <Typography variant='body2' sx={{ color: 'text.secondary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayRole}</Typography>
               </Stack>
             </Stack>
           )}
-          <IconButton sx={{ height: '64px', width: '32px', borderRadius: '8px', backgroundColor: 'transparent', transition: 'background-color 0.2s ease, color 0.2s ease', '&:hover': { backgroundColor: `rgba(229, 75, 75, 0.08)`, color: colors.strawberryRed } }} onClick={() => setIsCollapsed(!isCollapsed)}>
+          <IconButton sx={{ height: '48px', width: '48px', borderRadius: '8px', backgroundColor: 'transparent', transition: 'background-color 0.2s ease, color 0.2s ease', '&:hover': { backgroundColor: `rgba(229, 75, 75, 0.08)`, color: colors.strawberryRed } }} onClick={() => setIsCollapsed(!isCollapsed)}>
             {isCollapsed ? <KeyboardArrowRightIcon/> : <KeyboardArrowLeftIcon/>}
           </IconButton>
         </Stack>
