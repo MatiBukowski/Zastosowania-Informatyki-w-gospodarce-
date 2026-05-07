@@ -6,7 +6,7 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { colors } from '../../theme/palette';
 import { useAuth } from '../services/AuthProvider';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { usePostHog } from '@posthog/react';
 import BarChartIcon from '@mui/icons-material/BarChart';
 
@@ -40,7 +40,7 @@ interface SideBarMenuItemProps {
 const SideBarMenuItem = ({ href, icon, label, collapsed = false, isActive = false, onClick }: SideBarMenuItemProps) => {
   return (
     <IconButton 
-      {...(href ? { href } : {})}
+      {...(href ? { component: Link, to: href, viewTransition: true } as any : {})}
       onClick={onClick}
       sx={{ 
         color: isActive ? colors.strawberryRed : 'text.primary', 

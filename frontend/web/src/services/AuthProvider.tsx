@@ -65,7 +65,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             const token = response.data.access_token;
             setAccessToken(token);
             decodeAndSetTokenData(token);
-            navigate("/");
+            navigate("/", { viewTransition: true });
         } catch (error) {
             console.error("Login failed:", error);
             throw error;
@@ -85,7 +85,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             setRole(null);
             setFirstName(null);
             setSurname(null);
-            navigate("/auth");
+            navigate("/auth", { viewTransition: true });
         }
     }
 

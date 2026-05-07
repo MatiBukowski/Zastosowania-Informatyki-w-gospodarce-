@@ -32,7 +32,7 @@ export const LockedPage = () => {
         </Typography>
         <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400 }}>
           Please{' '}
-          <Link to="/auth" style={{ 
+          <Link to="/auth" viewTransition style={{ 
             color: '#E54B4B', 
             textDecoration: 'none',
             fontWeight: 600,
