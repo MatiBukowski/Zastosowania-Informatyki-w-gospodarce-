@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { getRestaurants } from '../api/RestaurantAPI';
 import { getForecast, IForecastData } from '../api/ForecastAPI';
 import { IRestaurant } from '../context/interfaces';
@@ -120,7 +120,7 @@ export const ForecastPage = () => {
         },
         {
           data: forecastP95Series,
-          label: 'p95 (upper)',
+          label: 'upper bound',
           color: 'rgba(46,125,50,0.20)',
           showMark: false,
           curve: 'linear' as const,
@@ -130,7 +130,7 @@ export const ForecastPage = () => {
         },
         {
           data: forecastP5Series,
-          label: 'p5 (lower)',
+          label: 'lower bound',
           color: 'rgba(255,255,255,0)',  // transparent fill cancels out upper area
           showMark: false,
           curve: 'linear' as const,
@@ -185,7 +185,7 @@ export const ForecastPage = () => {
               Forecast Visualization
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.disabled' }}>
-              Shaded area = 90% confidence interval (p5–p95)
+              Shaded area = possible error
             </Typography>
           </Stack>
           <Paper elevation={3} sx={{ p: 3 }}>
