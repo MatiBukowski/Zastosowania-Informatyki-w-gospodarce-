@@ -13,8 +13,8 @@ export function ScreenLayout({ children }: ScreenLayoutProps) {
         flex: 1,
         backgroundColor: theme.colors.background,
         paddingHorizontal: 16,
-        paddingVertical: 8,
       }}
+      edges={['top', 'left', 'right']}
     >
       {children}
     </SafeAreaView>
