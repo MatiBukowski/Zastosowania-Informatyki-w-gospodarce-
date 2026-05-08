@@ -8,6 +8,11 @@ export const getRestaurants = async (): Promise<IRestaurant[]> => {
   return response.data;
 };
 
+export const getRestaurantsByUser = async (): Promise<IRestaurant[]> => {
+  const response = await apiClient.get<IRestaurant[]>('/api/restaurants/my');
+  return response.data;
+};
+
 export const getRestaurantById = async (id: number): Promise<IRestaurant> => {
   const response = await apiClient.get<IRestaurant>(`/api/restaurants/${id}`);
   return response.data;

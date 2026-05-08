@@ -4,10 +4,10 @@ import { UnauthorizedPage } from '../pages/UnauthorizedPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: string;
+  requiredRoles?: string[];
 }
 
-export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, requiredRoles }: ProtectedRouteProps) => {
   const { accessToken, role } = useAuth();
 
   // Not logged in
@@ -16,10 +16,13 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   // Logged in but doesn't have required role
-  if (requiredRole && role !== requiredRole) {
-    return <UnauthorizedPage />;
+  if (requiredRoles && requiredRoles.length > 0) {
+    const hasPermission = role && requiredRoles.includes(role);
+
+    if (!hasPermission) {
+      return <UnauthorizedPage />;
+    }
   }
 
   return <>{children}</>;
 };
-
