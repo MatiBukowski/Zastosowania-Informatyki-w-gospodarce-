@@ -9,7 +9,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '../../../hooks/useRestaurants';
 import { ITable, TableStatus } from '../../../context/interfaces';
-import { theme } from '../../../theme/theme';
+import { theme } from '../../../ui/theme/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 function statusColor(status: TableStatus): string {

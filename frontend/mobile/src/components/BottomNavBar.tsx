@@ -8,7 +8,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useSegments } from 'expo-router';
-import { colors } from '../theme/palette';
+import { colors } from '../ui/theme/palette';
 
 interface NavItem {
   label: string;

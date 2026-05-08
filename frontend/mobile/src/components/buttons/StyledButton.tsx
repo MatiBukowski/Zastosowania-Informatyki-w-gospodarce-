@@ -1,5 +1,5 @@
 import { Pressable, Text, View } from 'react-native';
-import { theme } from '../../theme/theme';
+import { theme } from '../../ui/theme/theme';
 
 interface StyledButtonProps {
   children?: React.ReactNode;

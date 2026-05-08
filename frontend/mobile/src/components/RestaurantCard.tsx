@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 
 import { IRestaurant, CuisineType } from '@/context/interfaces';
-import { theme } from '@/theme/theme';
+import { theme } from '@/ui/theme/theme';
 
 function CuisineBox({cuisine}: {cuisine: CuisineType}) {
   return (

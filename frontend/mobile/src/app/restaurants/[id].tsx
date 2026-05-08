@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import { useEffect } from 'react';
 import { useGetRestaurantById } from '../../hooks/useRestaurants';
-import { theme } from '../../theme/theme';
+import { theme } from '../../ui/theme/theme';
 
 export default function RestaurantDetailsPage() {
     const { id } = useLocalSearchParams<{ id: string }>();

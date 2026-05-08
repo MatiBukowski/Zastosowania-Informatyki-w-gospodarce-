@@ -1,5 +1,10 @@
-import ScanView from '@/views/ScanView';
+import { AppLayout } from '@/ui/layouts/AppLayout';
+import ScanView from '@/ui/views/ScanView';
 
-export default function ScanScreen() {
-  return <ScanView />;
+export default function Scan() {
+  return (
+    <AppLayout>
+      <ScanView />
+    </AppLayout>
+  )
 }

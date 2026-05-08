@@ -1,7 +1,7 @@
 import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useGetRestaurantMenu } from '../../../hooks/useRestaurants';
-import { theme } from '../../../theme/theme';
+import { theme } from '../../../ui/theme/theme';
 import { Stack } from 'expo-router';
 export default function MenuScreen() {
   const { id } = useLocalSearchParams();
