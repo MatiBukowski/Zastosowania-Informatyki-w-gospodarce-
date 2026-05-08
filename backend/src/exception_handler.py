@@ -5,7 +5,9 @@ from src.exceptions import (
     InvalidCredentialsException,
     UserAlreadyExistsException,
     UserNotFoundException,
-    JWTHandlingException
+    JWTHandlingException,
+    UnauthorisedUserException,
+    ForecastGeneratingException
 )
 
 def register_exception_handlers(app):
@@ -35,4 +37,19 @@ def register_exception_handlers(app):
         return JSONResponse(
                 status_code=500,
                 content={"detail": str(exc)}
+        )
+
+    @app.exception_handler(UnauthorisedUserException)
+    async def unauthorised_user_exception_handler(request: Request, exc: UnauthorisedUserException):
+        return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": str(exc)},
+                headers=exc.headers
+        )
+
+    @app.exception_handler(ForecastGeneratingException)
+    async def forecast_generating_exception(request: Request, exc: ForecastGeneratingException):
+        return JSONResponse(
+                status_code=500,
+                content={"detail": str(exc)},
         )

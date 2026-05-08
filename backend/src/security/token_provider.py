@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 from src.models import AppUser
 from src.models import UserRoleEnum
 from src.config import settings
-from src.exceptions import JWTHandlingException
+from src.exceptions import JWTHandlingException, UnauthorisedUserException, UserNotFoundException
 from src.db import get_session
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -96,8 +96,7 @@ class TokenProvider:
             surname: str = payload.get("surname")
 
             if user_id is None or email is None or role_str is None:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
+                raise UnauthorisedUserException(
                     detail="Could not validate credentials",
                     headers={"Authenticate": "Bearer"},
                 )
@@ -110,8 +109,7 @@ class TokenProvider:
                 surname=surname
             )
         except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise UnauthorisedUserException(
                 detail=f"Could not validate credentials: {str(e)}",
                 headers={"Authenticate": "Bearer"},
             )
@@ -119,5 +117,5 @@ class TokenProvider:
     def get_current_active_user(self, access_token: str, db: Session = Depends(get_session)) -> AppUser:
         user = db.execute(select(AppUser).where(AppUser.user_id == self.get_current_user(access_token).user_id)).scalar_one_or_none()
         if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise UserNotFoundException("User not found")
         return user

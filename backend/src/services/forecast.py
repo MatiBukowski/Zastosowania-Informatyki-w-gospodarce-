@@ -1,6 +1,7 @@
-from fastapi import HTTPException, status, Depends
+from fastapi import Depends
 import numpy as np
 
+from exceptions import ForecastGeneratingException
 from ..schemas.forecast import ForecastBase
 from ..repositories import PosthogRepository
 
@@ -46,7 +47,7 @@ class ForecastService:
 
         try:
             point_forecast, quantile_forecast = model.forecast(
-                horizon=12,
+                horizon=8,
                 inputs=[
                     [result[1] for result in results],
                 ],
@@ -59,7 +60,4 @@ class ForecastService:
                 quantile_forecast=quantile_forecast.tolist(),
             )
         except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error generating forecast: {e}"
-            )
+            raise ForecastGeneratingException(f"Error generating forecast: {e}")

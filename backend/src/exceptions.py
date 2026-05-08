@@ -1,3 +1,6 @@
+from fastapi import HTTPException
+
+
 class UserAlreadyExistsException(Exception):
     """Exception raised when trying to register a user with an email that already exists."""
     pass
@@ -12,4 +15,13 @@ class InvalidCredentialsException(Exception):
 
 class JWTHandlingException(Exception):
     """General exception for JWT handling errors."""
+    pass
+
+class UnauthorisedUserException(HTTPException):
+    """Exception raised when a user is unauthorised to perform an action."""
+    def __init__(self, detail = None, headers = None) -> None:
+        super().__init__(status_code=401, detail=detail, headers=headers)
+
+class ForecastGeneratingException(Exception):
+    """Exception raised when the forecast generator fails"""
     pass
