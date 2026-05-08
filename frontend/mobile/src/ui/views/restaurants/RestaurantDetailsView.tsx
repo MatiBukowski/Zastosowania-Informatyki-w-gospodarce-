@@ -11,6 +11,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useGetRestaurantById } from '@/hooks/useRestaurants';
 import { theme } from '@/ui/theme/theme';
@@ -66,6 +67,16 @@ export default function RestaurantDetailsView() {
             <MaterialIcons name="image-not-supported" size={40} color={theme.colors.gray} />
           </View>
         )}
+
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={20} color={theme.colors.text} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.headerSection}>
@@ -128,7 +139,17 @@ const styles = StyleSheet.create({
   photoCard: {
     padding: 0,
     overflow: 'hidden',
+    position: 'relative',
     marginBottom: 14,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 999,
+    padding: 8,
   },
   photo: {
     width: '100%',
