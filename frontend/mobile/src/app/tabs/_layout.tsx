@@ -1,49 +1,66 @@
 import { theme } from '@/ui/theme/theme';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { withLayoutContext } from 'expo-router';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const { Navigator } = createMaterialTopTabNavigator();
+
+export const SwipeTabs = withLayoutContext(Navigator);
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <Tabs
+    <SwipeTabs
+      tabBarPosition='bottom'
       screenOptions={{
-        headerShown: false,
+        swipeEnabled: true,
+        animationEnabled: true,
+
         tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 0,
+          backgroundColor: 'white',
+          paddingBottom: insets.bottom,
         },
+
         tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: 'gray',
+        tabBarInactiveTintColor: '#888',
+
+        tabBarIndicatorStyle: {
+          display: 'none',
+        },
       }}
     >
-      <Tabs.Screen
+      <SwipeTabs.Screen
         name="home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color }: { color: string }) => (
+            <Ionicons name="home" size={24} color={color} />
           ),
         }}
       />
 
-      <Tabs.Screen
+      <SwipeTabs.Screen
         name="restaurants"
         options={{
           title: 'Restaurants',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="restaurant" size={size} color={color} />
+          tabBarIcon: ({ color }: { color: string }) => (
+            <Ionicons name="restaurant" size={24} color={color} />
           ),
         }}
       />
 
-      <Tabs.Screen
+      <SwipeTabs.Screen
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color, size }) => (
-              <Ionicons name="settings" size={size} color={color} />
+            tabBarIcon: ({ color }: { color: string }) => (
+              <Ionicons name="settings" size={24} color={color} />
           ),
         }}
       />
-    </Tabs>
+    </SwipeTabs>
   );
 }
