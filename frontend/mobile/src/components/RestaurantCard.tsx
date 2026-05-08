@@ -73,7 +73,13 @@ function RestaurantCard({
       >
         <PhotoBox photoUrl={restaurant.photo} />
         <View style={RestaurantCardStyles.content}>
-          <Text style={[theme.typography.h5, { color: theme.colors.secondary }]}>{restaurant.name}</Text>
+          <Text
+            style={[theme.typography.h5, { color: theme.colors.secondary }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {restaurant.name}
+          </Text>
           <LocationBox address={restaurant.address} />
           <CuisineBox cuisine={restaurant.cuisine} />
         </View>

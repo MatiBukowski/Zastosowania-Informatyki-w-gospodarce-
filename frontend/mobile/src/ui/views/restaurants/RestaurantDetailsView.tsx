@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
+import { Image as ExpoImage } from 'expo-image';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { useGetRestaurantById } from '@/hooks/useRestaurants';
 import { theme } from '@/ui/theme/theme';
@@ -50,21 +52,46 @@ export default function RestaurantDetailsView() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={theme.typography.h4}>{restaurant.name}</Text>
-      <Text style={[theme.typography.body, styles.address]}>{restaurant.address}</Text>
-
-      <View style={styles.tags}>
-        <View style={styles.tag}>
-          <Text style={styles.tagText}>{restaurant.cuisine}</Text>
-        </View>
-        {restaurant.has_kiosk && (
-          <View style={[styles.tag, { backgroundColor: '#2e7d32' }]}>
-            <Text style={styles.tagText}>Kiosk available</Text>
+      <View style={[theme.common.card, styles.photoCard]}>
+        {restaurant.photo ? (
+          <ExpoImage
+            style={styles.photo}
+            source={{ uri: restaurant.photo }}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={0}
+          />
+        ) : (
+          <View style={styles.photoPlaceholder}>
+            <MaterialIcons name="image-not-supported" size={40} color={theme.colors.gray} />
           </View>
         )}
       </View>
 
-      <View style={styles.divider} />
+      <View style={styles.headerSection}>
+        <Text style={[theme.typography.h4, { color: theme.colors.text }]} numberOfLines={3} ellipsizeMode="tail">
+          {restaurant.name}
+        </Text>
+        <Text style={[theme.typography.body, styles.address]}>{restaurant.address}</Text>
+
+        <View style={styles.tags}>
+          <View style={[styles.tag, styles.tagPrimary]}>
+            <Text style={styles.tagText}>{restaurant.cuisine}</Text>
+          </View>
+          {restaurant.has_kiosk && (
+            <View style={[styles.tag, styles.tagSecondary]}>
+              <Text style={styles.tagText}>Kiosk available</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      <View style={[theme.common.card, styles.descriptionCard]}>
+        <Text style={[theme.typography.h6, { color: theme.colors.text, marginBottom: 8 }]}>About</Text>
+        <Text style={[theme.typography.body, { color: theme.colors.text }]}>
+          {restaurant.description}
+        </Text>
+      </View>
 
       <TouchableOpacity
         style={styles.buttonPrimary}
@@ -97,17 +124,43 @@ export default function RestaurantDetailsView() {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  container: { paddingVertical: 20, paddingHorizontal: 4 },
+  container: { paddingVertical: 16 },
+  photoCard: {
+    padding: 0,
+    overflow: 'hidden',
+    marginBottom: 14,
+  },
+  photo: {
+    width: '100%',
+    height: 220,
+  },
+  photoPlaceholder: {
+    width: '100%',
+    height: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerSection: {
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
   address: { color: theme.colors.text, marginTop: 6, marginBottom: 12 },
-  tags: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  tags: { flexDirection: 'row', gap: 8 },
   tag: {
-    backgroundColor: theme.colors.primary,
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
+  tagPrimary: {
+    backgroundColor: theme.colors.primary,
+  },
+  tagSecondary: {
+    backgroundColor: theme.colors.secondary,
+  },
   tagText: { color: '#fff', fontSize: 12 },
-  divider: { height: 1, backgroundColor: '#333', marginVertical: 20 },
+  descriptionCard: {
+    marginBottom: 16,
+  },
   buttonPrimary: {
     backgroundColor: theme.colors.primary,
     borderRadius: 10,

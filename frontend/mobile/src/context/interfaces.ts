@@ -24,6 +24,7 @@ interface IRestaurantBase {
   has_kiosk: boolean;
   cuisine: CuisineType; 
   photo: string | null;
+  description: string | null;
 }
 
 // restaurant data including identifier
