@@ -1,7 +1,7 @@
 from fastapi import Depends
 import numpy as np
 
-from exceptions import ForecastGeneratingException
+from ..exceptions import ForecastGeneratingException
 from ..schemas.forecast import ForecastBase
 from ..repositories import PosthogRepository
 

@@ -1,7 +1,7 @@
 import jwt, secrets, logging
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 
 from src.models import AppUser
 from src.models import UserRoleEnum
