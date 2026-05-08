@@ -3,10 +3,13 @@ import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, StyleSheet } fr
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../theme/theme';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '../../../hooks/useRestaurants';
 import { getReservationsByTableId } from '../../../api/ReservationAPI';
 import { IReservation} from '../../../context/interfaces';
+import { useAuth } from '../../../services/AuthProvider';
+import { apiClient } from '../../../api/API';
+
 
 // assuming that the reservation duration is 2h (?)
 const reservation_duration_in_min = 120;
@@ -41,8 +44,12 @@ const isSlotAvailable = (slotTime: string, selectedDate: string, allReservations
 };
 
 const ReservationScreen = () => {
+
     const { id, name } = useLocalSearchParams();
     const today = new Date().toISOString().split('T')[0];
+
+    const { userId, accessToken } = useAuth();
+    const router = useRouter();
 
     // states
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -95,6 +102,60 @@ const ReservationScreen = () => {
         if (!dateStr) return "Select Date";
         return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     };
+
+
+    const handleReservationSubmit = async () => {
+
+    if (!selectedDate || !selectedTime || !guests) {
+        alert("Please select date, guests and time first.");
+        return;
+    }
+
+    // if no token, go to login
+    if (!accessToken || !userId) {
+        // save path
+        router.push('/authorization/login');
+        return;
+    }
+
+        // find a table
+        const suitableTables = tables.filter(t => t.capacity >= guests);
+        const freeTable = suitableTables.find(table => {
+            const tableReservations = allRelevantReservations.filter(res => res.table_id === table.table_id);
+            const startTimestamp = new Date(`${selectedDate}T${selectedTime}:00`).getTime();
+            const endTimestamp = startTimestamp + durationMs;
+
+            const hasCollision = tableReservations.some(res => {
+                const existingStart = new Date(`${res.reservation_date}T${res.start_time}:00`).getTime();
+                const existingEnd = existingStart + durationMs;
+                return startTimestamp < existingEnd && endTimestamp > existingStart;
+            });
+            return !hasCollision;
+        });
+
+        if (!freeTable) {
+            alert("Sorry, no table available for this specific time.");
+            return;
+        }
+
+        try {
+            const reservationData = {
+                restaurant_id: Number(id),
+                table_id: freeTable.table_id,
+                reservation_time: `${selectedDate}T${selectedTime}:00`,
+                user_id: Number(userId),
+                status: "CONFIRMED"
+            };
+
+            await apiClient.post('/api/reservations', reservationData);
+            alert("Success! Your table is booked.");
+            router.replace('/'); //
+        } catch (error) {
+            console.error("Reservation error:", error);
+            alert("Something went wrong with the reservation.");
+        }
+    };
+
 
 return (
         <SafeAreaView style={theme.common.screenContainer}>
@@ -242,7 +303,7 @@ return (
                 )}
 
 
-{/* SECTION 3: TIME GRID */}
+                {/*TIME GRID */}
                 {activeSection === 'time' && selectedDate && guests && (
                     <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
                         <View style={styles.gridWrapper}>
@@ -267,6 +328,23 @@ return (
                                 );
                             })}
                         </View>
+
+
+
+
+                    </View>
+                )}
+
+                {selectedDate && guests && selectedTime && (
+                    <View style={{ padding: 16, marginBottom: 30 }}>
+                        <TouchableOpacity
+                            style={styles.confirmButton}
+                            onPress={handleReservationSubmit}
+                        >
+                            <Text style={styles.confirmButtonText}>
+                                {!accessToken ? "Login to Reserve" : "Confirm Reservation"}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 )}
             </ScrollView>
@@ -398,6 +476,23 @@ const styles = StyleSheet.create({
         color: '#333',
         fontSize: 14,
         fontWeight: '700',
+    },
+    confirmButton: {
+        backgroundColor: theme.colors.primary,
+        paddingVertical: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+    },
+    confirmButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '800',
     }
 
 });

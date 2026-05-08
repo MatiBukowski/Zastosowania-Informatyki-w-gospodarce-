@@ -3,6 +3,7 @@ import { theme } from "../theme/theme";
 import {PostHogProvider} from 'posthog-react-native'
 import {useEffect} from "react";
 import { posthogClient } from '@/analitics/analitics';
+import { AuthProvider } from '../services/AuthProvider';
 
 export default function RootLayout() {
   const pathname = usePathname();
@@ -13,28 +14,31 @@ export default function RootLayout() {
   }, [pathname, params]);
 
   return (
-    <PostHogProvider client={posthogClient}>
-        <Stack
-          screenOptions={{
-            // global header
-            headerStyle: {
-              //headerShown: false,
-              backgroundColor: theme.colors.background,
-            },
-            headerTintColor: theme.colors.white,
-            headerTitleStyle: {
-              fontWeight: "800",
-              fontSize: 20,
-            },
-            // global background
-            contentStyle: {
-              backgroundColor: theme.colors.background,
-            },
-            headerShadowVisible: false,
-          }}
-        >
-        </Stack>
-    </PostHogProvider>
+    <AuthProvider>
+        <PostHogProvider client={posthogClient}>
+            <Stack
+              screenOptions={{
+                // global header
+                headerStyle: {
+                  //headerShown: false,
+                  backgroundColor: theme.colors.background,
+                },
+                headerTintColor: theme.colors.white,
+                headerTitleStyle: {
+                  fontWeight: "800",
+                  fontSize: 20,
+                },
+                // global background
+                contentStyle: {
+                  backgroundColor: theme.colors.background,
+                },
+                headerShadowVisible: false,
+              }}
+            >
+
+            </Stack>
+        </PostHogProvider>
+    </AuthProvider>
   );
 }
 

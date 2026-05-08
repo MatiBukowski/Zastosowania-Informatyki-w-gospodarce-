@@ -85,3 +85,16 @@ export interface ICreateTable {
   table_number: number;
   capacity: number;
 }
+
+// for login purposes
+export interface ILoginRequest {
+    email: string;
+    password: string;
+}
+
+export interface ILoginResponse {
+    access_token: string;
+    token_type: string;
+}
+
+
