@@ -87,7 +87,7 @@ export default function RestaurantTablesView() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.headerContainer}>
         <View>
           <Text style={theme.typography.h4}>Tables</Text>
