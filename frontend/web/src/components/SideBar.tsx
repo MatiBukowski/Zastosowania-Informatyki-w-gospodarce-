@@ -106,9 +106,10 @@ const SideBarMenuItem = ({ href, icon, label, collapsed = false, isActive = fals
 interface SideBarProps {
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
+  setRestaurantName: (name: string) => void;
 }
 
-const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
+const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProps) => {
   const { accessToken, role, firstName, surname, logout } = useAuth();
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   
@@ -215,6 +216,7 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
                     collapsed={false} 
                     isActive={isItemActive}
                     isSubItem={true}
+                    onClick={() => setRestaurantName(r.name)}
                   />
                 );
               })}
@@ -247,6 +249,7 @@ const SideBar = ({ isCollapsed, setIsCollapsed }: SideBarProps) => {
                     collapsed={false} 
                     isActive={isItemActive}
                     isSubItem={true}
+                    onClick={() => setRestaurantName(r.name)}
                   />
                 );
               })}
