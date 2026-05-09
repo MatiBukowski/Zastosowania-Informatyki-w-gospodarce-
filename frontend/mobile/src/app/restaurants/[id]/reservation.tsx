@@ -110,6 +110,8 @@ const ReservationScreen = () => {
         alert("Please select date, guests and time first.");
         return;
     }
+            return;
+        }
 
     // if no token, go to login
     if (!accessToken || !userId) {
