@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, Dimensions, TouchableOpacity } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { useResolveTableByToken } from '@/hooks/useTables';
 import { router } from 'expo-router/build/exports';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '@/ui/theme/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 const SCAN_AREA_SIZE = Math.min(width, height) * 0.7;
@@ -14,7 +17,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   camera: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
   },
   messageText: {
     color: 'white',
@@ -22,12 +25,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   overlay: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
   },
   overlayDark: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   scanAreaContainer: {
@@ -106,27 +109,55 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: '#666666',
   },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 999,
+    padding: 8,
+  },
 });
 
-const ScanOverlay = () => (
-  <View style={styles.overlay}>
-    <View style={styles.overlayDark} />
-    <View
-      style={[
-        styles.scanAreaContainer,
-        {
-          top: (height - SCAN_AREA_SIZE) / 2,
-          left: (width - SCAN_AREA_SIZE) / 2,
-        },
-      ]}
-    >
-      <View style={[styles.corner, styles.cornerTopLeft]} />
-      <View style={[styles.corner, styles.cornerTopRight]} />
-      <View style={[styles.corner, styles.cornerBottomLeft]} />
-      <View style={[styles.corner, styles.cornerBottomRight]} />
+const ScanOverlay = () => {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View style={styles.overlay}>
+      <View style={styles.overlayDark} />
+      <TouchableOpacity
+        style={[
+          styles.backButton,
+          {
+            top: insets.top + 10,
+            right: insets.right + 10,
+          },
+        ]}
+        onPress={() => router.back()}
+        activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+      >
+        <Ionicons name="arrow-back" size={20} color={theme.colors.text} />
+      </TouchableOpacity>
+      <View
+        style={[
+          styles.scanAreaContainer,
+          {
+            top: (height - SCAN_AREA_SIZE) / 2,
+            left: (width - SCAN_AREA_SIZE) / 2,
+          },
+        ]}
+      >
+        <View style={[styles.corner, styles.cornerTopLeft]} />
+        <View style={[styles.corner, styles.cornerTopRight]} />
+        <View style={[styles.corner, styles.cornerBottomLeft]} />
+        <View style={[styles.corner, styles.cornerBottomRight]} />
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 type ScanStatus = 'default' | 'loading' | 'error';
 
