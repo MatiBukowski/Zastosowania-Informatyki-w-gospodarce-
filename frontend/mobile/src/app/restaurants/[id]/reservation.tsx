@@ -108,8 +108,6 @@ const ReservationScreen = () => {
 
     if (!selectedDate || !selectedTime || !guests) {
         alert("Please select date, guests and time first.");
-        return;
-    }
             return;
         }
 
