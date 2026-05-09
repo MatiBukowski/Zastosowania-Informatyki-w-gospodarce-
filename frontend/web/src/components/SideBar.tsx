@@ -213,6 +213,7 @@ useEffect(() => {
             onClick={handleQrMenuClick}
             rightIcon={!isCollapsed && !isAdmin ? (isQrMenuOpen ? <ExpandLess /> : <ExpandMore />) : undefined}
           />
+<<<<<<< HEAD
           {!isAdmin && (
             <Collapse in={isQrMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
               <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -238,6 +239,31 @@ useEffect(() => {
               </List>
             </Collapse>
           )}
+=======
+          <Collapse in={isQrMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {restaurants.map((r) => {
+                const targetHref = `/qr?restaurantId=${r.restaurant_id}`;
+                const isItemActive = location.pathname === '/qr' && location.search.includes(`restaurantId=${r.restaurant_id}`);
+                return (
+                  <SideBarMenuItem 
+                    key={r.restaurant_id}
+                    href={targetHref} 
+                    icon={<RestaurantIcon sx={{ fontSize: '22px' }} />} 
+                    label={r.name} 
+                    collapsed={false} 
+                    isActive={isItemActive}
+                    isSubItem={true}
+                    onClick={() => setRestaurantName(r.name)}
+                  />
+                );
+              })}
+              {restaurants.length === 0 && (
+                 <Typography variant="caption" sx={{ pl: 4, pt: 1, color: 'text.secondary' }}>No restaurants found</Typography>
+              )}
+            </List>
+          </Collapse>
+>>>>>>> 2b98dd0 (Improve TableQrPage, SideBar and TableQr componoents)
 
           <SideBarMenuItem
             href={isAdmin ? '/forecast' : undefined}
@@ -248,6 +274,7 @@ useEffect(() => {
             onClick={handleStatsMenuClick}
             rightIcon={!isCollapsed && !isAdmin ? (isStatsMenuOpen ? <ExpandLess /> : <ExpandMore />) : undefined}
           />
+<<<<<<< HEAD
           {!isAdmin && (
             <Collapse in={isStatsMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
               <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -274,6 +301,32 @@ useEffect(() => {
               </List>
             </Collapse>
           )}
+=======
+          <Collapse in={isStatsMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {restaurants.map((r) => {
+                const targetHref = `/?restaurantId=${r.restaurant_id}`; 
+                const isItemActive = (location.pathname === '/' || location.pathname === '/dashboard') && location.search.includes(`restaurantId=${r.restaurant_id}`);
+                
+                return (
+                  <SideBarMenuItem 
+                    key={r.restaurant_id}
+                    href={targetHref} 
+                    icon={<ShowChartIcon sx={{ fontSize: '22px' }} />} 
+                    label={r.name} 
+                    collapsed={false} 
+                    isActive={isItemActive}
+                    isSubItem={true}
+                    onClick={() => setRestaurantName(r.name)}
+                  />
+                );
+              })}
+              {restaurants.length === 0 && (
+                 <Typography variant="caption" sx={{ pl: 4, pt: 1, color: 'text.secondary' }}>No restaurants found</Typography>
+              )}
+            </List>
+          </Collapse>
+>>>>>>> 2b98dd0 (Improve TableQrPage, SideBar and TableQr componoents)
 
         </Stack>
       </Box>
