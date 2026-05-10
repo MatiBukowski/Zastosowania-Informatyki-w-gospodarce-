@@ -8,4 +8,5 @@ from .restaurant import RestaurantService
 from .menu import MenuService
 from .table import TableService
 from .reservation import ReservationService
+from .forecast import ForecastService
 from .user import UserService

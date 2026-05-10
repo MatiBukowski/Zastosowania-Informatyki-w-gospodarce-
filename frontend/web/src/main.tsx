@@ -14,6 +14,18 @@ style.textContent = `
     width: 100%;
     height: 100%;
   }
+
+  /* View Transitions API styles */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.3s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(root) {
+      animation: none;
+    }
+  }
 `;
 document.head.appendChild(style);
 

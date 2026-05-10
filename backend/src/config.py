@@ -16,7 +16,9 @@ class Settings:
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
     POSTHOG_API_KEY: str = os.getenv("POSTHOG_API_KEY", "")
+    POSTHOG_PAT_KEY: str = os.getenv("POSTHOG_PAT_KEY", "")
     POSTHOG_HOST: str = os.getenv("POSTHOG_HOST", "https://eu.i.posthog.com")
+    POSTHOG_ID: int = int(os.getenv("POSTHOG_ID", 0))
 
     @property
     def database_url(self) -> str:

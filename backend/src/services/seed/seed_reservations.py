@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from ...models import RestaurantTable, Reservation, AppUser
 from ...models.enums import ReservationStatusEnum
@@ -28,7 +28,7 @@ def seed_reservations(session: Session, max_sample_tables: int = 15):
         random_table = random.choice(sample_tables)
         random_user = random.choice(users)
         
-        random_date = datetime.now(UTC) + timedelta(
+        random_date = datetime.now(timezone.utc) + timedelta(
             days=random.randint(1, 14), 
             hours=random.randint(8, 22),
             minutes=random.choice([0, 30])

@@ -7,11 +7,6 @@ on:
     paths-ignore: [ '.github/**', 'README.md', '.gitignore', 'Documentation/**', 'backend/**', 'frontend/mobile/**' ]
   workflow_dispatch:
 
-env:
-  VITE_API_URL: https://xederro.tech
-  VITE_PUBLIC_POSTHOG_KEY: ${{ secrets.POSTHOG_API_KEY }}
-  VITE_PUBLIC_POSTHOG_HOST: https://eu.i.posthog.com
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,13 +20,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
       - name: Docker Build and Push
         uses: docker/build-push-action@v6
         with:
           context: ./frontend/web
           file: ./frontend/web/Dockerfile
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
+            IS_PROD=true
             VITE_API_URL=https://xederro.tech
             VITE_PUBLIC_POSTHOG_KEY=${{ secrets.POSTHOG_API_KEY }}
             VITE_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
@@ -44,9 +45,6 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Update VPS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

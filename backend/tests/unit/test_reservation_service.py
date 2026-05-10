@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from src.services import ReservationService
 from src.schemas import ReservationCreate, ReservationUpdate
@@ -55,7 +55,7 @@ class TestReservationService:
             user_id=1,
             restaurant_id=1,
             table_id=1,
-            reservation_time=datetime.now(UTC) + timedelta(days=1),
+            reservation_time=datetime.now(timezone.utc) + timedelta(days=1),
             status=ReservationStatusEnum.PENDING
         )
         mock_repo.get_overlapping_reservations.return_value = []
@@ -78,7 +78,7 @@ class TestReservationService:
             user_id=1,
             restaurant_id=1,
             table_id=1,
-            reservation_time=datetime.now(UTC) + timedelta(days=1)
+            reservation_time=datetime.now(timezone.utc) + timedelta(days=1)
         )
         mock_repo.get_overlapping_reservations.return_value = [MagicMock(spec=Reservation)]
 
@@ -98,7 +98,7 @@ class TestReservationService:
             user_id=1,
             restaurant_id=1,
             table_id=999,
-            reservation_time=datetime.now(UTC) + timedelta(days=1)
+            reservation_time=datetime.now(timezone.utc) + timedelta(days=1)
         )
         mock_table_service.validate_table_exists.side_effect = HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -127,7 +127,7 @@ class TestReservationService:
         mock_repo = MagicMock()
         service = ReservationService(repo=mock_repo, table_service=MagicMock())
         
-        existing_time = datetime.now(UTC) + timedelta(days=1)
+        existing_time = datetime.now(timezone.utc) + timedelta(days=1)
         mock_res = Reservation(reservation_id=1, table_id=1, reservation_time=existing_time, status=ReservationStatusEnum.PENDING)
         mock_repo.get_reservation_by_id.return_value = mock_res
         
@@ -143,7 +143,7 @@ class TestReservationService:
         mock_repo = MagicMock()
         service = ReservationService(repo=mock_repo, table_service=MagicMock())
         
-        existing_time = datetime.now(UTC) + timedelta(days=1)
+        existing_time = datetime.now(timezone.utc) + timedelta(days=1)
         new_time = existing_time + timedelta(hours=1)
         
         mock_res = Reservation(reservation_id=1, table_id=1, reservation_time=existing_time)
@@ -162,7 +162,7 @@ class TestReservationService:
         mock_repo = MagicMock()
         service = ReservationService(repo=mock_repo, table_service=MagicMock())
         
-        existing_time = datetime.now(UTC) + timedelta(days=1)
+        existing_time = datetime.now(timezone.utc) + timedelta(days=1)
         new_time = existing_time + timedelta(hours=5)
         
         mock_res = Reservation(reservation_id=1, table_id=1, reservation_time=existing_time)
