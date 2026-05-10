@@ -10,9 +10,14 @@ export function useResolveTableByToken(token: string) {
 
   useEffect(() => {
     if (!token) {
+      setTable(null);
+      setLoading(false);
+      setError(null);
       return;
     }
 
+    setTable(null);
+    setError(null);
     setLoading(true);
     resolveTableByToken(token)
       .then(data => {

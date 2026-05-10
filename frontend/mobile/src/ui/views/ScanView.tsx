@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Text, Dimensions, TouchableOpacity } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { useResolveTableByToken } from '@/hooks/useTables';
-import { router } from 'expo-router/build/exports';
+import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/ui/theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -207,6 +207,15 @@ export default function ScanView() {
   const [scanStatus, setScanStatus] = useState<ScanStatus>('default');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const { table, loading, error } = useResolveTableByToken(qrToken || '');
+  const hasNavigatedRef = useRef(false);
+
+  const resetScan = useCallback(() => {
+    setScanned(false);
+    setQrToken(null);
+    setScanStatus('default');
+    setErrorMessage('');
+    hasNavigatedRef.current = false;
+  }, []);
 
   useEffect(() => {
     const getCameraPermissions = async () => {
@@ -217,14 +226,24 @@ export default function ScanView() {
     getCameraPermissions();
   }, []);
 
-  useEffect(() => {
-    if (qrToken) {
-      setScanStatus('loading');
-    }
-  }, [qrToken]);
+  useFocusEffect(
+    useCallback(() => {
+      // When coming back from the menu (or refocusing this view), clear previous scan state
+      // so the camera callback is re-enabled and we don't stick in "loading".
+      resetScan();
+      return () => {};
+    }, [resetScan])
+  );
 
   useEffect(() => {
-    if (table?.restaurant_id && qrToken) {
+    if (qrToken || loading) {
+      setScanStatus('loading');
+    }
+  }, [qrToken, loading]);
+
+  useEffect(() => {
+    if (table?.restaurant_id && qrToken && !hasNavigatedRef.current) {
+      hasNavigatedRef.current = true;
       router.push(`/restaurants/${table.restaurant_id}/menu`);
     }
   }, [table, qrToken]);
@@ -235,13 +254,11 @@ export default function ScanView() {
       setErrorMessage(error);
       // Reset error after 3 seconds
       const timer = setTimeout(() => {
-        setScanStatus('default');
-        setErrorMessage('');
-        setScanned(false);
+        resetScan();
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [error]);
+  }, [error, resetScan]);
 
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
@@ -256,16 +273,14 @@ export default function ScanView() {
         setScanStatus('error');
         setErrorMessage('No token found in QR code');
         setTimeout(() => {
-          setScanStatus('default');
-          setScanned(false);
+          resetScan();
         }, 2000);
       }
     } catch (error) {
       setScanStatus('error');
       setErrorMessage('Invalid QR code format');
       setTimeout(() => {
-        setScanStatus('default');
-        setScanned(false);
+        resetScan();
       }, 2000);
     }
   };
@@ -289,7 +304,11 @@ export default function ScanView() {
       />
       <ScanOverlay />
       <StatusDisplay status={scanStatus} error={errorMessage} />
-      {scanned && <Text style={styles.messageText}>Tap to scan again</Text>}
+      {scanned && (
+        <TouchableOpacity onPress={resetScan} activeOpacity={0.8}>
+          <Text style={styles.messageText}>Tap to scan again</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
