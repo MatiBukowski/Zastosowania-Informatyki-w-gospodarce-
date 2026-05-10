@@ -1,5 +1,5 @@
  import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '../../../hooks/useRestaurants';
 import { useAuth } from '../../../services/AuthProvider';
@@ -113,37 +113,45 @@ const SelectTableScreen = () => {
         <View style={styles.container}>
             <Text style={styles.title}>Select Table at {name}</Text>
             <Text style={styles.subtitle}>{date} at {time}</Text>
+            {isLoading ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                    <Text style={{ marginTop: 10, color: 'gray' }}>Checking table availability...</Text>
+                </View>
+            ) : (
+                <>
+                <ScrollView contentContainerStyle={styles.tableGrid}>
+                    {availableTables.map(table => {
+                        const isSelected = selectedTableId === table.table_id;
+                        return (
+                            <TouchableOpacity
+                                key={table.table_id}
+                                activeOpacity={0.7}
+                                style={[
+                                    styles.tableCard,
+                                    isSelected && styles.selectedCard
+                                ]}
+                                onPress={() => setSelectedTableId(table.table_id)}
+                            >
+                                <Ionicons
+                                    name={isSelected ? "checkbox" : "square-outline"}
+                                    size={30}
+                                    color={isSelected ? theme.colors.primary : "#ccc"}
+                                />
+                                <Text style={[styles.tableNumber, isSelected && { color: theme.colors.primary }]}>
+                                    Table {table.table_number}
+                                </Text>
+                                <Text style={styles.capacityText}>Seats: {table.capacity}</Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </ScrollView>
 
-            <ScrollView contentContainerStyle={styles.tableGrid}>
-                {availableTables.map(table => {
-                    const isSelected = selectedTableId === table.table_id;
-                    return (
-                        <TouchableOpacity
-                            key={table.table_id}
-                            activeOpacity={0.7}
-                            style={[
-                                styles.tableCard,
-                                isSelected && styles.selectedCard
-                            ]}
-                            onPress={() => setSelectedTableId(table.table_id)}
-                        >
-                            <Ionicons
-                                name={isSelected ? "checkbox" : "square-outline"}
-                                size={30}
-                                color={isSelected ? theme.colors.primary : "#ccc"}
-                            />
-                            <Text style={[styles.tableNumber, isSelected && { color: theme.colors.primary }]}>
-                                Table {table.table_number}
-                            </Text>
-                            <Text style={styles.capacityText}>Seats: {table.capacity}</Text>
-                        </TouchableOpacity>
-                    );
-                })}
-            </ScrollView>
-
-            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-                <Text style={styles.buttonText}>Confirm My Selection</Text>
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+                    <Text style={styles.buttonText}>Confirm My Selection</Text>
+                </TouchableOpacity>
+            </>
+            )}
         </View>
     );
 };
