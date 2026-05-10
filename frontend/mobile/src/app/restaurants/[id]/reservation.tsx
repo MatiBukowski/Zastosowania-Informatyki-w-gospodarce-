@@ -61,40 +61,95 @@ const ReservationScreen = () => {
     const { tables, loading: loadingTables } = useGetTablesByRestaurantId(Number(id));
 
     // check all reservations
-    useEffect(() => {
-        if (tables && tables.length > 0 && selectedDate) {
-            const fetchAll = async () => {
-                const suitableTables = tables.filter(t => t.capacity >= guests);
-                const promises = suitableTables.map(t => getReservationsByTableId(t.table_id));
-                const results = await Promise.all(promises);
+// Stan dla wszystkich stolików restauracji
+const [allTables, setAllTables] = useState<any[]>([]);
 
-                setAllRelevantReservations(results.flat());
-            };
-            fetchAll();
-            }
-        }, [tables, guests, selectedDate]);
+useEffect(() => {
+    const fetchAllData = async () => {
+        if (!id || !selectedDate || !guests) return;
 
-    const checkIsAnyTableFree = (slotTime: string) => {
-        const startTimestamp = new Date(`${selectedDate}T${slotTime}:00`).getTime();
-        const endTimestamp = startTimestamp + durationMs;
+        try {
+            // 1. Pobieramy wszystkie stoliki (zgodnie z Twoim pomysłem)
+            const tablesRes = await apiClient.get(`/api/restaurants/${id}/tables`);
+            const fetchedTables = tablesRes.data;
+            setAllTables(fetchedTables);
 
+            // 2. Filtrujemy tylko stoliki pasujące do liczby gości
+            const suitableTables = fetchedTables.filter((t: any) => t.capacity >= Number(guests));
 
-        const suitableTables = tables.filter(t => t.capacity >= guests);
+            // 3. Pobieramy rezerwacje dla tych konkretnych stolików
+            const promises = suitableTables.map((t: any) =>
+                apiClient.get(`/api/tables/${t.table_id}/reservation`)
+                    .then(res => res.data)
+                    .catch(() => [])
+            );
 
-        // time slot is free if there is a table without collision during that time
-        return suitableTables.some(table => {
-            // reservations assigned to this table
-            const tableReservations = allRelevantReservations.filter(res => res.table_id === table.table_id);
+            const results = await Promise.all(promises);
+            setAllRelevantReservations(results.flat());
 
-            const hasCollision = tableReservations.some(res => {
-                const existingStart = new Date(`${res.reservation_date}T${res.start_time}:00`).getTime();
-                const existingEnd = existingStart + durationMs;
-                return startTimestamp < existingEnd && endTimestamp > existingStart;
-            });
-
-            return !hasCollision;
-        });
+        } catch (err) {
+            console.error("Error fetching data:", err);
+        }
     };
+
+    fetchAllData();
+}, [id, selectedDate, guests]);
+
+
+const checkIsAnyTableFree = (slotTime: string) => {
+    // 1. Podstawowe zabezpieczenia
+    if (!selectedDate || !guests || allRelevantReservations.length === 0) {
+        // Jeśli nie mamy jeszcze danych o rezerwacjach, domyślnie pozwalamy (lub blokujemy)
+        // Ale tutaj lepiej sprawdzić, czy dane w ogóle dotarły
+        return true;
+    }
+
+    // 2. Tworzymy timestamp dla sprawdzanego slotu (UTC)
+    const slotStart = new Date(`${selectedDate}T${slotTime}:00Z`).getTime();
+    const durationMs = 120 * 60 * 1000; // 2h
+    const slotEnd = slotStart + durationMs;
+
+    // 3. Filtrujemy stoliki, które pasują do liczby osób
+    // Używamy tables z hooka lub allTables z Twojego poprzedniego kroku
+    const suitableTables = tables.filter(t => t.capacity >= Number(guests));
+
+    // 4. Szukamy czy choć JEDEN stolik jest wolny
+    return suitableTables.some(table => {
+        // Wyciągamy rezerwacje tylko dla tego stolika
+        const tableRes = allRelevantReservations.filter(res =>
+            Number(res.table_id) === Number(table.table_id)
+        );
+
+        // Jeśli stolik nie ma żadnych rezerwacji, jest wolny!
+        if (tableRes.length === 0) return true;
+
+        const hasCollision = tableRes.some(res => {
+            if (!res.reservation_time) return false;
+
+            // 5. Parsujemy czas z bazy
+            // split('.')[0] usuwa milisekundy, które czasem psują porównanie w JS
+            const cleanResTime = res.reservation_time.split('.')[0] + 'Z';
+            const resStart = new Date(cleanResTime).getTime();
+            const resEnd = resStart + durationMs;
+
+            // 6. LOGIKA OKNA 2H (Collision detection)
+            const colliding = slotStart < resEnd && slotEnd > resStart;
+
+            // Logowanie dla problematycznych godzin (20:00 - 22:00)
+            if (slotTime.startsWith("20") || slotTime.startsWith("21")) {
+                console.log(`[DEBUG] Table ${table.table_id} | Slot: ${slotTime}`);
+                console.log(` - Slot UTC: ${new Date(slotStart).toISOString()}`);
+                console.log(` - Res  UTC: ${new Date(resStart).toISOString()}`);
+                console.log(` - Result: ${colliding ? "COLLISION ❌" : "FREE ✅"}`);
+            }
+
+            return colliding;
+        });
+
+        // Jeśli nie ma kolizji na TYM stoliku, zwracamy true (stolik dostępny)
+        return !hasCollision;
+    });
+};
 
     const timeSlots = generateTimeSlots(0, 23);
 
@@ -104,7 +159,7 @@ const ReservationScreen = () => {
     };
 
 
-    const handleReservationSubmit = async () => {
+    const handleReservationSubmit = () => {
 
     if (!selectedDate || !selectedTime || !guests) {
         alert("Please select date, guests and time first.");
@@ -114,48 +169,22 @@ const ReservationScreen = () => {
     // if no token, go to login
     if (!accessToken || !userId) {
         // save path
-        router.push('/authorization/login');
+        router.push('/user/login');
         return;
     }
 
-        // find a table
-        const suitableTables = tables.filter(t => t.capacity >= guests);
-        const freeTable = suitableTables.find(table => {
-            const tableReservations = allRelevantReservations.filter(res => res.table_id === table.table_id);
-            const startTimestamp = new Date(`${selectedDate}T${selectedTime}:00`).getTime();
-            const endTimestamp = startTimestamp + durationMs;
-
-            const hasCollision = tableReservations.some(res => {
-                const existingStart = new Date(`${res.reservation_date}T${res.start_time}:00`).getTime();
-                const existingEnd = existingStart + durationMs;
-                return startTimestamp < existingEnd && endTimestamp > existingStart;
-            });
-            return !hasCollision;
+        // if already logged, go ahead with the reservation
+        router.push({
+            pathname: "/restaurants/[id]/selectTable",
+            params: {
+                id: id,
+                date: selectedDate,
+                time: selectedTime,
+                guests: guests,
+                name: name
+            }
         });
-
-        if (!freeTable) {
-            alert("Sorry, no table available for this specific time.");
-            return;
-        }
-
-        try {
-            const reservationData = {
-                restaurant_id: Number(id),
-                table_id: freeTable.table_id,
-                reservation_time: `${selectedDate}T${selectedTime}:00`,
-                user_id: Number(userId),
-                status: "CONFIRMED"
-            };
-
-            await apiClient.post('/api/reservations', reservationData);
-            alert("Success! Your table is booked.");
-            router.replace('/'); //
-        } catch (error) {
-            console.error("Reservation error:", error);
-            alert("Something went wrong with the reservation.");
-        }
     };
-
 
 return (
         <SafeAreaView style={theme.common.screenContainer}>
@@ -493,6 +522,11 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight: '800',
+    },
+    disabledItem: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#eee',
+    opacity: 0.5,
     }
 
 });

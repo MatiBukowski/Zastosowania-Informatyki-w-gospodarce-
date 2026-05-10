@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useAuth } from '../../services/AuthProvider';
 import { useRouter } from 'expo-router';
-import { theme } from '../../../theme/theme';
+import { theme } from '../../theme/theme';
 
 const LoginScreen = () => {
     const { login } = useAuth();
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     button: {
-        backgroundColor: '#E3B04B',
+        backgroundColor: theme.colors.primary,
         padding: 16,
         borderRadius: 12,
         alignItems: 'center',
