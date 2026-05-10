@@ -1,7 +1,7 @@
 import { apiClient } from './API';
 import { IRestaurant } from '@/context/interfaces';
+import { getReservationsByTableId, createReservation } from '../../../api/ReservationAPI';
 
-// Add restaurants API client functions: getRestaurants(), getRestaurantById(id).
 export const getRestaurants = async (): Promise<IRestaurant[]> => {
   const response = await apiClient.get<IRestaurant[]>('/api/restaurants');
   return response.data;

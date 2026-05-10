@@ -3,9 +3,11 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-nati
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '../../../hooks/useRestaurants';
 import { useAuth } from '../../../services/AuthProvider';
-import { apiClient } from '../../../api/API';
 import { theme } from '../../../theme/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { IReservation } from '../../../context/interfaces';
+import { getReservationsByTableId, createReservation } from '../../../api/ReservationAPI';
+
 
 const SelectTableScreen = () => {
     const { id, date, time, guests, name } = useLocalSearchParams();
@@ -15,55 +17,52 @@ const SelectTableScreen = () => {
     const { tables } = useGetTablesByRestaurantId(Number(id));
     const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const durationMs = 120 * 60 * 1000; // should be somewhere
 
     useEffect(() => {
-        const fetchRes = async () => {
-            try {
-                setIsLoading(true);
-                console.log("Fetching reservations for tables:", tables.map(t => t.table_id));
+            const fetchRes = async () => {
+                try {
+                    setIsLoading(true);
 
-                const promises = tables.map(t =>
-                    apiClient.get(`/api/tables/${t.table_id}/reservation`)
-                        .then(res => {
-                            console.log(`Table ${t.table_id} API returned:`, res.data.length, "items");
-                            return res.data;
-                        })
-                        .catch(err => [])
-                );
+                    const promises = tables.map(t =>
+                        getReservationsByTableId(t.table_id)
+                            .then(data => {
 
-                const results = await Promise.all(promises);
-                const flatResults = results.flat();
-                console.log("Total reservations in state:", flatResults.length);
-                setAllReservations(flatResults);
-            } catch (err) {
-                console.error("Error getting reservation:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        if (tables && tables.length > 0) fetchRes();
-    }, [tables]);
+                                console.log(`Table ${t.table_id} API returned:`, data.length, "items");
+                                return data;
+                            })
+                            .catch(err => {
+                                console.warn(`Error for table ${t.table_id}:`, err);
+                                return [];
+                            })
+                    );
 
-    //filter logic
-    //const availableTables = tables.filter(table => table.capacity >= Number(guests));
-const availableTables = tables.filter(table => {
-    // 1. Sprawdzenie pojemności
+                    const results = await Promise.all(promises);
+                    const flatResults = results.flat();
+
+                    setAllReservations(flatResults);
+                } catch (err) {
+                    console.error("Error fetching reservations:", err);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            if (tables && tables.length > 0) fetchRes();
+        }, [tables]);
+
+    //tables filter logic
+    const availableTables = tables.filter(table => {
     const hasEnoughCapacity = table.capacity >= Number(guests);
 
-    console.log(`\n[CHECKING TABLE] ID: ${table.table_id} (No. ${table.table_number})`);
-    console.log(`- Capacity: ${table.capacity} vs Required: ${guests} -> ${hasEnoughCapacity ? 'PASS ✅' : 'FAIL ❌'}`);
 
     if (!hasEnoughCapacity) return false;
 
-    // 2. Przygotowanie czasu wybranego przez użytkownika (UTC)
     const selectedStart = new Date(`${date}T${time}:00Z`).getTime();
-    const durationMs = 120 * 60 * 1000; // 2h
+    //const durationMs = 120 * 60 * 1000; // 2h
     const selectedEnd = selectedStart + durationMs;
 
-    console.log(`- User wants slot: ${date} ${time} (UTC)`);
-    console.log(`  Start TS: ${selectedStart} | End TS: ${selectedEnd}`);
 
-    // 3. Sprawdzanie kolizji z istniejącymi rezerwacjami
     const tableReservations = allReservations.filter(res =>
         Number(res.table_id) === Number(table.table_id)
     );
@@ -74,19 +73,11 @@ const availableTables = tables.filter(table => {
         const resStart = new Date(res.reservation_time).getTime();
         const resEnd = resStart + durationMs;
 
-        // Warunek kolizji
+        // collision condition
         const isColliding = selectedStart < resEnd && selectedEnd > resStart;
-
-        if (isColliding) {
-            console.log(`  ! COLLISION DETECTED !`);
-            console.log(`    DB Res: ${res.reservation_time}`);
-            console.log(`    DB Start TS: ${resStart} | DB End TS: ${resEnd}`);
-        }
-
         return isColliding;
     });
 
-    console.log(`- Final Decision: ${hasCollision ? 'HIDDEN (Busy) ❌' : 'SHOWING (Free) ✅'}`);
 
     return !hasCollision;
 });
@@ -103,15 +94,12 @@ const availableTables = tables.filter(table => {
                 user_id: Number(userId),
             };
 
-            const endpointUrl = `/api/tables/${selectedTableId}/reservation`;
-
-            console.log("API URL:", endpointUrl);
-            console.log("Data:", reservationData);
 
 
-            const response = await apiClient.post(endpointUrl, reservationData);
-            console.log("Server status:", response.status);
-            console.log("Data:", response.data);
+
+            const response = await createReservation(selectedTableId, reservationData as any);
+
+
             alert("Reservation successful!");
             router.dismissAll();
             router.replace('/');
@@ -161,10 +149,27 @@ const availableTables = tables.filter(table => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-    title: { fontSize: 20, fontWeight: '800', textAlign: 'center', marginTop: 20 },
-    subtitle: { textAlign: 'center', color: 'gray', marginBottom: 20 },
-    tableGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: '#fff',
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: '800',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    subtitle: {
+        textAlign: 'center',
+        color: 'gray',
+        marginBottom: 20,
+    },
+    tableGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
     tableCard: {
         width: '48%',
         height: 100,
@@ -173,11 +178,31 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 15
+        marginBottom: 15,
     },
-    selectedCard: { borderColor: theme.colors.primary, borderWidth: 2, backgroundColor: '#fdf2f2' },
-    confirmButton: { backgroundColor: theme.colors.primary, padding: 18, borderRadius: 12, alignItems: 'center' },
-    buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
+    selectedCard: {
+        borderColor: theme.colors.primary,
+        borderWidth: 2,
+        backgroundColor: '#fdf2f2',
+    },
+    tableNumber: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    capacityText: {
+        fontSize: 12,
+        color: 'gray',
+    },
+    confirmButton: {
+        backgroundColor: theme.colors.primary,
+        padding: 18,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
 });
-
 export default SelectTableScreen;

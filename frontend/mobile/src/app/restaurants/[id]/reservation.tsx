@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, StyleSheet, Alert } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../theme/theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '../../../hooks/useRestaurants';
+import { getTablesByRestaurantId } from '../../../api/RestaurantApi';
 import { getReservationsByTableId } from '../../../api/ReservationAPI';
-import { IReservation} from '../../../context/interfaces';
+import { IReservation } from '../../../context/interfaces';
 import { useAuth } from '../../../services/AuthProvider';
-import { apiClient } from '../../../api/API';
 
-
-// assuming that the reservation duration is 2h (?)
 const reservation_duration_in_min = 120;
 const durationMs = reservation_duration_in_min * 60 * 1000;
 
-
-// currently without range for possible reservation timeslots (open and closing hours)
 const generateTimeSlots = (startHour: number, endHour: number) => {
     const slots = [];
     for (let hour = startHour; hour <= endHour; hour++) {
@@ -29,151 +25,95 @@ const generateTimeSlots = (startHour: number, endHour: number) => {
     return slots;
 };
 
-const isSlotAvailable = (slotTime: string, selectedDate: string, allReservations: any[]) => {
-    const startTimestamp = new Date(`${selectedDate}T${slotTime}:00`).getTime();
-
-
-    const endTimestamp = startTimestamp + durationMs;
-
-    // collision check
-    return !allReservations.some(res => {
-        const existingStart = new Date(`${res.reservation_date}T${res.start_time}:00`).getTime();
-        const existingEnd = existingStart + durationMs;
-        return startTimestamp < existingEnd && endTimestamp > existingStart;
-    });
-};
-
 const ReservationScreen = () => {
-
     const { id, name } = useLocalSearchParams();
     const today = new Date().toISOString().split('T')[0];
-
     const { userId, accessToken } = useAuth();
     const router = useRouter();
 
-    // states
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [guests, setGuests] = useState<number | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [allRelevantReservations, setAllRelevantReservations] = useState<IReservation[]>([]);
-
     const [activeSection, setActiveSection] = useState<'calendar' | 'guests' | 'time'>('calendar');
+
     const { tables, loading: loadingTables } = useGetTablesByRestaurantId(Number(id));
 
-    // check all reservations
-// Stan dla wszystkich stolików restauracji
-const [allTables, setAllTables] = useState<any[]>([]);
+    // fetch all reservations for tables that fit the guest count
+    useEffect(() => {
+        const fetchAllData = async () => {
+            if (!id || !selectedDate || !guests || !tables || tables.length === 0) return;
 
-useEffect(() => {
-    const fetchAllData = async () => {
-        if (!id || !selectedDate || !guests) return;
+            try {
+                const suitableTables = tables.filter((t: any) => t.capacity >= Number(guests));
 
-        try {
-            // 1. Pobieramy wszystkie stoliki (zgodnie z Twoim pomysłem)
-            const tablesRes = await apiClient.get(`/api/restaurants/${id}/tables`);
-            const fetchedTables = tablesRes.data;
-            setAllTables(fetchedTables);
+                const promises = suitableTables.map((t: any) =>
+                    getReservationsByTableId(t.table_id)
+                        .then(data => data)
+                        .catch(() => [])
+                );
 
-            // 2. Filtrujemy tylko stoliki pasujące do liczby gości
-            const suitableTables = fetchedTables.filter((t: any) => t.capacity >= Number(guests));
+                const results = await Promise.all(promises);
+                const flatResults = results.flat();
 
-            // 3. Pobieramy rezerwacje dla tych konkretnych stolików
-            const promises = suitableTables.map((t: any) =>
-                apiClient.get(`/api/tables/${t.table_id}/reservation`)
-                    .then(res => res.data)
-                    .catch(() => [])
+                console.log(`[DEBUG] Loaded ${flatResults.length} reservations for ${suitableTables.length} tables`);
+                setAllRelevantReservations(flatResults);
+            } catch (err) {
+                console.error("Error fetching reservation data:", err);
+            }
+        };
+
+        fetchAllData();
+    }, [id, selectedDate, guests, tables]);
+
+    // time slot availability check
+    const checkIsAnyTableFree = (slotTime: string) => {
+        if (!selectedDate || !guests || tables.length === 0) return false;
+
+
+        const slotStart = new Date(`${selectedDate}T${slotTime}:00Z`).getTime();
+        const slotEnd = slotStart + durationMs;
+
+        const suitableTables = tables.filter(t => t.capacity >= Number(guests));
+
+        // if there is at least one table without collision
+        return suitableTables.some(table => {
+            const tableRes = allRelevantReservations.filter(res =>
+                Number(res.table_id) === Number(table.table_id)
             );
 
-            const results = await Promise.all(promises);
-            setAllRelevantReservations(results.flat());
+            if (tableRes.length === 0) return true;
 
-        } catch (err) {
-            console.error("Error fetching data:", err);
-        }
-    };
-
-    fetchAllData();
-}, [id, selectedDate, guests]);
+            const hasCollision = tableRes.some(res => {
+                if (!res.reservation_time) return false;
 
 
-const checkIsAnyTableFree = (slotTime: string) => {
-    // 1. Podstawowe zabezpieczenia
-    if (!selectedDate || !guests || allRelevantReservations.length === 0) {
-        // Jeśli nie mamy jeszcze danych o rezerwacjach, domyślnie pozwalamy (lub blokujemy)
-        // Ale tutaj lepiej sprawdzić, czy dane w ogóle dotarły
-        return true;
-    }
+                const resStart = new Date(res.reservation_time).getTime();
+                const resEnd = resStart + durationMs;
 
-    // 2. Tworzymy timestamp dla sprawdzanego slotu (UTC)
-    const slotStart = new Date(`${selectedDate}T${slotTime}:00Z`).getTime();
-    const durationMs = 120 * 60 * 1000; // 2h
-    const slotEnd = slotStart + durationMs;
+                // 2h slot
+                const colliding = slotStart < resEnd && slotEnd > resStart;
 
-    // 3. Filtrujemy stoliki, które pasują do liczby osób
-    // Używamy tables z hooka lub allTables z Twojego poprzedniego kroku
-    const suitableTables = tables.filter(t => t.capacity >= Number(guests));
+                return colliding;
+            });
 
-    // 4. Szukamy czy choć JEDEN stolik jest wolny
-    return suitableTables.some(table => {
-        // Wyciągamy rezerwacje tylko dla tego stolika
-        const tableRes = allRelevantReservations.filter(res =>
-            Number(res.table_id) === Number(table.table_id)
-        );
-
-        // Jeśli stolik nie ma żadnych rezerwacji, jest wolny!
-        if (tableRes.length === 0) return true;
-
-        const hasCollision = tableRes.some(res => {
-            if (!res.reservation_time) return false;
-
-            // 5. Parsujemy czas z bazy
-            // split('.')[0] usuwa milisekundy, które czasem psują porównanie w JS
-            const cleanResTime = res.reservation_time.split('.')[0] + 'Z';
-            const resStart = new Date(cleanResTime).getTime();
-            const resEnd = resStart + durationMs;
-
-            // 6. LOGIKA OKNA 2H (Collision detection)
-            const colliding = slotStart < resEnd && slotEnd > resStart;
-
-            // Logowanie dla problematycznych godzin (20:00 - 22:00)
-            if (slotTime.startsWith("20") || slotTime.startsWith("21")) {
-                console.log(`[DEBUG] Table ${table.table_id} | Slot: ${slotTime}`);
-                console.log(` - Slot UTC: ${new Date(slotStart).toISOString()}`);
-                console.log(` - Res  UTC: ${new Date(resStart).toISOString()}`);
-                console.log(` - Result: ${colliding ? "COLLISION ❌" : "FREE ✅"}`);
-            }
-
-            return colliding;
+            return !hasCollision;
         });
-
-        // Jeśli nie ma kolizji na TYM stoliku, zwracamy true (stolik dostępny)
-        return !hasCollision;
-    });
-};
+    };
 
     const timeSlots = generateTimeSlots(0, 23);
 
-    const formatDate = (dateStr: string | null) => {
-        if (!dateStr) return "Select Date";
-        return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    };
-
-
     const handleReservationSubmit = () => {
-
-    if (!selectedDate || !selectedTime || !guests) {
-        alert("Please select date, guests and time first.");
+        if (!selectedDate || !selectedTime || !guests) {
+            Alert.alert("Missing Information", "Please select date, guests and time first.");
             return;
         }
 
-    // if no token, go to login
-    if (!accessToken || !userId) {
-        // save path
-        router.push('/user/login');
-        return;
-    }
+        if (!accessToken || !userId) {
+            router.push('/user/login');
+            return;
+        }
 
-        // if already logged, go ahead with the reservation
         router.push({
             pathname: "/restaurants/[id]/selectTable",
             params: {
@@ -186,134 +126,97 @@ const checkIsAnyTableFree = (slotTime: string) => {
         });
     };
 
-return (
+    return (
         <SafeAreaView style={theme.common.screenContainer}>
             <ScrollView showsVerticalScrollIndicator={false}>
 
                 <View style={styles.headerContainer}>
-                    <Text style={styles.restaurantName}>
-                        {name || "Restaurant"}
-                    </Text>
-                    <Text style={styles.subtitle}>
-                        Choose the reservation details
-                    </Text>
+                    <Text style={styles.restaurantName}>{name || "Restaurant"}</Text>
+                    <Text style={styles.subtitle}>Choose the reservation details</Text>
                 </View>
 
+                {/* Segmented Selector */}
                 <View style={styles.segmentedSelector}>
                     <TouchableOpacity
                         style={[styles.selectorTab, activeSection === 'calendar' && styles.activeTab]}
                         onPress={() => setActiveSection('calendar')}
                     >
                         <Ionicons name="calendar-outline" size={18} color={activeSection === 'calendar' ? theme.colors.primary : theme.colors.text} />
-                    <Text style={[styles.selectorText, activeSection === 'calendar' && { color: theme.colors.primary }]}>
-                        {selectedDate
-                            ? new Date(selectedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-                            : "DATE"
-                        }
-                    </Text>
+                        <Text style={[styles.selectorText, activeSection === 'calendar' && { color: theme.colors.primary }]}>
+                            {selectedDate ? new Date(selectedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : "DATE"}
+                        </Text>
                     </TouchableOpacity>
 
-
                     <View style={styles.divider} />
-
-
-                    {/*People*/}
 
                     <TouchableOpacity
                         disabled={!selectedDate}
-                        style={[
-                            styles.selectorTab,
-                            activeSection === 'guests' && styles.activeTab,
-                            !selectedDate && { opacity: 0.3 }
-                        ]}
+                        style={[styles.selectorTab, activeSection === 'guests' && styles.activeTab, !selectedDate && { opacity: 0.3 }]}
                         onPress={() => setActiveSection('guests')}
                     >
                         <Ionicons name="people-outline" size={18} color={activeSection === 'guests' ? theme.colors.primary : theme.colors.text} />
-                        <Text style={[styles.selectorText, activeSection === 'guests' && { color: theme.colors.primary }]}>{guests ? `${guests} Pers.` : "Pers."}</Text>
+                        <Text style={[styles.selectorText, activeSection === 'guests' && { color: theme.colors.primary }]}>
+                            {guests ? `${guests} Pers.` : "Pers."}
+                        </Text>
                     </TouchableOpacity>
 
                     <View style={styles.divider} />
 
-                    {/*Time*/}
                     <TouchableOpacity
                         disabled={!selectedDate || !guests}
-                        style={[
-                            styles.selectorTab,
-                            activeSection === 'time' && styles.activeTab,
-                            (!selectedDate || !guests) && { opacity: 0.3 }
-                        ]}
+                        style={[styles.selectorTab, activeSection === 'time' && styles.activeTab, (!selectedDate || !guests) && { opacity: 0.3 }]}
                         onPress={() => setActiveSection('time')}
                     >
                         <Ionicons name="time-outline" size={18} color={activeSection === 'time' ? theme.colors.primary : theme.colors.text} />
-                        <Text style={[styles.selectorText, activeSection === 'time' && { color: theme.colors.primary }]}>{selectedTime || "Time"}</Text>
+                        <Text style={[styles.selectorText, activeSection === 'time' && { color: theme.colors.primary }]}>
+                            {selectedTime || "Time"}
+                        </Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* Calendar */}
+                {/* Calendar, Guests, Time */}
                 {activeSection === 'calendar' && (
-                <View style={[theme.common.card, { padding: 10 }]}>
-                    <Calendar
-                        current={selectedDate || today}
-                        minDate={today}
+                    <View style={[theme.common.card, { padding: 10 }]}>
+                        <Calendar
+                            current={selectedDate || today}
+                            minDate={today}
+                            onDayPress={day => {
+                                setSelectedDate(day.dateString);
+                                setActiveSection('guests');
+                            }}
+                            markedDates={{ [selectedDate]: { selected: true, selectedColor: theme.colors.primary } }}
+                            renderArrow={(direction) => (
+                                <Ionicons name={direction === 'left' ? 'chevron-back' : 'chevron-forward'} size={24} color={theme.colors.primary} />
+                            )}
+                            dayComponent={({ date, state }) => {
+                                const isSelected = selectedDate === date?.dateString;
+                                const isDisabled = state === 'disabled';
+                                const isToday = date?.dateString === today;
 
-                        onDayPress={day => {
-                            setSelectedDate(day.dateString);
-                            setActiveSection('guests');
-                        }}
-                        markedDates={{
-                            [selectedDate]: { selected: true, selectedColor: theme.colors.primary }
-                        }}
-                        renderArrow={(direction) => (
-                            <Ionicons
-                                name={direction === 'left' ? 'chevron-back' : 'chevron-forward'}
-                                size={24}
-                                color={theme.colors.primary}
-                            />
-                        )}
-                        dayComponent={({ date, state }) => {
-                            const isSelected = selectedDate === date?.dateString;
-                            const isDisabled = state === 'disabled';
-                            const isToday = date?.dateString === today;
-
-                            return (
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        if (!isDisabled && date) {
-                                            !isDisabled && setSelectedDate(date.dateString);
-                                            setActiveSection('guests');
-                                        }
-                                    }}
-                                    style={[
-                                        styles.dayTile,
-                                        {
+                                return (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            if (!isDisabled && date) {
+                                                setSelectedDate(date.dateString);
+                                                setActiveSection('guests');
+                                            }
+                                        }}
+                                        style={[styles.dayTile, {
                                             backgroundColor: isSelected ? theme.colors.primary : theme.colors.white,
                                             borderColor: isSelected ? theme.colors.primary : 'rgba(34, 34, 23, 0.1)',
                                             borderBottomWidth: isSelected ? 1 : 3,
                                             opacity: isDisabled ? 0.3 : 1,
-                                        }
-                                    ]}
-                                >
-                                    <Text style={{
-                                        color: isSelected ? theme.colors.white : (isToday ? theme.colors.primary : theme.colors.text),
-                                        fontWeight: isSelected ? '800' : '500',
-                                        fontSize: 15
-                                    }}>
-                                        {date?.day}
-                                    </Text>
-                                </TouchableOpacity>
-                            );
-                        }}
-                        theme={{
-                            calendarBackground: 'transparent',
-                            textSectionTitleColor: theme.colors.gray,
-                            monthTextColor: theme.colors.text,
-                            textMonthFontWeight: '800',
-                            textMonthFontSize: 18,
-                            arrowColor: theme.colors.primary
-                        }}
-                    />
-                </View>
-            )}
+                                        }]}
+                                    >
+                                        <Text style={{ color: isSelected ? theme.colors.white : (isToday ? theme.colors.primary : theme.colors.text), fontWeight: isSelected ? '800' : '500', fontSize: 15 }}>
+                                            {date?.day}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            }}
+                        />
+                    </View>
+                )}
 
                 {activeSection === 'guests' && selectedDate && (
                     <View style={styles.gridContainer}>
@@ -322,7 +225,7 @@ return (
                                 <TouchableOpacity
                                     key={num}
                                     style={[styles.gridItem, guests === num && styles.selectedItem]}
-                                    onPress={() => setActiveSection('time') || setGuests(num)}
+                                    onPress={() => { setGuests(num); setActiveSection('time'); }}
                                 >
                                     <Text style={[styles.gridItemText, guests === num && { color: theme.colors.primary }]}>{num}</Text>
                                 </TouchableOpacity>
@@ -331,8 +234,6 @@ return (
                     </View>
                 )}
 
-
-                {/*TIME GRID */}
                 {activeSection === 'time' && selectedDate && guests && (
                     <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
                         <View style={styles.gridWrapper}>
@@ -357,22 +258,13 @@ return (
                                 );
                             })}
                         </View>
-
-
-
-
                     </View>
                 )}
 
                 {selectedDate && guests && selectedTime && (
                     <View style={{ padding: 16, marginBottom: 30 }}>
-                        <TouchableOpacity
-                            style={styles.confirmButton}
-                            onPress={handleReservationSubmit}
-                        >
-                            <Text style={styles.confirmButtonText}>
-                                {!accessToken ? "Login to Reserve" : "Confirm Reservation"}
-                            </Text>
+                        <TouchableOpacity style={styles.confirmButton} onPress={handleReservationSubmit}>
+                            <Text style={styles.confirmButtonText}>{!accessToken ? "Login to Reserve" : "Confirm Reservation"}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -410,10 +302,12 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         padding: 4,
         marginBottom: 20,
-        // shade
         elevation: 2,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
         shadowOpacity: 0.05,
         shadowRadius: 4,
     },
@@ -448,40 +342,18 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         marginVertical: 2,
     },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        marginBottom: 12,
-        color: theme.colors.text,
-    },
-    timeSlot: {
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: 'rgba(34, 34, 23, 0.1)',
-        backgroundColor: '#fff',
-    },
-    selectedTimeSlot: {
-        backgroundColor: theme.colors.primary,
-        borderColor: theme.colors.primary,
-    },
-    disabledTimeSlot: {
-        backgroundColor: '#f5f5f5',
-        borderColor: '#eee',
-        opacity: 0.5,
-    },
-    timeText: {
-        fontWeight: '600',
-    },
-    activeTab: {
-        borderBottomColor: theme.colors.primary,
-    },
-
     gridContainer: {
         marginTop: 20,
         paddingHorizontal: 16,
         width: '100%',
+    },
+    timeSectionContainer: {
+        marginTop: 20,
+        paddingHorizontal: 16,
+    },
+    footerContainer: {
+        padding: 16,
+        marginBottom: 30,
     },
     gridWrapper: {
         flexDirection: 'row',
@@ -514,7 +386,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         elevation: 4,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
         shadowOpacity: 0.2,
         shadowRadius: 5,
     },
@@ -523,12 +398,18 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '800',
     },
+    activeTab: {
+        borderBottomColor: theme.colors.primary,
+    },
+    selectedItem: {
+        borderColor: theme.colors.primary,
+        borderWidth: 2,
+    },
     disabledItem: {
-    backgroundColor: '#f0f0f0',
-    borderColor: '#eee',
-    opacity: 0.5,
-    }
-
+        backgroundColor: '#f0f0f0',
+        borderColor: '#eee',
+        opacity: 0.5,
+    },
 });
 
 export default ReservationScreen;
