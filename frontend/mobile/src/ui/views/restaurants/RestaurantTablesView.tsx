@@ -1,4 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { useEffect } from 'react';
+import { usePostHog } from 'posthog-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   View,
@@ -66,6 +68,16 @@ export default function RestaurantTablesView() {
   const router = useRouter();
   const restaurantId = Number(id);
   const { tables, loading, error } = useGetTablesByRestaurantId(restaurantId);
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    if (tables && tables.length > 0) {
+      posthog.capture('tables_list_viewed', {
+        restaurant_id: restaurantId,
+        count: tables.length
+      });
+    }
+  }, [tables]);
 
   if (loading) {
     return (
