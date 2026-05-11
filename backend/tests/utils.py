@@ -1,5 +1,5 @@
 from src.models import CuisineTypeEnum, Restaurant, MenuItem, AppUser, RestaurantTable
-
+from src.security import PasswordHandler
 
 def create_restaurants(db):
     restaurant = Restaurant(
@@ -33,17 +33,6 @@ def create_menu(db):
     db.add_all(menu)
     db.commit()
 
-def create_users(db):
-    user = AppUser(
-        email="test@example.com",
-        first_name="Test",
-        surname="User",
-        password_hash="password",
-        is_active=True
-    )
-    db.add(user)
-    db.commit()
-
 def create_tables(db, restaurant_id: int = 1):
     table = RestaurantTable(
         restaurant_id=restaurant_id,
@@ -52,4 +41,14 @@ def create_tables(db, restaurant_id: int = 1):
         status="FREE"
     )
     db.add(table)
+    db.commit()
+
+def create_user(db):
+    user = AppUser(
+        email="test@example.com",
+        password_hash=PasswordHandler.hash_password("password123"),
+        first_name="John",
+        surname="Doe"
+    )
+    db.add(user)
     db.commit()

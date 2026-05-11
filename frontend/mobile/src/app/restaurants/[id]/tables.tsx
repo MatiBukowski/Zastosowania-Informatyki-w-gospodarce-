@@ -11,6 +11,8 @@ import { useGetTablesByRestaurantId } from '../../../hooks/useRestaurants';
 import { ITable, TableStatus } from '../../../context/interfaces';
 import { theme } from '../../../theme/theme';
 import { MaterialIcons } from '@expo/vector-icons';
+import {useEffect} from "react";
+import {usePostHog} from "posthog-react-native";
 
 function statusColor(status: TableStatus): string {
     switch (status) {
@@ -61,8 +63,18 @@ function TableCard({ table, onReserve }: { table: ITable; onReserve: () => void 
 export default function RestaurantTablesPage() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
+    const posthog = usePostHog();
     const restaurantId = Number(id);
     const { tables, loading, error } = useGetTablesByRestaurantId(restaurantId);
+
+    useEffect(() => {
+      if (tables && tables.length > 0) {
+        posthog.capture('tables_list_viewed', {
+          restaurant_id: restaurantId,
+          count: tables.length
+        });
+      }
+    }, [tables]);
 
     if (loading) {
         return (

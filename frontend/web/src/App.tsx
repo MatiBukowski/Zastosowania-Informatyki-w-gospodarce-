@@ -1,19 +1,31 @@
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import { theme } from '../theme/theme';
-import { HomePage} from './pages/HomePage';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { HomePage } from './pages/HomePage';
 import { TableQRPage } from './pages/TableQRPage'
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ForecastPage } from './pages/ForecastPage';
+import { Routes, Route } from 'react-router-dom';
+import Root from './Root';
+import { LoginPage } from './pages/LoginPage';
+import { AuthProvider } from './services/AuthProvider';
+import { theme } from '../theme/theme';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { useState } from 'react';
 
 function App() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
-          <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/qr" element={<TableQRPage />} />
-          </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/auth" element={<LoginPage/>}/>
+          <Route element={<Root isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/qr" element={<ProtectedRoute requiredRole="ADMIN"><TableQRPage /></ProtectedRoute>} />
+            <Route path="/forecast" element={<ProtectedRoute requiredRole="ADMIN"><ForecastPage /></ProtectedRoute>} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
