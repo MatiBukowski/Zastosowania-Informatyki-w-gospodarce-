@@ -79,7 +79,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
           cd backend
-          pip install alembic
+          pip install alembic python-dotenv
           alembic upgrade head
 
       - name: Update VPS
