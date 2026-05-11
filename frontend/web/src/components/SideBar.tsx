@@ -123,7 +123,7 @@ const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProp
   const displayName = firstName && surname ? `${firstName} ${surname}` : "User";
   const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Role";
   const isQrActive = location.pathname === '/qr';
-  const isStatsActive = location.pathname === '/' || location.pathname.startsWith('/statistics');
+  const isStatsActive = location.pathname === '/dashboard';
 
   useEffect(() => {
     if (isAxiosReady && accessToken) {
@@ -242,8 +242,8 @@ const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProp
           <Collapse in={isStatsMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
             <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {restaurants.map((r) => {
-                const targetHref = `/?restaurantId=${r.restaurant_id}`;
-                const isItemActive = (location.pathname === '/' || location.pathname === '/dashboard') && location.search.includes(`restaurantId=${r.restaurant_id}`);
+                const targetHref = `/dashboard?restaurantId=${r.restaurant_id}`;
+                const isItemActive = (location.pathname === '/dashboard') && location.search.includes(`restaurantId=${r.restaurant_id}`);
 
                 return (
                   <SideBarMenuItem

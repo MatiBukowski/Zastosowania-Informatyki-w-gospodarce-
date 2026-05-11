@@ -1,14 +1,17 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { getRestaurants } from '../api/RestaurantAPI';
+import { useSearchParams, useOutletContext } from 'react-router-dom';
 import { getForecast } from '../api/ForecastAPI';
-import { IRestaurant, IForecastData } from '../context/interfaces';
+import { IForecastData } from '../context/interfaces';
 import { useAuth } from '../services/AuthProvider';
 import {
-  Select, MenuItem, FormControl, InputLabel,
   Box, Typography, CircularProgress, Paper, Stack, Divider,
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { usePostHog } from '@posthog/react';
+
+interface ContextType {
+  restaurantName: string;
+}
 
 /** Returns the pixel width of a DOM element, updating on resize. */
 function useElementWidth(ref: React.RefObject<HTMLElement>) {
@@ -28,8 +31,9 @@ function useElementWidth(ref: React.RefObject<HTMLElement>) {
 
 export const ForecastPage = () => {
   const { isAxiosReady } = useAuth();
-  const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
-  const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | ''>('');
+  const { restaurantName } = useOutletContext<ContextType>();
+  const [searchParams] = useSearchParams();
+  const restaurantId = searchParams.get('restaurantId');
   const [forecastData, setForecastData] = useState<IForecastData | null>(null);
   const [loading, setLoading] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -37,31 +41,26 @@ export const ForecastPage = () => {
   const posthog = usePostHog();
 
   useEffect(() => {
-    if (isAxiosReady) {
-      getRestaurants().then(setRestaurants).catch(console.error);
-    }
-  }, [isAxiosReady]);
-
-  useEffect(() => {
-    if (isAxiosReady && selectedRestaurantId !== '') {
+    if (isAxiosReady && restaurantId) {
+      const id = parseInt(restaurantId, 10);
       setLoading(true);
       setForecastData(null);
-      getForecast(selectedRestaurantId as number)
+      getForecast(id)
         .then((data) => {
           setForecastData(data);
           posthog.capture('restaurant_forecast_viewed', {
-            restaurant_id: selectedRestaurantId,
+            restaurant_id: id,
           });
         })
         .catch((err) => {
           console.error(err);
           posthog.capture('failed_restaurant_forecast_view', {
-            restaurant_id: selectedRestaurantId,
+            restaurant_id: id,
           });
         })
         .finally(() => setLoading(false));
     }
-  }, [selectedRestaurantId, posthog, isAxiosReady]);
+  }, [restaurantId, posthog, isAxiosReady]);
 
   const chartData = useMemo(() => {
     if (!forecastData) return { xAxis: [], series: [] };
@@ -159,21 +158,9 @@ export const ForecastPage = () => {
         Restaurant Demand Forecast
       </Typography>
 
-      <FormControl fullWidth sx={pageStyles.selectWrapper}>
-        <InputLabel id="restaurant-select-label">Select Restaurant</InputLabel>
-        <Select
-          labelId="restaurant-select-label"
-          value={selectedRestaurantId}
-          label="Select Restaurant"
-          onChange={(e) => setSelectedRestaurantId(e.target.value as number)}
-        >
-          {restaurants.map((r) => (
-            <MenuItem key={r.restaurant_id} value={r.restaurant_id}>
-              {r.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
+        {restaurantName}
+      </Typography>
 
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -211,7 +198,7 @@ export const ForecastPage = () => {
         </>
       )}
 
-      {!loading && selectedRestaurantId !== '' && !forecastData && (
+      {!loading && restaurantId !== '' && !forecastData && (
         <Typography sx={{ mt: 2, color: 'text.secondary' }}>
           No forecast data available for this restaurant.
         </Typography>
