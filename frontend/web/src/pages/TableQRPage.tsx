@@ -154,52 +154,6 @@ export const TableQRPage = () => {
           </Stack>
 
           <Box sx={pageStyles.grid}>
-<<<<<<< HEAD
-            {tables.map((table) => {
-              const isSelected = selectedTables.includes(table.table_id);
-              return (
-                <Box 
-                    key={table.table_id} 
-                    sx={pageStyles.tableCard(isSelected)}
-                    onClick={() => toggleTableSelection(table.table_id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        toggleTableSelection(table.table_id);
-                      }
-                    }}
-                >
-                  <FormControlLabel
-                    control={<Checkbox 
-                      checked={isSelected} 
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        toggleTableSelection(table.table_id);
-                      }} 
-                      size="small" 
-                    />}
-                    label={<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Table #{table.table_number}</Typography>}
-                    sx={{ margin: 0 }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <Box sx={pageStyles.infoBox(isSelected)}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                      System ID: <strong>{table.table_id}</strong>
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                      Capacity: <strong>{table.capacity} guests</strong>
-                    </Typography>
-                  </Box>
-                  {isSelected && (
-                    <Box sx={{ mt: 'auto', pt: 1 }}>
-                      <TableQR token={table.qr_code_token} table_number={table.table_number} />
-                    </Box>
-                  )}
-                </Box>
-              );
-            })}
-=======
   {tables.map((table) => {
     const isSelected = selectedTables.includes(table.table_id);
     return (
@@ -242,14 +196,13 @@ export const TableQRPage = () => {
               onClick={(e) => e.stopPropagation()}
             />
             <Box sx={pageStyles.infoBox(isSelected)}>
-              <Typography variant="caption" display="block" color="text.secondary">
+              <Typography variant="caption" sx={{ display: 'block' }} color="text.secondary">
                 System ID: <strong>{table.table_id}</strong>
               </Typography>
-              <Typography variant="caption" display="block" color="text.secondary">
+              <Typography variant="caption" sx={{ display: 'block' }} color="text.secondary">
                 Capacity: <strong>{table.capacity} guests</strong>
               </Typography>
             </Box>
->>>>>>> 2b98dd0 (Improve TableQrPage, SideBar and TableQr componoents)
           </Box>
 
           <Typography

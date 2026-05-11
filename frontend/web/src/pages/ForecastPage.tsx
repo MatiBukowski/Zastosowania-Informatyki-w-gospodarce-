@@ -8,6 +8,8 @@ import {
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { usePostHog } from '@posthog/react';
+import { useAuth } from '../services/AuthProvider';
+
 
 /** Returns the pixel width of a DOM element, updating on resize. */
 function useElementWidth(ref: React.RefObject<HTMLElement>) {
@@ -26,6 +28,7 @@ function useElementWidth(ref: React.RefObject<HTMLElement>) {
 }
 
 export const ForecastPage = () => {
+  const { role } = useAuth();
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | ''>('');
   const [forecastData, setForecastData] = useState<IForecastData | null>(null);

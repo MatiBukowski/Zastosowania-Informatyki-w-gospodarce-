@@ -15,6 +15,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getRestaurantsByUser, getRestaurants } from '../api/RestaurantAPI';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import { IRestaurant } from '../context/interfaces';
+import { usePostHog } from '@posthog/react';
 
 
 const dividerTextStyle = {
@@ -115,10 +116,7 @@ const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProp
   const [isQrMenuOpen, setIsQrMenuOpen] = useState(false); 
   const [isStatsMenuOpen, setIsStatsMenuOpen] = useState(false); 
   
-<<<<<<< HEAD
   const posthog = usePostHog();
-=======
->>>>>>> e512ad5 (Fix 'access denied' issue)
   const location = useLocation();
 
   const displayName = firstName && surname ? `${firstName} ${surname}` : "User";
@@ -160,11 +158,7 @@ useEffect(() => {
 
   const handleQrMenuClick = () => {
     if (isAdmin) return;
-<<<<<<< HEAD
     posthog.capture('sidebar_nav_clicked', { destination: '/qr' })
-=======
-
->>>>>>> e512ad5 (Fix 'access denied' issue)
     if (isCollapsed) {
       setIsCollapsed(false);
       setIsQrMenuOpen(true);
@@ -176,11 +170,7 @@ useEffect(() => {
 
   const handleStatsMenuClick = () => {
     if (isAdmin) return;
-<<<<<<< HEAD
     posthog.capture('sidebar_nav_clicked', { destination: '/qr' })
-=======
-
->>>>>>> e512ad5 (Fix 'access denied' issue)
     if (isCollapsed) {
       setIsCollapsed(false);
       setIsStatsMenuOpen(true);
@@ -194,7 +184,7 @@ useEffect(() => {
     <Box sx={{ display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0, height: '100vh', width: isCollapsed ? '80px' : '250px', backgroundColor: '#ece0dd', borderRight: '1px solid', borderColor: 'divider', transition: 'width 0.3s ease', zIndex: 1000 }}>
 
       <Box sx={{ padding: '15px', borderTop: '1px solid', borderColor: 'divider'}}>
-        <Stack direction='row' sx={{ alignItems: 'center', spacing: 1, justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
+        <Stack direction='row' alignItems='center' spacing={1} sx={{ justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
           {!isCollapsed && (
             <Stack direction='row' sx={{ flexGrow: 1 }}>
               <Box sx={{ border: '1px solid', borderRadius: '12px', width: '48px', height: '48px', borderColor: colors.strawberryRed }} />
@@ -223,10 +213,6 @@ useEffect(() => {
             onClick={handleQrMenuClick}
             rightIcon={!isCollapsed && !isAdmin ? (isQrMenuOpen ? <ExpandLess /> : <ExpandMore />) : undefined}
           />
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> e512ad5 (Fix 'access denied' issue)
           {!isAdmin && (
             <Collapse in={isQrMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
               <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -252,40 +238,9 @@ useEffect(() => {
               </List>
             </Collapse>
           )}
-<<<<<<< HEAD
-=======
-          <Collapse in={isQrMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {restaurants.map((r) => {
-                const targetHref = `/qr?restaurantId=${r.restaurant_id}`;
-                const isItemActive = location.pathname === '/qr' && location.search.includes(`restaurantId=${r.restaurant_id}`);
-                return (
-                  <SideBarMenuItem 
-                    key={r.restaurant_id}
-                    href={targetHref} 
-                    icon={<RestaurantIcon sx={{ fontSize: '22px' }} />} 
-                    label={r.name} 
-                    collapsed={false} 
-                    isActive={isItemActive}
-                    isSubItem={true}
-                    onClick={() => setRestaurantName(r.name)}
-                  />
-                );
-              })}
-              {restaurants.length === 0 && (
-                 <Typography variant="caption" sx={{ pl: 4, pt: 1, color: 'text.secondary' }}>No restaurants found</Typography>
-              )}
-            </List>
-          </Collapse>
->>>>>>> 2b98dd0 (Improve TableQrPage, SideBar and TableQr componoents)
 
           <SideBarMenuItem
             href={isAdmin ? '/forecast' : undefined}
-=======
-
-          <SideBarMenuItem
-            href={isAdmin ? '/statistics' : undefined}
->>>>>>> e512ad5 (Fix 'access denied' issue)
             icon={<BarChartIcon sx={{ fontSize: '28px' }} />} 
             label='Forecast' 
             collapsed={isCollapsed} 
@@ -293,21 +248,12 @@ useEffect(() => {
             onClick={handleStatsMenuClick}
             rightIcon={!isCollapsed && !isAdmin ? (isStatsMenuOpen ? <ExpandLess /> : <ExpandMore />) : undefined}
           />
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> e512ad5 (Fix 'access denied' issue)
           {!isAdmin && (
             <Collapse in={isStatsMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
               <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {restaurants.map((r) => {
-<<<<<<< HEAD
                   const targetHref = `/forecast?restaurantId=${r.restaurant_id}`; 
                   const isItemActive = location.pathname === '/forecast' && location.search.includes(`restaurantId=${r.restaurant_id}`);
-=======
-                  const targetHref = `/?restaurantId=${r.restaurant_id}`; 
-                  const isItemActive = (location.pathname === '/' || location.pathname === '/dashboard') && location.search.includes(`restaurantId=${r.restaurant_id}`);
->>>>>>> e512ad5 (Fix 'access denied' issue)
                   
                   return (
                     <SideBarMenuItem 
@@ -328,35 +274,6 @@ useEffect(() => {
               </List>
             </Collapse>
           )}
-<<<<<<< HEAD
-=======
-          <Collapse in={isStatsMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {restaurants.map((r) => {
-                const targetHref = `/?restaurantId=${r.restaurant_id}`; 
-                const isItemActive = (location.pathname === '/' || location.pathname === '/dashboard') && location.search.includes(`restaurantId=${r.restaurant_id}`);
-                
-                return (
-                  <SideBarMenuItem 
-                    key={r.restaurant_id}
-                    href={targetHref} 
-                    icon={<ShowChartIcon sx={{ fontSize: '22px' }} />} 
-                    label={r.name} 
-                    collapsed={false} 
-                    isActive={isItemActive}
-                    isSubItem={true}
-                    onClick={() => setRestaurantName(r.name)}
-                  />
-                );
-              })}
-              {restaurants.length === 0 && (
-                 <Typography variant="caption" sx={{ pl: 4, pt: 1, color: 'text.secondary' }}>No restaurants found</Typography>
-              )}
-            </List>
-          </Collapse>
->>>>>>> 2b98dd0 (Improve TableQrPage, SideBar and TableQr componoents)
-=======
->>>>>>> e512ad5 (Fix 'access denied' issue)
 
         </Stack>
       </Box>

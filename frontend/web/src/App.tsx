@@ -22,10 +22,7 @@ function App() {
           <Route element={<Root isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>}>
             <Route path="/" element={<HomePage />} />
             <Route path="/qr" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><TableQRPage /></ProtectedRoute>} />
-<<<<<<< HEAD
             <Route path="/forecast" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><ForecastPage /></ProtectedRoute>} />
-=======
->>>>>>> e512ad5 (Fix 'access denied' issue)
           </Route>
         </Routes>
       </AuthProvider>
