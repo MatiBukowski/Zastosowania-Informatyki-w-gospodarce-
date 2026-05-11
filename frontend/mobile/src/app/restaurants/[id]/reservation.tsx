@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, StyleSheet, Alert } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme/theme';
+import { theme } from '../../../ui/theme/theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '../../../hooks/useRestaurants';
 import { getTablesByRestaurantId } from '../../../api/RestaurantApi';

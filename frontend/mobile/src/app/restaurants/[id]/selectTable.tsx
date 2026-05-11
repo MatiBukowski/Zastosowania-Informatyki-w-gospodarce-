@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '../../../hooks/useRestaurants';
 import { useAuth } from '../../../services/AuthProvider';
-import { theme } from '../../../theme/theme';
+import { theme } from '../../../ui/theme/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { IReservation } from '../../../context/interfaces';
 import { getReservationsByTableId, createReservation } from '../../../api/ReservationAPI';
