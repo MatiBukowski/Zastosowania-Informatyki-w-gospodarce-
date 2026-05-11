@@ -10,8 +10,7 @@ import { getReservationsByTableId } from '@/api/ReservationAPI';
 import { IReservation } from '@/context/interfaces';
 import { useAuth } from '@/services/AuthProvider';
 import { Dimensions } from 'react-native';
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const SECTION_HEIGHT = SCREEN_HEIGHT * 0.4;
+import { usePostHog } from 'posthog-react-native';
 
 const reservation_duration_in_min = 120;
 const durationMs = reservation_duration_in_min * 60 * 1000;
@@ -41,6 +40,7 @@ const RestaurantCreateReservationView = () => {
     const [activeSection, setActiveSection] = useState<'calendar' | 'guests' | 'time'>('calendar');
 
     const { tables, loading: loadingTables } = useGetTablesByRestaurantId(Number(id));
+    const posthog = usePostHog();
 
     // fetch all reservations for tables that fit the guest count
     useEffect(() => {
@@ -116,6 +116,24 @@ const RestaurantCreateReservationView = () => {
             return;
         }
 
+        posthog.capture('restaurant_reservation_params_confirmed', {
+        restaurant_id: id,
+        restaurant_name: name,
+        selected_date: selectedDate,
+        selected_time: selectedTime,
+        guest_count: guests
+        });
+
+        router.push({
+            pathname: "/restaurants/[id]/selectTable",
+            params: {
+                id: id,
+                date: selectedDate,
+                time: selectedTime,
+                guests: guests,
+                name: name
+            }
+        });
         router.push({
             pathname: "/restaurants/[id]/selectTable",
             params: {

@@ -7,7 +7,7 @@ import { theme } from '@/ui/theme/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { IReservation } from '@context/interfaces';
 import { getReservationsByTableId, createReservation } from '@/api/ReservationAPI';
-
+import { usePostHog } from 'posthog-react-native';
 
 const RestaurantSelectTableView = () => {
     const { id, date, time, guests, name } = useLocalSearchParams();
@@ -18,6 +18,7 @@ const RestaurantSelectTableView = () => {
     const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const durationMs = 120 * 60 * 1000; // should be somewhere
+    const posthog = usePostHog();
 
     useEffect(() => {
             const fetchRes = async () => {
@@ -98,7 +99,13 @@ const RestaurantSelectTableView = () => {
 
 
             const response = await createReservation(selectedTableId, reservationData as any);
-
+            posthog.capture('restaurant_reservation_created', {
+                restaurant_id: id,
+                restaurant_name: name,
+                table_id: selectedTableId,
+                reservation_time: localDateTime.toISOString(),
+                guest_count: guests
+            });
 
             alert("Reservation successful!");
             router.dismissAll();
