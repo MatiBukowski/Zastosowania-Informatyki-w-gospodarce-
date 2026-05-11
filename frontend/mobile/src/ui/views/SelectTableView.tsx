@@ -6,17 +6,28 @@ import { useAuth } from '../../services/AuthProvider';
 import { theme } from '../theme/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { getReservationsByTableId, createReservation } from '../../api/ReservationAPI';
+import { usePostHog } from 'posthog-react-native';
 
 
 const SelectTableView = () => {
     const { id, date, time, guests, name } = useLocalSearchParams();
     const { userId } = useAuth();
     const router = useRouter();
+    const posthog = usePostHog();
     const [allReservations, setAllReservations] = useState<any[]>([]);
     const { tables } = useGetTablesByRestaurantId(Number(id));
     const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const durationMs = 120 * 60 * 1000; // should be somewhere
+
+    useEffect(() => {
+        posthog.capture('select_table_view_opened', {
+            restaurant_id: id,
+            date: date,
+            time: time,
+            guests: guests
+        });
+    }, []);
 
     useEffect(() => {
             const fetchRes = async () => {
@@ -93,17 +104,30 @@ const SelectTableView = () => {
                 user_id: Number(userId),
             };
 
-
-
+            posthog.capture('reservation_confirm_clicked', {
+                restaurant_id: id,
+                table_id: selectedTableId,
+                date: date,
+                time: time
+            });
 
             const response = await createReservation(selectedTableId, reservationData as any);
 
+            posthog.capture('reservation_success', {
+                restaurant_id: id,
+                table_id: selectedTableId,
+                reservation_id: response?.reservation_id
+            });
 
             alert("Reservation successful!");
             router.dismissAll();
             router.replace('/');
         } catch (error: any) {
             console.error("Reservation error details:", error.response?.data || error.message);
+            posthog.capture('reservation_failed', {
+                restaurant_id: id,
+                error: error.message
+            });
             alert("Error creating reservation. Check console for details.");
         }
     };

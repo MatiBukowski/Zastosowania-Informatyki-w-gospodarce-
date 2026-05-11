@@ -5,6 +5,7 @@ from src.models import AppUser
 from src.repositories import UserRepository
 from src.exceptions import UserAlreadyExistsException, UserNotFoundException, InvalidCredentialsException
 from src.security import PasswordHandler
+from ..middleware.posthog import posthog
 
 
 class UserService:
@@ -25,6 +26,17 @@ class UserService:
             first_name=user.first_name,
             surname=user.surname
         ))
+
+        posthog.capture(
+            distinct_id=f"user_{new_user.user_id}",
+            event="user_registered",
+            properties={
+                "email": new_user.email,
+                "first_name": new_user.first_name,
+                "surname": new_user.surname
+            }
+        )
+
         return new_user
 
     def login_user(self, user: UserLoginRequest):

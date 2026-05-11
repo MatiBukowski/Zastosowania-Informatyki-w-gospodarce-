@@ -8,7 +8,7 @@ import {useGetTablesByRestaurantId} from '../../hooks/useRestaurants';
 import {getReservationsByTableId} from '../../api/ReservationAPI';
 import {IReservation} from '../../context/interfaces';
 import {useAuth} from '../../services/AuthProvider';
-import RestaurantView from "@/ui/views/RestaurantView";
+import {usePostHog} from 'posthog-react-native';
 
 const reservation_duration_in_min = 120;
 const durationMs = reservation_duration_in_min * 60 * 1000;
@@ -30,12 +30,17 @@ const ReservationView = () => {
     const today = new Date().toISOString().split('T')[0];
     const { userId, accessToken } = useAuth();
     const router = useRouter();
+    const posthog = usePostHog();
 
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [guests, setGuests] = useState<number | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [allRelevantReservations, setAllRelevantReservations] = useState<IReservation[]>([]);
     const [activeSection, setActiveSection] = useState<'calendar' | 'guests' | 'time'>('calendar');
+
+    useEffect(() => {
+        posthog.capture('reservation_view_opened', { restaurant_id: id, restaurant_name: name });
+    }, []);
 
     const { tables } = useGetTablesByRestaurantId(Number(id));
 

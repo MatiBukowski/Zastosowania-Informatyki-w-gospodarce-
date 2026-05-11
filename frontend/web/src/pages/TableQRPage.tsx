@@ -37,6 +37,12 @@ export const TableQRPage = () => {
   }, [restaurantId, posthog]);
 
   const toggleTableSelection = (tableId: number) => {
+    const isNowSelected = !selectedTables.includes(tableId);
+    posthog.capture('table_selection_toggled', {
+        table_id: tableId,
+        is_selected: isNowSelected,
+        restaurant_id: restaurantId
+    });
     setSelectedTables((prev) =>
       prev.includes(tableId) ? prev.filter((id) => id !== tableId) : [...prev, tableId]
     );

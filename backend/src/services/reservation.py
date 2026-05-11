@@ -3,6 +3,7 @@ from ..repositories import ReservationRepository
 from ..schemas import ReservationCreate, ReservationUpdate
 from ..models import Reservation
 from .table import TableService
+from ..middleware.posthog import posthog
 
 class ReservationService:
     def __init__(
@@ -37,7 +38,20 @@ class ReservationService:
             )
             
         new_reservation = Reservation(**data.model_dump())
-        return self.repo.create_reservation(new_reservation)
+        created_reservation = self.repo.create_reservation(new_reservation)
+        
+        posthog.capture(
+            distinct_id=f"user_{created_reservation.user_id}",
+            event="reservation_created",
+            properties={
+                "reservation_id": created_reservation.reservation_id,
+                "table_id": created_reservation.table_id,
+                "reservation_time": str(created_reservation.reservation_time),
+                "num_guests": created_reservation.num_guests
+            }
+        )
+        
+        return created_reservation
 
     def update_reservation(self, reservation_id: int, data: ReservationUpdate):
         reservation = self.repo.get_reservation_by_id(reservation_id)
@@ -63,4 +77,16 @@ class ReservationService:
         for key, value in update_data.items():
             setattr(reservation, key, value)
             
-        return self.repo.update_reservation(reservation)
+        updated_reservation = self.repo.update_reservation(reservation)
+        
+        posthog.capture(
+            distinct_id=f"user_{updated_reservation.user_id}",
+            event="reservation_updated",
+            properties={
+                "reservation_id": updated_reservation.reservation_id,
+                "table_id": updated_reservation.table_id,
+                "status": updated_reservation.status.value if hasattr(updated_reservation.status, 'value') else updated_reservation.status
+            }
+        )
+        
+        return updated_reservation

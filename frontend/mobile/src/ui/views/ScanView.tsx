@@ -6,6 +6,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/ui/theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { usePostHog } from 'posthog-react-native';
 
 const { width, height } = Dimensions.get('window');
 const SCAN_AREA_SIZE = Math.min(width, height) * 0.7;
@@ -208,6 +209,7 @@ export default function ScanView() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const { table, loading, error } = useResolveTableByToken(qrToken || '');
   const hasNavigatedRef = useRef(false);
+  const posthog = usePostHog();
 
   const resetScan = useCallback(() => {
     setScanned(false);
@@ -218,9 +220,16 @@ export default function ScanView() {
   }, []);
 
   useEffect(() => {
+    posthog.capture('scan_view_opened');
+  }, []);
+
+  useEffect(() => {
     const getCameraPermissions = async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === "granted");
+      if (status !== "granted") {
+        posthog.capture('camera_permission_denied');
+      }
     };
 
     getCameraPermissions();
@@ -244,6 +253,10 @@ export default function ScanView() {
   useEffect(() => {
     if (table?.restaurant_id && qrToken && !hasNavigatedRef.current) {
       hasNavigatedRef.current = true;
+      posthog.capture('qr_scan_success', {
+        restaurant_id: table.restaurant_id,
+        table_id: table.table_id
+      });
       router.push(`/restaurants/${table.restaurant_id}/menu`);
     }
   }, [table, qrToken]);
@@ -252,6 +265,7 @@ export default function ScanView() {
     if (error) {
       setScanStatus('error');
       setErrorMessage(error);
+      posthog.capture('qr_scan_failed', { error: error });
       // Reset error after 3 seconds
       const timer = setTimeout(() => {
         resetScan();
@@ -263,6 +277,7 @@ export default function ScanView() {
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
     setScanStatus('loading');
+    posthog.capture('qr_code_detected');
     try {
       const url = new URL(data);
       const token = url.searchParams.get('token');
@@ -272,6 +287,7 @@ export default function ScanView() {
       } else {
         setScanStatus('error');
         setErrorMessage('No token found in QR code');
+        posthog.capture('qr_scan_error', { message: 'No token found' });
         setTimeout(() => {
           resetScan();
         }, 2000);
@@ -279,6 +295,7 @@ export default function ScanView() {
     } catch (error) {
       setScanStatus('error');
       setErrorMessage('Invalid QR code format');
+      posthog.capture('qr_scan_error', { message: 'Invalid format' });
       setTimeout(() => {
         resetScan();
       }, 2000);
