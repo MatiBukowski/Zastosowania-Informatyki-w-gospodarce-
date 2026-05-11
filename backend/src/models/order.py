@@ -2,7 +2,7 @@ from ..db import Base
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
     DateTime,
     ForeignKey,
@@ -49,3 +49,9 @@ class Order(Base):
     status: Mapped[OrderStatusEnum] = mapped_column(SAEnum(OrderStatusEnum, name="order_status_enum"), nullable=False, default=OrderStatusEnum.NEW)
     total_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+
+    items: Mapped[list["OrderItem"]] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

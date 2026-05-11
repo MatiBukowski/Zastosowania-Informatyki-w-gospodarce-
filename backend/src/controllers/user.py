@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import JSONResponse
 
 from src.security import TokenProvider
 from src.services import UserService
 from src.schemas import UserRegisterRequest, UserLoginRequest
 from src.config import settings
+from src.exceptions import RefreshTokenMissing
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -73,7 +74,7 @@ def refresh_token(request: Request, token_provider: TokenProvider = Depends()):
     refresh_token = request.cookies.get("refresh_token")
 
     if not refresh_token:
-        raise HTTPException(status_code=401, detail="Refresh token is missing")
+        raise RefreshTokenMissing(detail="Refresh token is missing")
 
     new_access_token = token_provider.generate_access_token_from_refresh_token(refresh_token)
 

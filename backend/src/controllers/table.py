@@ -1,7 +1,15 @@
 from fastapi import APIRouter, Depends
 from uuid import UUID
-from ..schemas import TableResponse, TableUpdate, ReservationResponse, ReservationCreate
-from ..services import TableService, ReservationService
+from ..schemas import (
+    TableResponse,
+    TableUpdate,
+    ReservationResponse,
+    ReservationCreate,
+    OrderResponse,
+    OrderCreate,
+    OrderDetailsResponse,
+)
+from ..services import TableService, ReservationService, OrderService
 
 
 router = APIRouter(prefix="/tables", tags=["Tables - Public QR Scan"])
@@ -48,3 +56,22 @@ def get_table_reservations_endpoint(table_id: int, service: ReservationService =
 def post_reservation_endpoint(table_id: int, reservation_data: ReservationCreate, service: ReservationService = Depends()):
     reservation_data.table_id = table_id
     return service.create_new_reservation(reservation_data)
+
+
+@router.get(
+    "/{table_id}/orders",
+    summary="Get specific table orders",
+    response_model=list[OrderResponse]
+)
+def get_table_orders_endpoint(table_id: int, service: OrderService = Depends()):
+    return service.get_orders_for_table(table_id)
+
+
+@router.post(
+    "/{table_id}/orders",
+    summary="Create new order for table",
+    response_model=OrderDetailsResponse
+)
+def post_order_endpoint(table_id: int, order_data: OrderCreate, service: OrderService = Depends()):
+    order_data.table_id = table_id
+    return service.create_new_order(order_data)

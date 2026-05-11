@@ -1,7 +1,7 @@
 from ..db import Base
 from decimal import Decimal
 from typing import Optional
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Numeric, Text, ForeignKeyConstraint, CheckConstraint
 
 
@@ -33,3 +33,5 @@ class OrderItem(Base):
     quantity: Mapped[int] = mapped_column(nullable=False)
     unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     customization_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
+
+    order: Mapped["Order"] = relationship(back_populates="items")

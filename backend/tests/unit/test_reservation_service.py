@@ -1,10 +1,10 @@
 import pytest
 from unittest.mock import MagicMock
 from datetime import datetime, timedelta, timezone
-from fastapi import HTTPException, status
 from src.services import ReservationService
 from src.schemas import ReservationCreate, ReservationUpdate
 from src.models import Reservation, ReservationStatusEnum
+from src.exceptions import ReservationNotFound, ReservationTimeConflict, TableNotFound
 
 class TestReservationService:
 
@@ -40,10 +40,8 @@ class TestReservationService:
         service = ReservationService(repo=mock_repo, table_service=MagicMock())
         mock_repo.get_reservation_by_id.return_value = None
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(ReservationNotFound) as exc_info:
             service.get_reservation(reservation_id=1)
-
-        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
         assert "Reservation with id=1 not found" in exc_info.value.detail
 
     def test_create_reservation_success(self):
@@ -82,10 +80,8 @@ class TestReservationService:
         )
         mock_repo.get_overlapping_reservations.return_value = [MagicMock(spec=Reservation)]
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(ReservationTimeConflict) as exc_info:
             service.create_new_reservation(data)
-
-        assert exc_info.value.status_code == status.HTTP_409_CONFLICT
         assert "Table is already reserved" in exc_info.value.detail
         mock_repo.create_reservation.assert_not_called()
 
@@ -100,15 +96,13 @@ class TestReservationService:
             table_id=999,
             reservation_time=datetime.now(timezone.utc) + timedelta(days=1)
         )
-        mock_table_service.validate_table_exists.side_effect = HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+        mock_table_service.validate_table_exists.side_effect = TableNotFound(
             detail="Table not found"
         )
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(TableNotFound) as exc_info:
             service.create_new_reservation(data)
-        
-        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+
         assert "Table not found" in exc_info.value.detail
 
     def test_update_reservation_not_found_raises_404(self):
@@ -117,10 +111,8 @@ class TestReservationService:
         mock_repo.get_reservation_by_id.return_value = None
         update_data = ReservationUpdate(status=ReservationStatusEnum.CONFIRMED)
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(ReservationNotFound) as exc_info:
             service.update_reservation(reservation_id=1, data=update_data)
-
-        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
         assert "Reservation with id=1 not found" in exc_info.value.detail
 
     def test_update_reservation_status_only_success(self):
@@ -152,10 +144,8 @@ class TestReservationService:
 
         update_data = ReservationUpdate(reservation_time=new_time)
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(ReservationTimeConflict) as exc_info:
             service.update_reservation(reservation_id=1, data=update_data)
-
-        assert exc_info.value.status_code == status.HTTP_409_CONFLICT
         mock_repo.update_reservation.assert_not_called()
 
     def test_update_reservation_valid_time_change_success(self):

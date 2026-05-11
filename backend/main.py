@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI, APIRouter
 from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
@@ -11,9 +12,16 @@ from src.controllers import (
     restaurant_router,
     table_router,
     reservation_router,
+    order_router,
     forecast_router,
     reservation_router,
     user_router
+)
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
 )
 
 @asynccontextmanager
@@ -53,6 +61,7 @@ prefix_router.include_router(health_router)
 prefix_router.include_router(restaurant_router)
 prefix_router.include_router(table_router)
 prefix_router.include_router(reservation_router)
+prefix_router.include_router(order_router)
 prefix_router.include_router(user_router)
 prefix_router.include_router(forecast_router)
 app.include_router(prefix_router)

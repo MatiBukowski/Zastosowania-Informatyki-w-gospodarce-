@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
-from fastapi import HTTPException, status
 from src.services import RestaurantService
+from src.exceptions import RestaurantNotFound
 
 
 class TestRestaurantService:
@@ -42,10 +42,9 @@ class TestRestaurantService:
         mock_repo.get_restaurant_by_id.return_value = None
         service = RestaurantService(repo=mock_repo)
 
-        with pytest.raises(HTTPException) as exception:
+        with pytest.raises(RestaurantNotFound) as exception:
             service.get_restaurant(restaurant_id=1)
 
-        assert exception.value.status_code == status.HTTP_404_NOT_FOUND
         assert "Restaurant with id=1 not found" in exception.value.detail
         mock_repo.get_restaurant_by_id.assert_called_once_with(1)
 

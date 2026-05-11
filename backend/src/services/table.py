@@ -1,6 +1,12 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 import uuid
 from ..models import RestaurantTable, TableStatusEnum
+from ..exceptions import (
+    InvalidQrToken,
+    OccupiedTableUpdateNotAllowed,
+    TableAlreadyExists,
+    TableNotFound,
+)
 from ..schemas import TableCreate, TableUpdate
 from ..repositories import TableRepository
 
@@ -12,8 +18,7 @@ class TableService:
     def create_new_table(self, restaurant_id: int, table_data: TableCreate):
         existing_table = self.repo.get_table_by_number(table_data.table_number, restaurant_id)
         if existing_table:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, 
+            raise TableAlreadyExists(
                 detail=f"Table number {table_data.table_number} already exists in this restaurant"
             )
 
@@ -24,16 +29,10 @@ class TableService:
     def update_existing_table(self, table_id: int, table_data: TableUpdate):     
         db_table = self.repo.get_table_by_id(table_id)
         if not db_table:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                detail="Table doesn't exist"
-            )
+            raise TableNotFound(detail="Table doesn't exist")
 
         if db_table.status == TableStatusEnum.OCCUPIED:
-             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot update an occupied table"
-            )
+               raise OccupiedTableUpdateNotAllowed(detail="Cannot update an occupied table")
 
         update_table_data = table_data.model_dump(exclude_unset=True)
         for key, value in update_table_data.items():
@@ -45,10 +44,7 @@ class TableService:
         db_table = self.repo.get_table_by_token(token)
 
         if not db_table:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Invalid or expired QR token"
-            )
+            raise InvalidQrToken(detail="Invalid or expired QR token")
             
         return db_table
 
@@ -57,10 +53,7 @@ class TableService:
         updated_table = self.repo.update_qr_code_token(table_id, new_token)
 
         if not updated_table:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Table with id {table_id} not found"
-            )
+            raise TableNotFound(detail=f"Table with id {table_id} not found")
 
         return updated_table
 
@@ -70,8 +63,5 @@ class TableService:
     def validate_table_exists(self, table_id: int):
         table = self.repo.get_table_by_id(table_id)
         if not table:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Table with id={table_id} not found"
-            )
+            raise TableNotFound(detail=f"Table with id={table_id} not found")
         return table

@@ -1,10 +1,15 @@
 import pytest
 import uuid
 from unittest.mock import MagicMock
-from fastapi import HTTPException, status
 from src.services import TableService
 from src.schemas import TableCreate, TableUpdate
 from src.models import RestaurantTable, TableStatusEnum
+from src.exceptions import (
+    InvalidQrToken,
+    OccupiedTableUpdateNotAllowed,
+    TableAlreadyExists,
+    TableNotFound,
+)
 
 
 class TestTableService:
@@ -33,10 +38,9 @@ class TestTableService:
         service = TableService(repo=mock_repo)
         table_data = TableCreate(table_number=5, capacity=4)
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(TableAlreadyExists) as exc_info:
             service.create_new_table(restaurant_id=1, table_data=table_data)
 
-        assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Table number 5 already exists in this restaurant" in exc_info.value.detail
         mock_repo.create_table.assert_not_called()
 
@@ -68,10 +72,9 @@ class TestTableService:
         service = TableService(repo=mock_repo)
         update_data = TableUpdate(capacity=5)
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(TableNotFound) as exc_info:
             service.update_existing_table(table_id=1, table_data=update_data)
 
-        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
         mock_repo.update_table.assert_not_called()
     
     def test_update_existing_table_occupied_raises_400(self):
@@ -85,10 +88,9 @@ class TestTableService:
         service = TableService(repo=mock_repo)
         update_data = TableUpdate(capacity=5)
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(OccupiedTableUpdateNotAllowed) as exc_info:
             service.update_existing_table(table_id=1, table_data=update_data)
 
-        assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot update an occupied table" in exc_info.value.detail
         mock_repo.update_table.assert_not_called()
 
@@ -120,10 +122,9 @@ class TestTableService:
         mock_repo.get_table_by_token.return_value = None
 
         service = TableService(repo=mock_repo)
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(InvalidQrToken) as exc_info:
             service.resolve_table_by_token(test_token)
 
-        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
         assert exc_info.value.detail == "Invalid or expired QR token"
         
         mock_repo.get_table_by_token.assert_called_once_with(test_token)
@@ -156,8 +157,7 @@ class TestTableService:
         mock_repo.update_qr_code_token.return_value = None
 
         service = TableService(repo=mock_repo)
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(TableNotFound) as exc_info:
             service.regenerate_table_qr_code(table_id=1)
 
-        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
         assert exc_info.value.detail == "Table with id 1 not found"
