@@ -8,6 +8,9 @@ import {
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { usePostHog } from '@posthog/react';
+import { useAuth } from '../services/AuthProvider';
+import { useSearchParams, useOutletContext } from 'react-router-dom';
+
 
 /** Returns the pixel width of a DOM element, updating on resize. */
 function useElementWidth(ref: React.RefObject<HTMLElement>) {
@@ -25,7 +28,16 @@ function useElementWidth(ref: React.RefObject<HTMLElement>) {
   return width;
 }
 
+interface ContextType {
+  restaurantName: string;
+}
+
 export const ForecastPage = () => {
+  const { role } = useAuth();
+  const { restaurantName } = useOutletContext<ContextType>();
+  const [searchParams] = useSearchParams();
+  const urlRestaurantId = searchParams.get('restaurantId');
+
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | ''>('');
   const [forecastData, setForecastData] = useState<IForecastData | null>(null);
@@ -34,11 +46,41 @@ export const ForecastPage = () => {
   const chartWidth = useElementWidth(chartContainerRef);
   const posthog = usePostHog();
 
-  useEffect(() => {
-    getRestaurants().then(setRestaurants).catch(console.error);
-  }, []);
+  const isAdmin = role === "ADMIN";
 
   useEffect(() => {
+    if (isAdmin) {
+      getRestaurants().then(setRestaurants).catch(console.error);
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (!role || isAdmin) return;
+
+    if (urlRestaurantId) {
+      const id = parseInt(urlRestaurantId, 10);
+      setLoading(true);
+      setForecastData(null);
+      getForecast(id)
+        .then((data) => {
+          setForecastData(data);
+          posthog.capture('restaurant_forecast_viewed', {
+            restaurant_id: id,
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          posthog.capture('failed_restaurant_forecast_view', {
+            restaurant_id: id,
+          });
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [role, isAdmin, urlRestaurantId, posthog]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
     if (selectedRestaurantId !== '') {
       setLoading(true);
       setForecastData(null);
@@ -57,7 +99,7 @@ export const ForecastPage = () => {
         })
         .finally(() => setLoading(false));
     }
-  }, [selectedRestaurantId, posthog]);
+  }, [isAdmin, selectedRestaurantId, posthog]);
 
   const chartData = useMemo(() => {
     if (!forecastData) return { xAxis: [], series: [] };
@@ -155,21 +197,29 @@ export const ForecastPage = () => {
         Restaurant Demand Forecast
       </Typography>
 
-      <FormControl fullWidth sx={pageStyles.selectWrapper}>
-        <InputLabel id="restaurant-select-label">Select Restaurant</InputLabel>
-        <Select
-          labelId="restaurant-select-label"
-          value={selectedRestaurantId}
-          label="Select Restaurant"
-          onChange={(e) => setSelectedRestaurantId(e.target.value as number)}
-        >
-          {restaurants.map((r) => (
-            <MenuItem key={r.restaurant_id} value={r.restaurant_id}>
-              {r.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {isAdmin && (
+        <FormControl fullWidth sx={pageStyles.selectWrapper}>
+          <InputLabel id="restaurant-select-label">Select Restaurant</InputLabel>
+          <Select
+            labelId="restaurant-select-label"
+            value={selectedRestaurantId}
+            label="Select Restaurant"
+            onChange={(e) => setSelectedRestaurantId(e.target.value as number)}
+          >
+            {restaurants.map((r) => (
+              <MenuItem key={r.restaurant_id} value={r.restaurant_id}>
+                {r.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
+
+      {!isAdmin && restaurantName && (
+        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
+          {restaurantName}
+        </Typography>
+      )}
 
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>

@@ -31,7 +31,8 @@ app = FastAPI(
     version="0.1.0",
     openapi_url="/api/swagger.json",
     docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    redoc_url="/api/redoc",
+    swagger_ui_parameters={"persistAuthorization": True}
 )
 
 register_exception_handlers(app)

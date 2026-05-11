@@ -151,6 +151,11 @@ erDiagram
     boolean is_active
   }
 
+  RESTAURANT_USER {
+    int user_id FK
+    int restaurant_id FK
+  }
+
   TABLE {
     int table_id PK
     int restaurant_id FK
@@ -198,6 +203,9 @@ erDiagram
     datetime reservation_time
     varchar status
   }
+
+  USER ||--o{ RESTAURANT_USER : "is assigned to"
+  RESTAURANT ||--o{ RESTAURANT_USER : "has staff"
 
   RESTAURANT ||--o{ TABLE : has
   RESTAURANT ||--o{ MENU_ITEM : offers
