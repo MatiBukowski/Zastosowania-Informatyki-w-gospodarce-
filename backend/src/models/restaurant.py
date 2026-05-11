@@ -1,8 +1,11 @@
+from typing import List, TYPE_CHECKING
 from ..db import Base
 from typing import Optional
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Boolean, Text, Enum as SAEnum
 from .enums import CuisineTypeEnum
+if TYPE_CHECKING:
+    from .app_user import AppUser
 
 
 class Restaurant(Base):
@@ -16,3 +19,8 @@ class Restaurant(Base):
     photo: Mapped[Optional[str]] = mapped_column(String(512), nullable=True, default=None)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    admins: Mapped[List["AppUser"]] = relationship(
+        secondary="restaurant_user", 
+        back_populates="managed_restaurants"
+    )
