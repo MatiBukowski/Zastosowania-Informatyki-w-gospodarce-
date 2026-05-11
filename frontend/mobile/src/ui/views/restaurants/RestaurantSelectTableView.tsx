@@ -111,8 +111,10 @@ const RestaurantSelectTableView = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Select Table at {name}</Text>
-            <Text style={styles.subtitle}>{date} at {time}</Text>
+            <View style={styles.paddedSection}>
+                <Text style={styles.title}>Select Table at {name}</Text>
+                <Text style={styles.subtitle}>{date} at {time}</Text>
+            </View>
             {isLoading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -147,7 +149,7 @@ const RestaurantSelectTableView = () => {
                     })}
                 </ScrollView>
 
-                <View style={styles.footer}>
+                <View style={styles.footerContainer}>
                     <TouchableOpacity
                         style={[styles.confirmButton, !selectedTableId && styles.disabledButton]}
                         onPress={handleConfirm}
@@ -165,8 +167,11 @@ const RestaurantSelectTableView = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        //padding: 20,
         //backgroundColor: theme.colors.backgroundColor,
+    },
+    paddedSection: {
+        paddingHorizontal: 20,
     },
     title: {
         fontSize: 20,
@@ -188,6 +193,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
+         paddingHorizontal: 20,
     },
     tableCard: {
         width: '48%',
@@ -244,11 +250,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#ccc',
         opacity: 0.6,
     },
-    footer: {
-        padding: 20,
-        paddingBottom: 40,
-        borderTopWidth: 1,
-        borderTopColor: '#f0f0f0',
-    }
+    footerContainer: {
+        padding: 16,
+        marginBottom: 30,
+        //backgroundColor: '#fff',
+    },
 });
 export default RestaurantSelectTableView;
