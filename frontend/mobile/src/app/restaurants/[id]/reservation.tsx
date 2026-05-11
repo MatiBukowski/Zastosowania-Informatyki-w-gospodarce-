@@ -9,6 +9,9 @@ import { getTablesByRestaurantId } from '../../../api/RestaurantApi';
 import { getReservationsByTableId } from '../../../api/ReservationAPI';
 import { IReservation } from '../../../context/interfaces';
 import { useAuth } from '../../../services/AuthProvider';
+import { Dimensions } from 'react-native';
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const SECTION_HEIGHT = SCREEN_HEIGHT * 0.4;
 
 const reservation_duration_in_min = 120;
 const durationMs = reservation_duration_in_min * 60 * 1000;
@@ -102,7 +105,7 @@ const ReservationScreen = () => {
     };
 
     const timeSlots = generateTimeSlots(0, 23);
-
+    const isComplete = selectedDate && guests && selectedTime;
     const handleReservationSubmit = () => {
         if (!selectedDate || !selectedTime || !guests) {
             Alert.alert("Missing Information", "Please select date, guests and time first.");
@@ -128,7 +131,9 @@ const ReservationScreen = () => {
 
     return (
         <SafeAreaView style={theme.common.screenContainer}>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 120 }}>
 
                 <View style={styles.headerContainer}>
                     <Text style={styles.restaurantName}>{name || "Restaurant"}</Text>
@@ -260,15 +265,23 @@ const ReservationScreen = () => {
                         </View>
                     </View>
                 )}
-
-                {selectedDate && guests && selectedTime && (
-                    <View style={{ padding: 16, marginBottom: 30 }}>
-                        <TouchableOpacity style={styles.confirmButton} onPress={handleReservationSubmit}>
-                            <Text style={styles.confirmButtonText}>{!accessToken ? "Login to Reserve" : "Confirm Reservation"}</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
             </ScrollView>
+
+            <View style={styles.footer}>
+                <TouchableOpacity
+                    style={[
+                        styles.confirmButton,
+                        !isComplete && styles.disabledButton
+                    ]}
+                    onPress={handleReservationSubmit}
+                    disabled={!isComplete}
+                >
+                    <Text style={[styles.confirmButtonText, !isComplete]}>
+                        {isComplete ? "Confirm Reservation" : "Complete Selections"}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
         </SafeAreaView>
     );
 };
@@ -347,10 +360,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         width: '100%',
     },
-    timeSectionContainer: {
-        marginTop: 20,
-        paddingHorizontal: 16,
-    },
     footerContainer: {
         padding: 16,
         marginBottom: 30,
@@ -360,6 +369,10 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'flex-start',
         width: '100%',
+    },
+    defaultItem: {
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.05)',
     },
     gridItem: {
         width: '23%',
@@ -372,6 +385,11 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         marginBottom: 10,
         marginRight: '2%',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
     },
     gridItemText: {
         color: '#333',
@@ -380,18 +398,14 @@ const styles = StyleSheet.create({
     },
     confirmButton: {
         backgroundColor: theme.colors.primary,
-        paddingVertical: 16,
-        borderRadius: 12,
+        paddingVertical: 18,
+        borderRadius: 16,
         alignItems: 'center',
-        justifyContent: 'center',
-        elevation: 4,
+        elevation: 8,
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
     },
     confirmButtonText: {
         color: '#fff',
@@ -409,6 +423,30 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f0f0',
         borderColor: '#eee',
         opacity: 0.5,
+    },
+    footer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingHorizontal: 24,
+        paddingBottom: 40,
+    },
+    timeSectionContainer: {
+        paddingHorizontal: 16,
+        marginTop: 10,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#1A1A1A',
+        marginBottom: 15,
+        marginLeft: 4,
+    },
+    disabledButton: {
+        backgroundColor: '#E0E0E0',
+        elevation: 0,
+        shadowOpacity: 0,
     },
 });
 

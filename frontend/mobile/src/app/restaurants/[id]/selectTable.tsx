@@ -129,7 +129,7 @@ const SelectTableScreen = () => {
                                 activeOpacity={0.7}
                                 style={[
                                     styles.tableCard,
-                                    isSelected && styles.selectedCard
+                                    isSelected ? styles.selectedCard : styles.defaultCard
                                 ]}
                                 onPress={() => setSelectedTableId(table.table_id)}
                             >
@@ -147,9 +147,15 @@ const SelectTableScreen = () => {
                     })}
                 </ScrollView>
 
-                <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-                    <Text style={styles.buttonText}>Confirm My Selection</Text>
-                </TouchableOpacity>
+                <View style={styles.footer}>
+                    <TouchableOpacity
+                        style={[styles.confirmButton, !selectedTableId && styles.disabledButton]}
+                        onPress={handleConfirm}
+                        disabled={!selectedTableId}
+                    >
+                        <Text style={styles.buttonText}>Confirm My Selection</Text>
+                    </TouchableOpacity>
+                </View>
             </>
             )}
         </View>
@@ -160,7 +166,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#fff',
+        //backgroundColor: theme.colors.backgroundColor,
     },
     title: {
         fontSize: 20,
@@ -172,6 +178,11 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: 'gray',
         marginBottom: 20,
+    },
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     tableGrid: {
         flexDirection: 'row',
@@ -187,15 +198,27 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 15,
+        backgroundColor: '#fff',
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    defaultCard: {
+        borderColor: '#eee',
+        borderColor: 'rgba(0,0,0,0.08)',
     },
     selectedCard: {
         borderColor: theme.colors.primary,
         borderWidth: 2,
         backgroundColor: '#fdf2f2',
+        elevation: 6,
     },
     tableNumber: {
         fontSize: 14,
         fontWeight: '600',
+        marginTop: 5,
     },
     capacityText: {
         fontSize: 12,
@@ -203,14 +226,29 @@ const styles = StyleSheet.create({
     },
     confirmButton: {
         backgroundColor: theme.colors.primary,
-        padding: 18,
+        padding: 20,
         borderRadius: 12,
         alignItems: 'center',
+        elevation: 5,
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
     },
     buttonText: {
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 16,
     },
+    disabledButton: {
+        backgroundColor: '#ccc',
+        opacity: 0.6,
+    },
+    footer: {
+        padding: 20,
+        paddingBottom: 40,
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
+    }
 });
 export default SelectTableScreen;
