@@ -3,6 +3,7 @@ import { useSearchParams, useOutletContext } from 'react-router-dom';
 import { getTablesByRestaurantId } from '../api/RestaurantAPI';
 import { TableQR } from '../components/TableQR';
 import { ITable } from '../context/interfaces';
+import { useAuth } from '../services/AuthProvider';
 import { Button, Box, Checkbox, FormControlLabel, Typography, Divider, Stack } from '@mui/material';
 import { usePostHog } from '@posthog/react';
 
@@ -11,6 +12,7 @@ interface ContextType {
 }
 
 export const TableQRPage = () => {
+  const { isAxiosReady } = useAuth();
   const { restaurantName } = useOutletContext<ContextType>();
   const [tables, setTables] = useState<ITable[]>([]);
   const [selectedTables, setSelectedTables] = useState<number[]>([]);
@@ -20,7 +22,7 @@ export const TableQRPage = () => {
   const restaurantId = searchParams.get('restaurantId');
 
   useEffect(() => {
-    if (restaurantId) {
+    if (isAxiosReady && restaurantId) {
       const id = parseInt(restaurantId, 10);
       getTablesByRestaurantId(id)
         .then((data) => { setTables(data); setSelectedTables([]);
@@ -34,7 +36,7 @@ export const TableQRPage = () => {
         posthog.capture('failed_tables_qr_generator_view', { restaurant_id: id });
       });
     }
-  }, [restaurantId, posthog]);
+  }, [restaurantId, posthog, isAxiosReady]);
 
   const toggleTableSelection = (tableId: number) => {
     const isNowSelected = !selectedTables.includes(tableId);

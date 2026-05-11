@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { getRestaurants } from '../api/RestaurantAPI';
 import { getForecast } from '../api/ForecastAPI';
 import { IRestaurant, IForecastData } from '../context/interfaces';
+import { useAuth } from '../services/AuthProvider';
 import {
   Select, MenuItem, FormControl, InputLabel,
   Box, Typography, CircularProgress, Paper, Stack, Divider,
@@ -26,6 +27,7 @@ function useElementWidth(ref: React.RefObject<HTMLElement>) {
 }
 
 export const ForecastPage = () => {
+  const { isAxiosReady } = useAuth();
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | ''>('');
   const [forecastData, setForecastData] = useState<IForecastData | null>(null);
@@ -35,11 +37,13 @@ export const ForecastPage = () => {
   const posthog = usePostHog();
 
   useEffect(() => {
-    getRestaurants().then(setRestaurants).catch(console.error);
-  }, []);
+    if (isAxiosReady) {
+      getRestaurants().then(setRestaurants).catch(console.error);
+    }
+  }, [isAxiosReady]);
 
   useEffect(() => {
-    if (selectedRestaurantId !== '') {
+    if (isAxiosReady && selectedRestaurantId !== '') {
       setLoading(true);
       setForecastData(null);
       getForecast(selectedRestaurantId as number)
@@ -57,7 +61,7 @@ export const ForecastPage = () => {
         })
         .finally(() => setLoading(false));
     }
-  }, [selectedRestaurantId, posthog]);
+  }, [selectedRestaurantId, posthog, isAxiosReady]);
 
   const chartData = useMemo(() => {
     if (!forecastData) return { xAxis: [], series: [] };

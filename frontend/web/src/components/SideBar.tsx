@@ -111,7 +111,7 @@ interface SideBarProps {
 }
 
 const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProps) => {
-  const { accessToken, role, firstName, surname, logout } = useAuth();
+  const { accessToken, role, firstName, surname, logout, isAxiosReady } = useAuth();
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
 
   const [isQrMenuOpen, setIsQrMenuOpen] = useState(false);
@@ -126,22 +126,20 @@ const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProp
   const isStatsActive = location.pathname === '/' || location.pathname.startsWith('/statistics');
 
   useEffect(() => {
-    getRestaurantsByUser().then(setRestaurants).catch(console.error);
-  }, []);
-
-  useEffect(() => {
-  getRestaurantsByUser()
-    .then((data) => {
-      setRestaurants(data);
-      posthog.capture('sidebar_restaurants_loaded', {
-        restaurants_count: data.length
-      });
-    })
-    .catch((err) => {
-      console.error(err);
-      posthog.capture('failed_sidebar_restaurants_load');
-    });
-  }, [posthog]);
+    if (isAxiosReady && accessToken) {
+      getRestaurantsByUser()
+        .then((data) => {
+          setRestaurants(data);
+          posthog.capture('sidebar_restaurants_loaded', {
+            restaurants_count: data.length
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          posthog.capture('failed_sidebar_restaurants_load');
+        });
+    }
+  }, [isAxiosReady, accessToken, posthog]);
 
   useEffect(() => {
     if (isCollapsed) {
