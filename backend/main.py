@@ -10,7 +10,6 @@ from src.controllers import (
     health_router,
     restaurant_router,
     table_router,
-    reservation_router,
     forecast_router,
     reservation_router,
     user_router

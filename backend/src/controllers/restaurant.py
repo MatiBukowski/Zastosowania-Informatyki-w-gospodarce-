@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from models import UserRoleEnum
-from security import RoleChecker
+from ..security import RoleChecker
 from ..schemas import (
     RestaurantPublicResponse,
     SingleRestaurantPublicResponse,
@@ -10,7 +9,7 @@ from ..schemas import (
     TableCreate
 )
 from ..services import RestaurantService, MenuService, TableService
-from ..models import AppUser
+from ..models import AppUser, UserRoleEnum
 from ..auth import get_current_user
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])

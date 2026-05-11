@@ -4,7 +4,8 @@ from src.models import (
     MenuItem,
     AppUser,
     RestaurantTable,
-    RestaurantUser
+    RestaurantUser,
+    UserRoleEnum
 )
 from src.security import PasswordHandler
 
@@ -52,12 +53,13 @@ def create_tables(db, restaurant_id: int = 1):
     db.add(table)
     db.commit()
 
-def create_user(db):
+def create_user(db, role=UserRoleEnum.CUSTOMER):
     user = AppUser(
         email="test@example.com",
         password_hash=PasswordHandler.hash_password("password123"),
         first_name="John",
-        surname="Doe"
+        surname="Doe",
+        role=role
     )
     db.add(user)
     db.commit()

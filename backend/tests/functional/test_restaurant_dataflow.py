@@ -1,3 +1,4 @@
+from src.models import UserRoleEnum
 from tests.utils import (
     create_restaurants,
     create_user,
@@ -53,7 +54,7 @@ class TestRestaurantDataflow:
         assert data["detail"] == "Restaurant with id=100 not found"
     
     def test_get_my_restaurants_flow(self, client, db):
-        user = create_user(db)
+        user = create_user(db, role=UserRoleEnum.MANAGER)
         restaurant = create_restaurants(db)
 
         assign_user_to_restaurant(db, user_id=user.user_id, restaurant_id=restaurant.restaurant_id)
@@ -72,3 +73,18 @@ class TestRestaurantDataflow:
         assert len(data) == 1
         assert data[0]["restaurant_id"] == restaurant.restaurant_id
         assert data[0]["name"] == restaurant.name
+
+    def test_get_my_restaurants_flow_forbidden(self, client, db):
+        user = create_user(db)
+        restaurant = create_restaurants(db)
+
+        assign_user_to_restaurant(db, user_id=user.user_id, restaurant_id=restaurant.restaurant_id)
+
+        login_data = {"email": user.email, "password": "password123"}
+        login_response = client.post("/api/auth/login", json=login_data)
+        token = login_response.json()["access_token"]
+
+        headers = {"Authorization": f"Bearer {token}"}
+        response = client.get("/api/restaurants/my", headers=headers)
+
+        assert response.status_code == 403

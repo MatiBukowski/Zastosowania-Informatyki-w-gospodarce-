@@ -45,9 +45,9 @@ class ReservationService:
             event="reservation_created",
             properties={
                 "reservation_id": created_reservation.reservation_id,
+                "user_id": created_reservation.user_id,
                 "table_id": created_reservation.table_id,
-                "reservation_time": str(created_reservation.reservation_time),
-                "num_guests": created_reservation.num_guests
+                "reservation_time": str(created_reservation.reservation_time)
             }
         )
         
