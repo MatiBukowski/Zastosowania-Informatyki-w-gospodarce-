@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useOutletContext } from 'react-router-dom';
-import { getTablesByRestaurantId } from '../api/RestaurantAPI';
+import { useAuth } from '../services/AuthProvider';
+import { getTablesByRestaurantId, getRestaurants} from '../api/RestaurantAPI';
 import { TableQR } from '../components/TableQR';
-import { ITable } from '../context/interfaces';
-import { Button, Box, Checkbox, FormControlLabel, Typography, Divider, Stack } from '@mui/material';
+import { ITable, IRestaurant } from '../context/interfaces';
+import { Select, MenuItem, FormControl, InputLabel, Button, Box, Checkbox, FormControlLabel, Typography, Divider, Stack } from '@mui/material';
 import { usePostHog } from '@posthog/react';
 
 interface ContextType {
@@ -11,30 +12,68 @@ interface ContextType {
 }
 
 export const TableQRPage = () => {
+  const { role } = useAuth();
   const { restaurantName } = useOutletContext<ContextType>();
   const [tables, setTables] = useState<ITable[]>([]);
   const [selectedTables, setSelectedTables] = useState<number[]>([]);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | ''>('');
+  const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   const posthog = usePostHog();
 
   const [searchParams] = useSearchParams();
-  const restaurantId = searchParams.get('restaurantId');
+  const urlRestaurantId = searchParams.get('restaurantId');
+
+  const isAdmin = role === "ADMIN";
+
+  const currentId = isAdmin ? selectedRestaurantId : urlRestaurantId;
+  const hasNoTables = currentId && tables.length === 0;
 
   useEffect(() => {
-    if (restaurantId) {
-      const id = parseInt(restaurantId, 10);
-      getTablesByRestaurantId(id)
-        .then((data) => { setTables(data); setSelectedTables([]);
-        posthog.capture('tables_qr_generator_viewed', {
-          restaurant_id: id,
-          tables_count: data.length
-        });
-        })
-      .catch((err) => {
-        console.error(err);
-        posthog.capture('failed_tables_qr_generator_view', { restaurant_id: id });
-      });
+    if (isAdmin) {
+      getRestaurants().then(setRestaurants).catch(console.error);
     }
-  }, [restaurantId, posthog]);
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (!role || isAdmin) return;
+
+    if (urlRestaurantId) {
+      const id = parseInt(urlRestaurantId, 10);
+      getTablesByRestaurantId(id)
+        .then((data) => { 
+          setTables(data); 
+          setSelectedTables([]);
+          posthog.capture('tables_qr_generator_viewed', {
+            restaurant_id: id,
+            tables_count: data.length
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          posthog.capture('failed_tables_qr_generator_view', { restaurant_id: id });
+        });
+    }
+  }, [role, isAdmin, urlRestaurantId, posthog]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    if (selectedRestaurantId !== '') {
+      getTablesByRestaurantId(selectedRestaurantId as number)
+        .then((data) => { 
+          setTables(data); 
+          setSelectedTables([]);
+          posthog.capture('tables_qr_generator_viewed', {
+            restaurant_id: selectedRestaurantId,
+            tables_count: data.length
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          posthog.capture('failed_tables_qr_generator_view', { restaurant_id: selectedRestaurantId });
+        });
+    }
+  }, [isAdmin, selectedRestaurantId, posthog]);
 
   const toggleTableSelection = (tableId: number) => {
     setSelectedTables((prev) =>
@@ -50,7 +89,7 @@ export const TableQRPage = () => {
  
   const handleDownloadSelected = () => {
     posthog.capture('qr_batch_download', {
-        restaurant_id: restaurantId,
+        restaurant_id: isAdmin ? selectedRestaurantId : urlRestaurantId,
         selected_count: selectedTables.length
     });
     const buttons = document.querySelectorAll('button');
@@ -66,11 +105,35 @@ export const TableQRPage = () => {
         QR Management Dashboard
       </Typography>
 
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
-        {restaurantName}
-      </Typography>
+      {isAdmin && (
+        <>
+          <FormControl fullWidth sx={pageStyles.selectWrapper}>
+            <InputLabel id="restaurant-select-label">Select Restaurant</InputLabel>
+            <Select
+              labelId="restaurant-select-label"
+              value={selectedRestaurantId}
+              label="Select Restaurant"
+              onChange={(e) => setSelectedRestaurantId(e.target.value as number)}
+            >
+              {restaurants.map((r) => (
+                <MenuItem key={r.restaurant_id} value={r.restaurant_id}>{r.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-      {restaurantId !== '' && tables.length === 0 && (
+          <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
+            {restaurants.find((r) => r.restaurant_id === selectedRestaurantId)?.name || ""}
+          </Typography>
+        </>
+      )}
+
+      {!isAdmin && (
+        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
+          {restaurantName}
+        </Typography>
+      )}
+
+      {hasNoTables && (
         <Typography sx={pageStyles.noTablesText}>No tables found for this restaurant.</Typography>
       )}
 

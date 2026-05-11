@@ -46,7 +46,6 @@ export interface ITable {
   status: TableStatus;
 }
 
-
 export interface ITableQRProps {
   token: string;
   table_number: number;
