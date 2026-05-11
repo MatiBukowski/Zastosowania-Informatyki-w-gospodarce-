@@ -113,15 +113,23 @@ export const TableQRPage = () => {
                     }}
                 >
                   <FormControlLabel
-                    control={<Checkbox checked={isSelected} onChange={() => toggleTableSelection(table.table_id)} size="small" />}
+                    control={<Checkbox 
+                      checked={isSelected} 
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleTableSelection(table.table_id);
+                      }} 
+                      size="small" 
+                    />}
                     label={<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Table #{table.table_number}</Typography>}
                     sx={{ margin: 0 }}
+                    onClick={(e) => e.stopPropagation()}
                   />
                   <Box sx={pageStyles.infoBox(isSelected)}>
-                    <Typography variant="caption" display="block" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                       System ID: <strong>{table.table_id}</strong>
                     </Typography>
-                    <Typography variant="caption" display="block" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                       Capacity: <strong>{table.capacity} guests</strong>
                     </Typography>
                   </Box>

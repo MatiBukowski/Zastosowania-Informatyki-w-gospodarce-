@@ -12,3 +12,7 @@ jwt
 passlib
 bcrypt==4.0.1
 posthog
+numpy
+#timesfm==2.5.0
+torch
+pydantic[email]

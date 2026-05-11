@@ -2,3 +2,5 @@ from .restaurant import RestaurantPublicResponse, SingleRestaurantPublicResponse
 from .menu import MenuItemResponse
 from .table import TableResponse, TableCreate, TableUpdate
 from .reservation import ReservationResponse, ReservationCreate, ReservationUpdate
+from .forecast import ForecastBase
+from .user import UserRegisterRequest, UserLoginRequest

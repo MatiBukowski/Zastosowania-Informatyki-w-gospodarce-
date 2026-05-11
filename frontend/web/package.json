@@ -9,12 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.0.0",
-    "@emotion/styled": "^11.0.0",
-    "@mui/material": "^6.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.0.0",
+    "@mui/material": "^9.0.0",
+    "@mui/x-charts": "^9.0.4",
     "@posthog/react": "^1.9.0",
     "axios": "^1.14.0",
     "frontend-shared": "*",
+    "jwt-decode": "^4.0.0",
     "posthog-js": "^1.371.3",
     "qrcode.react": "^4.2.0",
     "react": "^18.0.0",

@@ -1,0 +1,55 @@
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+from src.exceptions import (
+    InvalidCredentialsException,
+    UserAlreadyExistsException,
+    UserNotFoundException,
+    JWTHandlingException,
+    UnauthorisedUserException,
+    ForecastGeneratingException
+)
+
+def register_exception_handlers(app):
+    @app.exception_handler(UserAlreadyExistsException)
+    async def user_already_exists_exception_handler(request: Request, exc: UserAlreadyExistsException):
+        return JSONResponse(
+                status_code=409,
+                content={"detail": str(exc)}
+        )
+    
+    @app.exception_handler(UserNotFoundException)
+    async def user_not_found_exception_handler(request: Request, exc: UserNotFoundException):
+        return JSONResponse(
+                status_code=404,
+                content={"detail": str(exc)}
+        )
+    
+    @app.exception_handler(InvalidCredentialsException)
+    async def invalid_credentials_exception_handler(request: Request, exc: InvalidCredentialsException):
+        return JSONResponse(
+                status_code=401,
+                content={"detail": str(exc)}
+        )
+    
+    @app.exception_handler(JWTHandlingException)
+    async def jwt_handling_exception_handler(request: Request, exc: JWTHandlingException):
+        return JSONResponse(
+                status_code=500,
+                content={"detail": str(exc)}
+        )
+
+    @app.exception_handler(UnauthorisedUserException)
+    async def unauthorised_user_exception_handler(request: Request, exc: UnauthorisedUserException):
+        return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": str(exc)},
+                headers=exc.headers
+        )
+
+    @app.exception_handler(ForecastGeneratingException)
+    async def forecast_generating_exception(request: Request, exc: ForecastGeneratingException):
+        return JSONResponse(
+                status_code=500,
+                content={"detail": str(exc)},
+        )
