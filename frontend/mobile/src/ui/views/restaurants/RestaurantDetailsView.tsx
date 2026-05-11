@@ -111,7 +111,7 @@ export default function RestaurantDetailsView() {
             restaurant_id: restaurant.restaurant_id,
             restaurant_name: restaurant.name,
           });
-          router.push(`/restaurants/${restaurant.restaurant_id}/tables`);
+          router.push(`/restaurants/${restaurant.restaurant_id}/reservation`);
         }}
       >
         <Text style={styles.buttonTextPrimary}>Reserve a table</Text>

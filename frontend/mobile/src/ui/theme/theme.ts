@@ -1,5 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { colors } from './palette';
+import { Dimensions } from 'react-native';
+const { width } = Dimensions.get('window');
 
 export const theme = {
   // color base
@@ -11,7 +13,7 @@ export const theme = {
     text: colors.carbonBlack,
     accent: colors.tangerineDream,
     white: '#ffffff',
-    gray: '#666666',
+    gray: '#888888',
   },
   spacing: 16,
   borderRadius: 16,
@@ -21,7 +23,7 @@ export const theme = {
     h4: {
       fontSize: 24,
       fontWeight: '800' as const,
-      color: colors.strawberryRed,
+      color: colors.carbonBlack,
     },
     h5: {
       fontSize: 20,
@@ -39,7 +41,7 @@ export const theme = {
     },
     caption: {
       fontSize: 14,
-      color: '#666666',
+      color: colors.gray
     }
   },
 

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { posthogClient } from '@/analitics/analitics';
 import ThemeProvider from "@/ui/theme/ThemeProvider";
+import { AuthProvider } from '../services/AuthProvider';
 
 export default function RootLayout() {
   const pathname = usePathname();
@@ -14,11 +15,13 @@ export default function RootLayout() {
   }, [pathname, params]);
 
   return (
-    <PostHogProvider client={posthogClient}>
-      <ThemeProvider>
-        <Stack screenOptions={{ headerShown: false }}/>
-      </ThemeProvider>
-    </PostHogProvider>
+    <AuthProvider>
+        <PostHogProvider client={posthogClient}>
+          <ThemeProvider>
+            <Stack screenOptions={{ headerShown: false }}/>
+          </ThemeProvider>
+        </PostHogProvider>
+    </AuthProvider>
   );
 }
 

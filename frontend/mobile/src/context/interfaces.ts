@@ -39,17 +39,24 @@ export enum ReservationStatus {
   CANCELED = "CANCELED",
 }
 
-export interface IReservation {
-  reservation_id: number;
+
+// post
+export interface ICreateReservation {
+  reservation_time: string;
   restaurant_id: number;
   table_id: number;
   user_id: number;
-  reservation_time: string;
+}
+
+// get
+export interface IReservation extends ICreateReservation {
+  reservation_id: number;
   status: ReservationStatus;
 }
 
-export interface ICreateReservation {
-  reservation_time: string;
+// patch
+export interface IUpdateReservation extends Partial<ICreateReservation> {
+  status?: ReservationStatus;
 }
 
 export interface IMenuItem {
@@ -79,3 +86,16 @@ export interface ICreateTable {
   table_number: number;
   capacity: number;
 }
+
+// for login purposes
+export interface ILoginRequest {
+    email: string;
+    password: string;
+}
+
+export interface ILoginResponse {
+    access_token: string;
+    token_type: string;
+}
+
+
