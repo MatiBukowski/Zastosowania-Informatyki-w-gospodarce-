@@ -139,10 +139,10 @@ export const TableQRPage = () => {
               onClick={(e) => e.stopPropagation()}
             />
             <Box sx={pageStyles.infoBox(isSelected)}>
-              <Typography variant="caption" display="block" color="text.secondary">
+              <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
                 System ID: <strong>{table.table_id}</strong>
               </Typography>
-              <Typography variant="caption" display="block" color="text.secondary">
+              <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
                 Capacity: <strong>{table.capacity} guests</strong>
               </Typography>
             </Box>
