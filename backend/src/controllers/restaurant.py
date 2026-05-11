@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends
+
+from models import UserRoleEnum
+from security import RoleChecker
 from ..schemas import (
     RestaurantPublicResponse,
     SingleRestaurantPublicResponse,
     MenuItemResponse,
     TableResponse,
-    TableCreate,
-    TableUpdate
+    TableCreate
 )
 from ..services import RestaurantService, MenuService, TableService
 from ..models import AppUser
@@ -27,7 +29,8 @@ def get_restaurants_endpoint(service: RestaurantService = Depends()):
     "/my",
     response_model=list[RestaurantPublicResponse],
     summary="Get restaurants managed by specific user",
-    description="Retrieve a list of available restaurants managed by specific user"
+    description="Retrieve a list of available restaurants managed by specific user",
+    dependencies=[Depends(RoleChecker([UserRoleEnum.ADMIN, UserRoleEnum.MANAGER]))]
 )
 def get_restaurants_endpoint(service: RestaurantService = Depends(), current_user: AppUser = Depends(get_current_user)):
     return service.get_restaurants_for_user(current_user.user_id)

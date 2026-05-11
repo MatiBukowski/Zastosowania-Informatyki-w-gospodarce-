@@ -35,7 +35,6 @@ def register_user(user: UserRegisterRequest, service: UserService = Depends(), t
 
     return response
 
-from fastapi.security import OAuth2PasswordRequestForm
 @router.post(
     "/login",
     summary="Login user",
