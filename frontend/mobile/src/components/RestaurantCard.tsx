@@ -1,10 +1,11 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
+import { Image as ExpoImage } from 'expo-image';
 
 import { IRestaurant, CuisineType } from '@/context/interfaces';
-import { theme } from '@/theme/theme';
+import { theme } from '@/ui/theme/theme';
 
 function CuisineBox({cuisine}: {cuisine: CuisineType}) {
   return (
@@ -19,9 +20,15 @@ function PhotoBox({photoUrl}: {photoUrl: string | null}) {
   return (
     <View>
       {photoUrl ? (
-        <Image style={RestaurantCardStyles.common.photobox} source={{ uri: photoUrl }} />
+        <ExpoImage
+          style={RestaurantCardStyles.common.photo}
+          source={{ uri: photoUrl }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={0}
+        />
       ) : (
-        <View style={RestaurantCardStyles.common.photobox}>
+        <View style={RestaurantCardStyles.common.photoPlaceholder}>
           <MaterialIcons name='image-not-supported' size={32} color={theme.colors.gray} />
         </View>
       )}
@@ -38,7 +45,13 @@ function LocationBox({address}: {address: string}) {
   )
 }
 
-function RestaurantCard({ restaurant }: { restaurant: IRestaurant }) {
+function RestaurantCard({
+  restaurant,
+  pressEnabled = true,
+}: {
+  restaurant: IRestaurant;
+  pressEnabled?: boolean;
+}) {
   const router = useRouter();
   const posthog = usePostHog();
 
@@ -52,11 +65,21 @@ function RestaurantCard({ restaurant }: { restaurant: IRestaurant }) {
   };
 
   return (
-    <View style={theme.common.card}>
-      <TouchableOpacity onPress={handlePress}>
+    <View style={[theme.common.card, RestaurantCardStyles.card]}>
+      <TouchableOpacity
+        activeOpacity={1}
+        delayPressIn={80}
+        onPress={pressEnabled ? handlePress : undefined}
+      >
         <PhotoBox photoUrl={restaurant.photo} />
-        <View style={{ flexDirection: 'column', padding: 8 }}>
-          <Text style={[theme.typography.h5, { color: theme.colors.secondary }]}>{restaurant.name}</Text>
+        <View style={RestaurantCardStyles.content}>
+          <Text
+            style={[theme.typography.h5, { color: theme.colors.secondary }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {restaurant.name}
+          </Text>
           <LocationBox address={restaurant.address} />
           <CuisineBox cuisine={restaurant.cuisine} />
         </View>
@@ -66,20 +89,28 @@ function RestaurantCard({ restaurant }: { restaurant: IRestaurant }) {
 }
 
 const RestaurantCardStyles = {
+  card: {
+    padding: 0,
+    overflow: 'hidden' as const,
+  },
+  content: {
+    flexDirection: 'column' as const,
+    padding: 8,
+  },
   icon: {
     fontSize: 20,
     color: theme.colors.text,
   },
   common: StyleSheet.create({
-    photobox: {
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      width: '100%', 
-      minHeight: 300, 
-      borderWidth: 1, 
-      borderColor: theme.colors.gray, 
-      borderRadius: 8, 
-      padding: 16
+    photo: {
+      width: '100%',
+      height: 200,
+    },
+    photoPlaceholder: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '100%',
+      height: 200,
     },
     locationBox: {
       flexDirection: 'row', 

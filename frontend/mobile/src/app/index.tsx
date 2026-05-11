@@ -1,21 +1,13 @@
-import { View, SafeAreaView } from 'react-native';
-import { theme } from '../theme/theme';
-import RestaurantView from '../views/RestaurantView';
-import { usePostHog } from 'posthog-react-native';
+import { Redirect } from 'expo-router';
 import { useEffect } from 'react';
+import { usePostHog } from 'posthog-react-native';
 
-export default function HomePageMobile() {
+export default function Index() {
   const posthog = usePostHog();
 
   useEffect(() => {
     posthog.capture('app_opened');
   }, []);
-
-  return (
-    <SafeAreaView style={theme.common.screenContainer}>
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <RestaurantView />
-      </View>
-    </SafeAreaView>
-  );
+  
+  return <Redirect href="/tabs/home" />;
 }

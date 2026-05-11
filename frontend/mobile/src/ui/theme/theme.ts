@@ -52,6 +52,7 @@ export const theme = {
       flex: 1,
       backgroundColor: colors.seashell,
       paddingHorizontal: 16,
+      gap: 20,
     },
     card: {
       backgroundColor: '#ffffff',
