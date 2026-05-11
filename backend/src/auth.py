@@ -1,4 +1,4 @@
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from fastapi import Depends
 from src.repositories import UserRepository
@@ -7,9 +7,10 @@ from src.config import settings
 
 jwt_handler = jwt.JWT()
 jwt_key = jwt.jwk.OctetJWK(settings.JWT_SECRET.encode())
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+auth_scheme = HTTPBearer()
 
-def get_current_user(token: str = Depends(oauth2_scheme), repo: UserRepository = Depends()):
+def get_current_user(auth: HTTPAuthorizationCredentials = Depends(auth_scheme), repo: UserRepository = Depends()):
+    token = auth.credentials
     try:
         payload = jwt_handler.decode(token, jwt_key, algorithms=["HS256"])
         user_id = payload.get("user_id")
