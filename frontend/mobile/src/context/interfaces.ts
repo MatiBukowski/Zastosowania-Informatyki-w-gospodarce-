@@ -98,4 +98,43 @@ export interface ILoginResponse {
     token_type: string;
 }
 
+export enum OrderSource {
+  KIOSK = "KIOSK",
+  WEB_APP = "WEB_APP",
+  QR_TABLE = "QR_TABLE",
+}
 
+export enum OrderStatus {
+  NEW = "NEW",
+  PAID = "PAID",
+  IN_PREPARATION = "IN_PREPARATION",
+  READY = "READY",
+  CANCELED = "CANCELED",
+}
+
+export interface IOrderItem {
+  menu_item_id: number;
+  quantity: number;
+  customization_notes: string | null;
+}
+
+export interface ICreateOrder {
+  restaurant_id: number;
+  table_id: number | null;
+  reservation_id: number | null;
+  order_source: OrderSource;
+  items: IOrderItem[];
+}
+
+export interface IOrder {
+  order_id: number;
+  restaurant_id: number;
+  user_id: number | null;
+  table_id: number | null;
+  reservation_id: number | null;
+  order_source: OrderSource;
+  status: OrderStatus;
+  total_amount: number;
+  created_at: string;
+  items: IOrderItem[];
+}
