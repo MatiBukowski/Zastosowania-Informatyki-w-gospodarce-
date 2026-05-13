@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Text, Dimensions, TouchableOpacity } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
-import { useResolveTableByToken } from '@/hooks/useTables';
+import { useResolveTableByToken } from '@/services/hooks/useTables';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/ui/theme/theme';

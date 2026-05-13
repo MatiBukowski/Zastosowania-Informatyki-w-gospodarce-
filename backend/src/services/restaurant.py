@@ -5,9 +5,12 @@ class RestaurantService:
     def __init__(self, repo: RestaurantRepository = Depends()):
         self.repo = repo
 
-    def get_restaurants(self):
-        return self.repo.get_restaurants_list()
-    
+    def get_restaurants(self, search: str = None):
+        if search is not None:
+            return self.repo.get_searched_restaurants_list(search=search)
+        else:
+            return self.repo.get_all_restaurants()
+
     def get_restaurant(self, restaurant_id: int):
         restaurant = self.repo.get_restaurant_by_id(restaurant_id)
         if not restaurant:

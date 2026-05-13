@@ -4,11 +4,10 @@ import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/ui/theme/theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useGetTablesByRestaurantId } from '@/hooks/useRestaurants';
-import { getTablesByRestaurantId } from '@/api/RestaurantApi';
-import { getReservationsByTableId } from '@/api/ReservationAPI';
-import { IReservation } from '@/context/interfaces';
-import { useAuth } from '@/services/AuthProvider';
+import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
+import { getReservationsByTableId } from '@/services/api/ReservationAPI';
+import { IReservation } from '@/services/interfaces/interfaces';
+import { useAuth } from '@/services/providers/AuthProvider';
 import { Dimensions } from 'react-native';
 import { usePostHog } from 'posthog-react-native';
 

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId, postTable } from '../api/RestaurantAPI';
-import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/context/interfaces';
-import { IRestaurantSearchFilterParams } from '@/context/interfaces/restaurants';
+import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId, postTable } from '@/services/api/RestaurantAPI';
+import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/services/interfaces/interfaces';
+import { IRestaurantFilters } from '@/services/interfaces/restaurants';
 
-export function useGetRestaurants(params: IRestaurantSearchFilterParams) {
+export function useGetRestaurants(params: { search?: string }/* & IRestaurantFilters*/) {
   return useQuery({
     queryKey: ['restaurants', params],
     queryFn: () => getRestaurants(params),

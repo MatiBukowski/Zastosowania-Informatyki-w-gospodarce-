@@ -1,12 +1,12 @@
  import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useGetTablesByRestaurantId } from '@/hooks/useRestaurants';
-import { useAuth } from '@/services/AuthProvider';
+import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
+import { useAuth } from '@/services/providers/AuthProvider';
 import { theme } from '@/ui/theme/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { IReservation } from '@context/interfaces';
-import { getReservationsByTableId, createReservation } from '@/api/ReservationAPI';
+import { IReservation } from '@/services/interfaces/interfaces';
+import { getReservationsByTableId, createReservation } from '@/services/api/ReservationAPI';
 import { usePostHog } from 'posthog-react-native';
 
 const RestaurantSelectTableView = () => {

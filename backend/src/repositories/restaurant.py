@@ -9,8 +9,13 @@ class RestaurantRepository:
     def __init__(self, db: Session = Depends(get_session)):
         self.db = db
 
-    def get_restaurants_list(self):
+    def get_all_restaurants(self):
         return self.db.execute(select(Restaurant)).scalars().all()
+    
+    def get_searched_restaurants_list(self, search: str):
+        return self.db.execute(
+            select(Restaurant).where(Restaurant.name.ilike(f"%{search}%"))
+        ).scalars().all()
 
     def get_restaurant_by_id(self, restaurant_id: int) -> Restaurant | None:
         return self.db.execute(

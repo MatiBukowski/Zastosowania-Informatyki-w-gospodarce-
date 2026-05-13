@@ -1,8 +1,8 @@
 import { apiClient } from './API';
-import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/context/interfaces';
-import { IRestaurantSearchFilterParams } from '@/context/interfaces/restaurants';
+import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/services/interfaces/interfaces';
+import { IRestaurantFilters } from '@/services/interfaces/restaurants';
 
-export const getRestaurants = async (params: IRestaurantSearchFilterParams): Promise<IRestaurant[]> => {
+export const getRestaurants = async (params: {search? : string}/* & IRestaurantFilters*/): Promise<IRestaurant[]> => {
   const response = await apiClient.get<IRestaurant[]>('/api/restaurants', { params });
   return response.data;
 };

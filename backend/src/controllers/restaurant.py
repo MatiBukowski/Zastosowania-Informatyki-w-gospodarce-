@@ -20,8 +20,8 @@ router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
     summary="Get all restaurants",
     description="Retrieve a list of all available restaurants"
 )
-def get_restaurants_endpoint(service: RestaurantService = Depends()):
-    return service.get_restaurants()
+def get_restaurants_endpoint(search: str = None, service: RestaurantService = Depends()):
+    return service.get_restaurants(search=search)
 
 @router.get(
     "/my",
