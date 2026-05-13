@@ -14,10 +14,12 @@ const CUISINE_OPTIONS = Object.entries(CuisineType).map(([key, value]) => ({ lab
 
 
 function RestaurantView() {
-  const [filters, setFilters] = useState<IRestaurantFilters>({ cuisine: null });
+  const [filters, setFilters] = useState<{ cuisine: string[] }>({ cuisine: [] });
   const [search, setSearch] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search, 300);
-  const { data: restaurants, isLoading, error } = useGetRestaurants({ search: debouncedSearch, ...filters });
+  const debouncedCuisine = useDebounce(filters.cuisine, 300);
+  // Send cuisine as comma-separated string for API
+  const { data: restaurants, isLoading, error } = useGetRestaurants({ search: debouncedSearch, cuisine: debouncedCuisine.length ? debouncedCuisine.join(',') : undefined });
   const posthog = usePostHog();
   const [isScrolling, setIsScrolling] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
@@ -30,27 +32,51 @@ function RestaurantView() {
     }
   }, [restaurants]);
 
-  const removeFilter = (key: keyof IRestaurantFilters) => {
-    setFilters((prev) => ({ ...prev, [key]: null }));
+  // Remove a single cuisine from the array
+  const removeCuisine = (cuisine: string) => {
+    setFilters(f => ({ ...f, cuisine: f.cuisine.filter(c => c !== cuisine) }));
   };
 
-  const hasAnyFilter = !!filters.cuisine;
+  const hasAnyFilter = filters.cuisine.length > 0;
 
   return (
     <View style={{ flex: 1 }}>
       <SearchBar search={search} setSearch={setSearch} onFilterPress={() => setFilterModalVisible(true)} />
 
       {hasAnyFilter && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ minHeight: 40, marginBottom: 2 }}>
-          {filters.cuisine ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.secondary, borderRadius: 16, paddingHorizontal: 12, marginRight: 8, height: 32 }}>
-              <Text style={{ color: 'white', fontWeight: 'bold', marginRight: 4 }}>Cuisine: {CUISINE_OPTIONS.find(opt => opt.value === filters.cuisine)?.label || filters.cuisine}</Text>
-              <Pressable onPress={() => removeFilter('cuisine')} hitSlop={8}>
-                <Ionicons name="close" size={18} color="white" />
-              </Pressable>
-            </View>
-          ) : null}
-        </ScrollView>
+        <View style={{ minHeight: 40, marginBottom: 12, maxWidth: '100%' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: theme.colors.secondary,
+              borderRadius: 16,
+              paddingLeft: 12,
+              paddingRight: 4,
+              alignSelf: 'flex-start',
+              flexWrap: 'wrap',
+              maxWidth: '100%',
+            }}
+          >
+            <Text
+              style={{
+                color: 'white',
+                fontWeight: 'bold',
+                marginRight: 4,
+                flexShrink: 1,
+                flexWrap: 'wrap',
+                maxWidth: '90%',
+              }}
+              numberOfLines={3}
+              ellipsizeMode="tail"
+            >
+              Cuisine: {filters.cuisine.map(c => CUISINE_OPTIONS.find(opt => opt.value === c)?.label || c).join(', ')}
+            </Text>
+            <Pressable onPress={() => setFilters(f => ({ ...f, cuisine: [] }))} hitSlop={8} style={{ justifyContent: 'center', alignItems: 'center', height: 32, marginRight: 2 }}>
+              <Ionicons name="close" size={18} color="white" />
+            </Pressable>
+          </View>
+        </View>
       )}
 
       {/* Filter Modal */}
@@ -65,22 +91,33 @@ function RestaurantView() {
             <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Filters</Text>
             <Text style={{ marginTop: 8, marginBottom: 4 }}>Cuisine</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 }}>
-              {CUISINE_OPTIONS.map(opt => (
-                <TouchableOpacity
-                  key={opt.value}
-                  style={{
-                    backgroundColor: filters.cuisine === opt.value ? theme.colors.secondary : '#eee',
-                    borderRadius: 16,
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    marginRight: 8,
-                    marginBottom: 8,
-                  }}
-                  onPress={() => setFilters(f => ({ ...f, cuisine: f.cuisine === opt.value ? null : opt.value }))}
-                >
-                  <Text style={{ color: filters.cuisine === opt.value ? 'white' : '#333' }}>{opt.label}</Text>
-                </TouchableOpacity>
-              ))}
+              {CUISINE_OPTIONS.map(opt => {
+                const selected = filters.cuisine.includes(opt.value);
+                return (
+                  <TouchableOpacity
+                    key={opt.value}
+                    style={{
+                      backgroundColor: selected ? theme.colors.secondary : '#eee',
+                      borderRadius: 16,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      marginRight: 8,
+                      marginBottom: 8,
+                    }}
+                    onPress={() => setFilters(f => {
+                      const exists = f.cuisine.includes(opt.value);
+                      return {
+                        ...f,
+                        cuisine: exists
+                          ? f.cuisine.filter(c => c !== opt.value)
+                          : [...f.cuisine, opt.value]
+                      };
+                    })}
+                  >
+                    <Text style={{ color: selected ? 'white' : '#333' }}>{opt.label}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
               <TouchableOpacity onPress={() => setFilterModalVisible(false)} style={{ padding: 8 }}>
@@ -153,8 +190,8 @@ function SearchBar({
   );
 }
 
-function useDebounce(search: string | null, arg1: number) {
-  const [debounced, setDebounced] = useState<string | null>(search);
+function useDebounce(search: string | string[] | null, arg1: number) {
+  const [debounced, setDebounced] = useState<string | string[] | null>(search);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(search), arg1);

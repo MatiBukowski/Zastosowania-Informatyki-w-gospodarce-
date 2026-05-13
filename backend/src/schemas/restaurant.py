@@ -23,5 +23,7 @@ class SingleRestaurantPublicResponse(RestaurantPublicResponse):
 class RestaurantAdminResponse(SingleRestaurantPublicResponse):
     is_active: bool
 
+from typing import List
+
 class RestaurantFilters(BaseModel):
-    cuisine: Optional[CuisineTypeEnum] = None
+    cuisine: Optional[List[CuisineTypeEnum]] = None
