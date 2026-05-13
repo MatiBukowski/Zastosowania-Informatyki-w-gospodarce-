@@ -5,7 +5,7 @@ from ..schemas import (
     MenuItemResponse,
     TableResponse,
     TableCreate,
-    TableUpdate
+    RestaurantFilters
 )
 from ..services import RestaurantService, MenuService, TableService
 from ..models import AppUser
@@ -14,14 +14,21 @@ from ..auth import get_current_user
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
 
+from fastapi import Query
+from fastapi import Depends as FastAPIDepends
+
 @router.get(
     "",
     response_model=list[RestaurantPublicResponse],
     summary="Get all restaurants",
     description="Retrieve a list of all available restaurants"
 )
-def get_restaurants_endpoint(search: str = None, service: RestaurantService = Depends()):
-    return service.get_restaurants(search=search)
+def get_restaurants_endpoint(
+    search: str = Query(None),
+    filters: RestaurantFilters = FastAPIDepends(RestaurantFilters),
+    service: RestaurantService = Depends()
+):
+    return service.get_restaurants(search=search, filters=filters)
 
 @router.get(
     "/my",

@@ -1,4 +1,3 @@
 export interface IRestaurantFilters {
-  city?: string;
-  cuisine?: string;
+  cuisine: string | null;
 }

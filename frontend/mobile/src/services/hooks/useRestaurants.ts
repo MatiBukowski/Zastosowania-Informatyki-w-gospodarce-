@@ -5,7 +5,7 @@ import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRe
 import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/services/interfaces/interfaces';
 import { IRestaurantFilters } from '@/services/interfaces/restaurants';
 
-export function useGetRestaurants(params: { search?: string }/* & IRestaurantFilters*/) {
+export function useGetRestaurants(params: { search: string | null } & IRestaurantFilters) {
   return useQuery({
     queryKey: ['restaurants', params],
     queryFn: () => getRestaurants(params),

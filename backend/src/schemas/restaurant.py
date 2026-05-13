@@ -22,3 +22,6 @@ class SingleRestaurantPublicResponse(RestaurantPublicResponse):
 
 class RestaurantAdminResponse(SingleRestaurantPublicResponse):
     is_active: bool
+
+class RestaurantFilters(BaseModel):
+    cuisine: Optional[CuisineTypeEnum] = None

@@ -1,13 +1,18 @@
 from fastapi import Depends, HTTPException, status
 from ..repositories import RestaurantRepository
+from ..schemas import RestaurantFilters
 
 class RestaurantService:
     def __init__(self, repo: RestaurantRepository = Depends()):
         self.repo = repo
 
-    def get_restaurants(self, search: str = None):
+    def get_restaurants(self, search: str = None, filters: RestaurantFilters = None):
+        if search is not None and filters is not None:
+            return self.repo.get_searched_and_filtered_restaurants_list(search=search, filters=filters)
         if search is not None:
             return self.repo.get_searched_restaurants_list(search=search)
+        if filters is not None:
+            return self.repo.get_filtered_restaurants_list(filters=filters)
         else:
             return self.repo.get_all_restaurants()
 
