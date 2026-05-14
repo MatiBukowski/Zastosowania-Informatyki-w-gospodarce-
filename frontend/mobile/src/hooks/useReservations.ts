@@ -12,7 +12,7 @@ export function useGetReservationsByTableId(tableId: number) {
             setLoading(true);
             try {
                 const data = await getReservationsByTableId(tableId);
-                setReservations(data);
+                setReservations(data.items);
                 setError(null);
             } catch (err: any) {
                 console.error('useGetReservationsByTableId - error:', err);

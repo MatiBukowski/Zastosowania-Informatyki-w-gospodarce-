@@ -64,8 +64,17 @@ class TableService:
 
         return updated_table
 
-    def get_tables_for_restaurant(self, restaurant_id: int):
-        return self.repo.get_tables_by_restaurant_id(restaurant_id)
+    def get_tables_for_restaurant(self, restaurant_id: int, skip: int = 0, limit: int = 10, page: int = 1, size: int = 10):
+        import math
+        from ..schemas import PaginatedResponse
+        items, total = self.repo.get_tables_by_restaurant_id(restaurant_id, skip, limit)
+        return PaginatedResponse(
+            items=items,
+            total=total,
+            page=page,
+            size=size,
+            pages=math.ceil(total / size) if size > 0 else 1
+        )
 
     def validate_table_exists(self, table_id: int):
         table = self.repo.get_table_by_id(table_id)

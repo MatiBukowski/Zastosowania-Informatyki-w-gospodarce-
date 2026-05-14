@@ -51,6 +51,14 @@ export interface ITableQRProps {
   table_number: number;
 }
 
+export interface IPaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
 export interface IForecastData {
   historical: [string, number][];
   forecast: [number[]];

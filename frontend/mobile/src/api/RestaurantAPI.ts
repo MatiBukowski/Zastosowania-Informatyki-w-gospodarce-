@@ -1,9 +1,10 @@
 import { apiClient } from './API';
-import { IRestaurant } from '@/context/interfaces';
-import { getReservationsByTableId, createReservation } from '../../../api/ReservationAPI';
+import { IRestaurant, IMenuItem, ITable, ICreateTable, IPaginatedResponse } from '@/context/interfaces';
 
-export const getRestaurants = async (): Promise<IRestaurant[]> => {
-  const response = await apiClient.get<IRestaurant[]>('/api/restaurants');
+export const getRestaurants = async (page: number = 1, size: number = 10): Promise<IPaginatedResponse<IRestaurant>> => {
+  const response = await apiClient.get<IPaginatedResponse<IRestaurant>>('/api/restaurants', {
+    params: { page, size }
+  });
   return response.data;
 };
 
@@ -13,9 +14,11 @@ export const getRestaurantById = async (id: number): Promise<IRestaurant> => {
 };
 
 
-export const getMenuByRestaurantId = async (id: number): Promise<IMenuItem[]> => {
+export const getMenuByRestaurantId = async (id: number, page: number = 1, size: number = 50): Promise<IPaginatedResponse<IMenuItem>> => {
   try {
-    const response = await apiClient.get(`/api/restaurants/${id}/menu`);
+    const response = await apiClient.get<IPaginatedResponse<IMenuItem>>(`/api/restaurants/${id}/menu`, {
+      params: { page, size }
+    });
     return response.data;
   } catch (error) {
     console.error(`Error fetching menu for restaurant ${id}:`, error);
@@ -24,8 +27,10 @@ export const getMenuByRestaurantId = async (id: number): Promise<IMenuItem[]> =>
 };
 
 
-export const getTablesByRestaurantId = async (restaurantId: number): Promise<ITable[]> => {
-  const response = await apiClient.get<ITable[]>(`/api/restaurants/${restaurantId}/tables`);
+export const getTablesByRestaurantId = async (restaurantId: number, page: number = 1, size: number = 100): Promise<IPaginatedResponse<ITable>> => {
+  const response = await apiClient.get<IPaginatedResponse<ITable>>(`/api/restaurants/${restaurantId}/tables`, {
+    params: { page, size }
+  });
   return response.data;
 };
 

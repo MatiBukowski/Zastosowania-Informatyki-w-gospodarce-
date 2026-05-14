@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from uuid import UUID
-from ..schemas import TableResponse, TableUpdate, ReservationResponse, ReservationCreate
+from ..schemas import TableResponse, TableUpdate, ReservationResponse, ReservationCreate, PaginatedResponse
 from ..services import TableService, ReservationService
+from ..schemas.pagination import get_pagination_params
 
 
 router = APIRouter(prefix="/tables", tags=["Tables - Public QR Scan"])
@@ -35,10 +36,14 @@ def regenerate_qr_code_token(table_id: int, service: TableService = Depends()):
 @router.get(
     "/{table_id}/reservation",
     summary="Get specific table reservations",
-    response_model=list[ReservationResponse]
+    response_model=PaginatedResponse[ReservationResponse]
 )
-def get_table_reservations_endpoint(table_id: int, service: ReservationService = Depends()):
-    return service.get_reservations_for_table(table_id)
+def get_table_reservations_endpoint(
+    table_id: int, 
+    pagination: dict = Depends(get_pagination_params),
+    service: ReservationService = Depends()
+):
+    return service.get_reservations_for_table(table_id, **pagination)
 
 @router.post(
     "/{table_id}/reservation",

@@ -1,8 +1,10 @@
 import { apiClient } from './API';
-import { IReservation, ICreateReservation } from '@/context/interfaces';
+import { IReservation, ICreateReservation, IPaginatedResponse } from '@/context/interfaces';
 
-export const getReservationsByTableId = async (tableId: number): Promise<IReservation[]> => {
-    const response = await apiClient.get<IReservation[]>(`/api/tables/${tableId}/reservation`);
+export const getReservationsByTableId = async (tableId: number, page: number = 1, size: number = 100): Promise<IPaginatedResponse<IReservation>> => {
+    const response = await apiClient.get<IPaginatedResponse<IReservation>>(`/api/tables/${tableId}/reservation`, {
+        params: { page, size }
+    });
     return response.data;
 };
 

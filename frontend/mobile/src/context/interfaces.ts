@@ -98,4 +98,12 @@ export interface ILoginResponse {
     token_type: string;
 }
 
+export interface IPaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
 

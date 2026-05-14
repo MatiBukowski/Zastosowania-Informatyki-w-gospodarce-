@@ -18,7 +18,7 @@ export const HomePage = () => {
     getRestaurants()
       .then(data => {
         console.log("API data:", data);
-        posthog.capture('restaurants_fetched', { count: data.length });
+        posthog.capture('restaurants_fetched', { count: data.items.length });
       })
       .catch(err => {
         console.error("Error connecting to API.", err);

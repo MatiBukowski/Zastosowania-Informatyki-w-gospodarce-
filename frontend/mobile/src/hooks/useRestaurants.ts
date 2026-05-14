@@ -11,7 +11,7 @@ export function useGetRestaurants() {
   useEffect(() => {
     getRestaurants()
       .then(data => {
-        setRestaurants(data);
+        setRestaurants(data.items);
         setLoading(false);
       })
       .catch(err => {
@@ -56,7 +56,7 @@ export function useGetRestaurantMenu(restaurantId: number) {
     getMenuByRestaurantId(restaurantId)
       .then(data => {
 
-        setMenu(data);
+        setMenu(data.items);
         setLoading(false);
       })
       .catch(err => {
@@ -77,7 +77,7 @@ export function useGetTablesByRestaurantId(restaurantId: number) {
   useEffect(() => {
     getTablesByRestaurantId(restaurantId)
         .then(data => {
-          setTables(data);
+          setTables(data.items);
           setLoading(false);
         })
         .catch(err => {

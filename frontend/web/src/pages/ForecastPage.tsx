@@ -50,7 +50,7 @@ export const ForecastPage = () => {
 
   useEffect(() => {
     if (isAdmin && isAxiosReady) {
-      getRestaurants().then(setRestaurants).catch(console.error);
+      getRestaurants().then(res => setRestaurants(res.items)).catch(console.error);
     }
   }, [isAdmin, isAxiosReady]);
 

@@ -30,7 +30,7 @@ export const TableQRPage = () => {
 
   useEffect(() => {
     if (isAdmin && isAxiosReady) {
-      getRestaurants().then(setRestaurants).catch(console.error);
+      getRestaurants().then(res => setRestaurants(res.items)).catch(console.error);
     }
   }, [isAdmin, isAxiosReady]);
 
@@ -40,12 +40,12 @@ export const TableQRPage = () => {
     if (urlRestaurantId) {
       const id = parseInt(urlRestaurantId, 10);
       getTablesByRestaurantId(id)
-        .then((data) => { 
-          setTables(data); 
+        .then((res) => { 
+          setTables(res.items); 
           setSelectedTables([]);
           posthog.capture('tables_qr_generator_viewed', {
             restaurant_id: id,
-            tables_count: data.length
+            tables_count: res.items.length
           });
         })
         .catch((err) => {
@@ -60,12 +60,12 @@ export const TableQRPage = () => {
 
     if (selectedRestaurantId !== '') {
       getTablesByRestaurantId(selectedRestaurantId as number)
-        .then((data) => { 
-          setTables(data); 
+        .then((res) => { 
+          setTables(res.items); 
           setSelectedTables([]);
           posthog.capture('tables_qr_generator_viewed', {
             restaurant_id: selectedRestaurantId,
-            tables_count: data.length
+            tables_count: res.items.length
           });
         })
         .catch((err) => {

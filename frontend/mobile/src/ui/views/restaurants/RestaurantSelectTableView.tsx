@@ -29,8 +29,8 @@ const RestaurantSelectTableView = () => {
                         getReservationsByTableId(t.table_id)
                             .then(data => {
 
-                                console.log(`Table ${t.table_id} API returned:`, data.length, "items");
-                                return data;
+                                console.log(`Table ${t.table_id} API returned:`, data.items.length, "items");
+                                return data.items;
                             })
                             .catch(err => {
                                 console.warn(`Error for table ${t.table_id}:`, err);
