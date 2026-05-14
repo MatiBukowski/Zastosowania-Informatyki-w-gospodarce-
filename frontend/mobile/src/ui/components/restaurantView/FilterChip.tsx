@@ -14,11 +14,18 @@ export const styles = StyleSheet.create({
     paddingVertical: 6,
     marginRight: 8,
     marginBottom: 10,
+    maxWidth: '100%',
   },
   text: {
+    flexShrink: 1,
     color: 'white',
     fontWeight: '600',
     marginRight: 4,
+  },
+  iconContainer: {
+    flexShrink: 0,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
 });
 
@@ -37,7 +44,7 @@ export function FilterChip({
         {label}
       </Text>
 
-      <Pressable onPress={onRemove}>
+      <Pressable onPress={onRemove} style={styles.iconContainer}>
         <Ionicons
           name="close"
           size={16}

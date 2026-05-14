@@ -1,10 +1,8 @@
 import { useState } from 'react';
 
 import { useGetRestaurants } from '@/services/hooks/useRestaurants';
-
-import { useDebounce } from '../useDebounce';
-import { useRestaurantFilters } from './useRestaurantFilters';
-
+import { useDebounce } from '@/services/hooks/generic/useDebounce';
+import { useRestaurantFilters } from '@/services/hooks/restaurants/useRestaurantFilters';
 import { serializeFilters } from '@/utils/restaurantFilters';
 
 export function useRestaurantSearch() {

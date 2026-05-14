@@ -33,42 +33,38 @@ export default function RestaurantScreen() {
       />
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap'}}>
-        {Object.entries(filters).map(
-          ([key, values]) => {
-            if (
-              !Array.isArray(values) ||
-              values.length === 0
-            ) {
-              return null;
-            }
-
-            const config =
-              restaurantFilterConfig[
-                key as keyof typeof restaurantFilterConfig
-              ];
-
-            return values.map(value => {
-              const label =
-                config.options.find(
-                  option =>
-                    option.value === value
-                )?.label || value;
-
-              return (
-                <FilterChip
-                  key={`${key}-${value}`}
-                  label={label}
-                  onRemove={() =>
-                    toggleArrayFilter(
-                      key as any,
-                      value
-                    )
-                  }
-                />
-              );
-            });
+        {Object.entries(filters).map(([key, values]) => {
+          if (!Array.isArray(values) || values.length === 0) {
+            return null;
           }
-        )}
+
+          const config =
+            restaurantFilterConfig[
+              key as keyof typeof restaurantFilterConfig
+            ];
+
+          const resolveLabel = (value: string) =>
+            config.options.find(o => o.value === value)?.label || value;
+
+          const MAX_VISIBLE = 3;
+
+          const resolved = values.map(resolveLabel);
+          const visible = resolved.slice(0, MAX_VISIBLE);
+          const remaining = resolved.length - visible.length;
+
+          const chipLabel =
+            remaining > 0
+              ? `${config.label}: ${visible.join(', ')} +${remaining}`
+              : `${config.label}: ${resolved.join(', ')}`;
+
+          return (
+            <FilterChip
+              key={key}
+              label={chipLabel}
+              onRemove={() => clearFilter(key as any)}
+            />
+          );
+        })}
       </View>
 
       <RestaurantFiltersModal

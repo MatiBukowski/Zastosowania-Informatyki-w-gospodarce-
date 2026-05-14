@@ -28,28 +28,9 @@ export function RestaurantFiltersModal({
       transparent
       animationType="slide"
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.4)',
-          justifyContent: 'center',
-          padding: 24,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: 'white',
-            borderRadius: 24,
-            padding: 24,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: '700',
-              marginBottom: 16,
-            }}
-          >
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 24 }}>
+        <View style={{ backgroundColor: 'white', borderRadius: 24, padding: 24}}>
+          <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 16 }}>
             Filters
           </Text>
 
@@ -63,21 +44,11 @@ export function RestaurantFiltersModal({
 
             return (
               <View key={key}>
-                <Text
-                  style={{
-                    fontWeight: '600',
-                    marginBottom: 12,
-                  }}
-                >
+                <Text style={{ fontWeight: '600', marginBottom: 12 }}>
                   {config.label}
                 </Text>
 
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                  }}
-                >
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap'}}>
                   {config.options.map(option => {
                     const selected =
                       selectedValues.includes(
@@ -104,16 +75,10 @@ export function RestaurantFiltersModal({
                           paddingVertical: 8,
 
                           marginRight: 8,
-                          marginBottom: 8,
+                          marginBottom: 8
                         }}
                       >
-                        <Text
-                          style={{
-                            color: selected
-                              ? 'white'
-                              : '#333',
-                          }}
-                        >
+                        <Text style={{ color: selected? 'white': '#333'}}>
                           {option.label}
                         </Text>
                       </TouchableOpacity>
@@ -124,19 +89,8 @@ export function RestaurantFiltersModal({
             );
           })}
 
-          <TouchableOpacity
-            onPress={onClose}
-            style={{
-              alignSelf: 'flex-end',
-              marginTop: 16,
-            }}
-          >
-            <Text
-              style={{
-                color: theme.colors.primary,
-                fontWeight: '700',
-              }}
-            >
+          <TouchableOpacity onPress={onClose} style={{ alignSelf: 'flex-end', marginTop: 16}}>
+            <Text style={{ color: theme.colors.primary, fontWeight: '700'}}>
               Done
             </Text>
           </TouchableOpacity>
