@@ -107,6 +107,13 @@ const RestaurantCreateReservationView = () => {
 
     const handleReservationSubmit = () => {
         if (!selectedDate || !selectedTime || !guests) {
+            posthog.capture('restaurant_reservation_params_missing', {
+                restaurant_id: id,
+                restaurant_name: name,
+                has_date: !!selectedDate,
+                has_time: !!selectedTime,
+                has_guests: !!guests
+            });
             Alert.alert("Missing Information", "Please select date, guests and time first.");
             return;
         }

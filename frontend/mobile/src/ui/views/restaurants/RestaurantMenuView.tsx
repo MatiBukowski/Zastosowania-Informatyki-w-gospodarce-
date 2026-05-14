@@ -3,10 +3,27 @@ import { useLocalSearchParams, Stack } from 'expo-router';
 
 import { useGetRestaurantMenu } from '@/hooks/useRestaurants';
 import { theme } from '@/ui/theme/theme';
+import { usePostHog } from 'posthog-react-native';
+import { useEffect } from 'react';
 
 export default function RestaurantMenuView() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { menu, loading, error } = useGetRestaurantMenu(Number(id));
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    if (menu && menu.length > 0) {
+      posthog.capture('restaurant_menu_viewed', {
+        restaurant_id: id,
+        item_count: menu.length
+      });
+    } else if (error || (menu && menu.length === 0)) {
+        posthog.capture('restaurant_menu_fetch_failed', {
+            restaurant_id: id,
+            error: error || 'Empty menu'
+        });
+    }
+  }, [menu, error]);
 
   if (loading) {
     return (

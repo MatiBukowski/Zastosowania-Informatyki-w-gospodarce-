@@ -111,6 +111,14 @@ const RestaurantSelectTableView = () => {
             router.dismissAll();
             router.replace('/');
         } catch (error: any) {
+            const errorMessage = error.response?.data?.detail || error.message || "Unknown error";
+            posthog.capture('restaurant_reservation_failed', {
+                restaurant_id: id,
+                restaurant_name: name,
+                table_id: selectedTableId,
+                error: errorMessage,
+                guest_count: guests
+            });
             console.error("Reservation error details:", error.response?.data || error.message);
             alert("Error creating reservation. Check console for details.");
         }

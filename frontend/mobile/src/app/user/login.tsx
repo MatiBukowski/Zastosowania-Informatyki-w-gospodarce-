@@ -3,19 +3,24 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } fro
 import { useAuth } from '../../services/AuthProvider';
 import { useRouter } from 'expo-router';
 import { theme } from '../../ui/theme/theme';
+import { usePostHog } from 'posthog-react-native';
 
 const LoginScreen = () => {
     const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const router = useRouter();
+    const posthog = usePostHog();
 
     const handleLogin = async () => {
         try {
             await login({ email, password });
+            posthog.capture('login_success', { email });
             console.log("Logged in successfully!");
             router.back();
-        } catch (error) {
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.detail || "Login error! Please check your details.";
+            posthog.capture('login_failed', { email, error: errorMessage });
             alert("Login error! Please check your details.");
         }
     };
