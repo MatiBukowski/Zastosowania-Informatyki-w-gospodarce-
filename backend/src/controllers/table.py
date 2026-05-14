@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from uuid import UUID
 from ..schemas import TableResponse, TableUpdate, ReservationResponse, ReservationCreate, PaginatedResponse
 from ..services import TableService, ReservationService
 from ..schemas.pagination import get_pagination_params
-
+from ..middleware.rate_limit import limiter
 
 router = APIRouter(prefix="/tables", tags=["Tables - Public QR Scan"])
 
@@ -30,7 +30,8 @@ def update_table_endpoint(table_id: int, table_data: TableUpdate, service: Table
     summary="Regenerate QR code for existing table",
     response_model=TableResponse
 )
-def regenerate_qr_code_token(table_id: int, service: TableService = Depends()):
+@limiter.limit("3/minute")
+def regenerate_qr_code_token(request: Request, table_id: int, service: TableService = Depends()):
     return service.regenerate_table_qr_code(table_id)
 
 @router.get(
@@ -50,6 +51,7 @@ def get_table_reservations_endpoint(
     summary="Create new reservation for table",
     response_model=ReservationResponse
 )
-def post_reservation_endpoint(table_id: int, reservation_data: ReservationCreate, service: ReservationService = Depends()):
+@limiter.limit("5/minute")
+def post_reservation_endpoint(request: Request, table_id: int, reservation_data: ReservationCreate, service: ReservationService = Depends()):
     reservation_data.table_id = table_id
     return service.create_new_reservation(reservation_data)

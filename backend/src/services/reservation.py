@@ -45,6 +45,13 @@ class ReservationService:
                 detail="Table is already reserved for this time slot (2h window collision)."
             )
             
+        active_count = self.repo.count_active_reservations_for_user(data.user_id)
+        if active_count >= 15:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="User has reached the maximum allowed number of active reservations (15)."
+            )
+            
         new_reservation = Reservation(**data.model_dump())
         return self.repo.create_reservation(new_reservation)
 

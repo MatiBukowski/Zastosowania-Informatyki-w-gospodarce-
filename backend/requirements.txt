@@ -16,3 +16,4 @@ numpy
 #timesfm==2.5.0
 torch
 pydantic[email]
+slowapi

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from ..schemas import (
     RestaurantPublicResponse,
     SingleRestaurantPublicResponse,
@@ -12,6 +12,7 @@ from ..services import RestaurantService, MenuService, TableService
 from ..models import AppUser
 from ..auth import get_current_user
 from ..schemas.pagination import get_pagination_params
+from ..middleware.rate_limit import limiter
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
@@ -68,7 +69,8 @@ def get_menu_endpoint(
     summary="Create new table",
     response_model=TableResponse
 )
-def post_table_endpoint(restaurant_id: int, table_data: TableCreate, service: TableService = Depends()):
+@limiter.limit("2/minute")
+def post_table_endpoint(request: Request, restaurant_id: int, table_data: TableCreate, service: TableService = Depends()):
     return service.create_new_table(restaurant_id, table_data)
 
 @router.get(

@@ -19,6 +19,17 @@ class ReservationRepository:
         return self.db.execute(
             select(Reservation).where(Reservation.reservation_id == reservation_id)
         ).scalar_one_or_none()
+        
+    def count_active_reservations_for_user(self, user_id: int) -> int:
+        now = datetime.now()
+        query = select(func.count()).select_from(Reservation).where(
+            and_(
+                Reservation.user_id == user_id,
+                Reservation.status != ReservationStatusEnum.CANCELED,
+                Reservation.reservation_time >= now
+            )
+        )
+        return self.db.execute(query).scalar_one()
 
     def create_reservation(self, reservation: Reservation) -> Reservation:
         self.db.add(reservation)

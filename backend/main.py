@@ -5,6 +5,10 @@ from starlette.middleware.cors import CORSMiddleware
 from src.config import settings
 from src.services import run_seed
 from src.middleware import posthog, posthog_middleware, http_exception_handler
+from src.middleware.rate_limit import limiter
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from src.exception_handler import register_exception_handlers
 from src.controllers import (
     health_router,
@@ -37,6 +41,10 @@ app = FastAPI(
 
 register_exception_handlers(app)
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
