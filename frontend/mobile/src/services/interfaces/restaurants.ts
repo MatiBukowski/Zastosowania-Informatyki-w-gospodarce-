@@ -1,3 +1,5 @@
+import { CuisineType } from "@/services/interfaces/interfaces";
+
 export interface IRestaurantFilters {
-  cuisine: string | null;
+  cuisine?: CuisineType[];
 }
