@@ -110,7 +110,7 @@ interface SideBarProps {
 }
 
 const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProps) => {
-  const { accessToken, role, firstName, surname, logout } = useAuth();
+  const { accessToken, role, firstName, surname, logout, isAxiosReady } = useAuth();
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   
   const [isQrMenuOpen, setIsQrMenuOpen] = useState(false); 
@@ -129,7 +129,7 @@ const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProp
 
 useEffect(() => {
     const fetchRestaurants = async () => {
-      if (!role) return;
+      if (!role || !isAxiosReady) return;
       console.log("Fetching restaurants for role: ", role);
       try {
         let data;
@@ -147,7 +147,7 @@ useEffect(() => {
     };
 
     fetchRestaurants();
-  }, [role]);
+  }, [role, isAxiosReady, isAdmin]);
 
   useEffect(() => {
     if (isCollapsed) {

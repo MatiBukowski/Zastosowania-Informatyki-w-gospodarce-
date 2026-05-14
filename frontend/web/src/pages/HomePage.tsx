@@ -4,14 +4,16 @@ import { getRestaurants } from '../api/RestaurantAPI';
 import { useEffect } from 'react';
 import { usePostHog } from '@posthog/react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../services/AuthProvider';
 
 export const HomePage = () => {
   const info = getProjectInfo(); // name and version
   const posthog = usePostHog();
+  const { isAxiosReady } = useAuth();
   
-
   // console testing API connection 
   useEffect(() => {
+    if (!isAxiosReady) return;
     console.log("Connecting to API...");
     getRestaurants()
       .then(data => {

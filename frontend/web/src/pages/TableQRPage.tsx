@@ -12,7 +12,7 @@ interface ContextType {
 }
 
 export const TableQRPage = () => {
-  const { role } = useAuth();
+  const { role, isAxiosReady } = useAuth();
   const { restaurantName } = useOutletContext<ContextType>();
   const [tables, setTables] = useState<ITable[]>([]);
   const [selectedTables, setSelectedTables] = useState<number[]>([]);
@@ -29,13 +29,13 @@ export const TableQRPage = () => {
   const hasNoTables = currentId && tables.length === 0;
 
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin && isAxiosReady) {
       getRestaurants().then(setRestaurants).catch(console.error);
     }
-  }, [isAdmin]);
+  }, [isAdmin, isAxiosReady]);
 
   useEffect(() => {
-    if (!role || isAdmin) return;
+    if (!role || isAdmin || !isAxiosReady) return;
 
     if (urlRestaurantId) {
       const id = parseInt(urlRestaurantId, 10);
@@ -53,10 +53,10 @@ export const TableQRPage = () => {
           posthog.capture('failed_tables_qr_generator_view', { restaurant_id: id });
         });
     }
-  }, [role, isAdmin, urlRestaurantId, posthog]);
+  }, [role, isAdmin, urlRestaurantId, posthog, isAxiosReady]);
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isAdmin || !isAxiosReady) return;
 
     if (selectedRestaurantId !== '') {
       getTablesByRestaurantId(selectedRestaurantId as number)
@@ -73,7 +73,7 @@ export const TableQRPage = () => {
           posthog.capture('failed_tables_qr_generator_view', { restaurant_id: selectedRestaurantId });
         });
     }
-  }, [isAdmin, selectedRestaurantId, posthog]);
+  }, [isAdmin, selectedRestaurantId, posthog, isAxiosReady]);
 
   const toggleTableSelection = (tableId: number) => {
     setSelectedTables((prev) =>
