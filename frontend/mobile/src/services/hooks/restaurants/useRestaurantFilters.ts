@@ -4,7 +4,7 @@ import { IRestaurantFilters } from '@/services/interfaces/restaurants';
 
 export function useRestaurantFilters() {
   const [filters, setFilters] = useState<IRestaurantFilters>({
-    cuisine: [],
+    cuisine: null,
   });
 
   function toggleArrayFilter<
@@ -17,9 +17,11 @@ export function useRestaurantFilters() {
 
       return {
         ...prev,
-        [key]: exists
-          ? current.filter(v => v !== value)
-          : [...current, value],
+        [key]: exists ? (
+          current.filter(v => v !== value).length > 0
+            ? current.filter(v => v !== value)
+            : null
+        ) : [...current, value],
       };
     });
   }
@@ -29,13 +31,13 @@ export function useRestaurantFilters() {
   ) {
     setFilters(prev => ({
       ...prev,
-      [key]: [],
+      [key]: null,
     }));
   }
 
   function clearAllFilters() {
     setFilters({
-      cuisine: [],
+      cuisine: null,
     });
   }
 

@@ -15,7 +15,9 @@ export const restaurantFilterConfig = {
 export function serializeFilters(filters: IRestaurantFilters) {
   return Object.entries(filters).reduce(
     (acc, [key, value]) => {
-      if (!value) {
+      if (
+        value == null || (Array.isArray(value) && value.length === 0)
+      ) {
         return acc;
       }
 
