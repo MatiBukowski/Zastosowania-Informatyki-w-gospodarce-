@@ -1,5 +1,5 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from pydantic import BaseModel, ConfigDict, field_validator
+from typing import Optional, List
 from ..models.enums import CuisineTypeEnum
 
 
@@ -23,7 +23,21 @@ class SingleRestaurantPublicResponse(RestaurantPublicResponse):
 class RestaurantAdminResponse(SingleRestaurantPublicResponse):
     is_active: bool
 
-from typing import List
 
 class RestaurantFilters(BaseModel):
     cuisine: Optional[List[CuisineTypeEnum]] = None
+
+
+class RestaurantFilterQuery(BaseModel):
+    cuisine: Optional[List[str]] = None
+
+    @field_validator("cuisine", mode="before")
+    def split_csv_list(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = [v]
+        out = []
+        for item in v:
+            out.extend([x.strip() for x in item.split(",") if x.strip()])
+        return out or None

@@ -9,19 +9,22 @@ class RestaurantRepository:
     def __init__(self, db: Session = Depends(get_session)):
         self.db = db
 
+    def _apply_filters(self, query, filters):
+        if filters.cuisine:
+            query = query.where(Restaurant.cuisine.in_(filters.cuisine))
+        return query
+
     def get_all_restaurants(self):
         return self.db.execute(select(Restaurant)).scalars().all()
     
     def get_searched_and_filtered_restaurants_list(self, search: str, filters):
         query = select(Restaurant).where(Restaurant.name.ilike(f"%{search}%"))
-        if filters.cuisine:
-            query = query.where(Restaurant.cuisine.in_(filters.cuisine))
+        query = self._apply_filters(query, filters)
         return self.db.execute(query).scalars().all()
 
     def get_filtered_restaurants_list(self, filters):
         query = select(Restaurant)
-        if filters.cuisine:
-            query = query.where(Restaurant.cuisine.in_(filters.cuisine))
+        query = self._apply_filters(query, filters)
         return self.db.execute(query).scalars().all()
     
     def get_searched_restaurants_list(self, search: str):

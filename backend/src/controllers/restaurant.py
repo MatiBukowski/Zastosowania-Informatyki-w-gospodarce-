@@ -1,22 +1,25 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+
 from ..schemas import (
     RestaurantPublicResponse,
     SingleRestaurantPublicResponse,
     MenuItemResponse,
     TableResponse,
     TableCreate,
-    RestaurantFilters
+    RestaurantFilterQuery
 )
 from ..services import RestaurantService, MenuService, TableService
 from ..models import AppUser
-from ..models.enums import CuisineTypeEnum
 from ..auth import get_current_user
 
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
 
-from fastapi import Query
-from fastapi import Depends as FastAPIDepends
+def get_restaurant_filter_query(
+    cuisine: list[str] | None = Query(None),
+) -> RestaurantFilterQuery:
+    return RestaurantFilterQuery(cuisine=cuisine)
+
 
 @router.get(
     "",
@@ -26,18 +29,11 @@ from fastapi import Depends as FastAPIDepends
 )
 def get_restaurants_endpoint(
     search: str = Query(None),
-    cuisine: list[str] = Query(None),
+    filters: RestaurantFilterQuery = Depends(get_restaurant_filter_query),
     service: RestaurantService = Depends()
 ):
-    cuisine_enum = None
-    if cuisine:
-        # Handle both repeated and comma-separated values
-        cuisine_flat = []
-        for c in cuisine:
-            cuisine_flat.extend([x.strip() for x in c.split(",") if x.strip()])
-        cuisine_enum = [CuisineTypeEnum(c) for c in cuisine_flat]
-    filters = RestaurantFilters(cuisine=cuisine_enum)
     return service.get_restaurants(search=search, filters=filters)
+
 
 @router.get(
     "/my",
