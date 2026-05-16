@@ -14,23 +14,13 @@ class RestaurantRepository:
             query = query.where(Restaurant.cuisine.in_(filters.cuisine))
         return query
 
-    def get_all_restaurants(self):
-        return self.db.execute(select(Restaurant)).scalars().all()
-    
-    def get_searched_and_filtered_restaurants_list(self, search: str, filters):
-        query = select(Restaurant).where(Restaurant.name.ilike(f"%{search}%"))
-        query = self._apply_filters(query, filters)
-        return self.db.execute(query).scalars().all()
-
-    def get_filtered_restaurants_list(self, filters):
+    def get_restaurants(self, search=None, filters=None):
         query = select(Restaurant)
-        query = self._apply_filters(query, filters)
+        if search:
+            query = query.where(Restaurant.name.ilike(f"%{search}%"))
+        if filters:
+            query = self._apply_filters(query, filters)
         return self.db.execute(query).scalars().all()
-    
-    def get_searched_restaurants_list(self, search: str):
-        return self.db.execute(
-            select(Restaurant).where(Restaurant.name.ilike(f"%{search}%"))
-        ).scalars().all()
 
     def get_restaurant_by_id(self, restaurant_id: int) -> Restaurant | None:
         return self.db.execute(
