@@ -1,27 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId, postTable } from '../api/RestaurantAPI';
+import { fetchAll, fetchNext } from '../api/PaginationHelper';
 import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/context/interfaces';
 
 export function useGetRestaurants() {
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    getRestaurants()
-      .then(data => {
-        setRestaurants(data.items);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('useGetRestaurants - error:', err);
-        setError(err.message);
-        setLoading(false);
-      });
+  const loadRestaurants = useCallback(async (pageNum: number) => {
+    setLoading(true);
+    try {
+      const response = await fetchNext((p, s) => getRestaurants(p, s), pageNum, 10);
+      setRestaurants(prev => pageNum === 1 ? response.items : [...prev, ...response.items]);
+      setHasMore(response.page < response.pages);
+      setPage(response.page);
+      setLoading(false);
+    } catch (err: any) {
+      console.error('useGetRestaurants - error:', err);
+      setError(err.message);
+      setLoading(false);
+    }
   }, []);
 
-  return { restaurants, loading, error };
+  useEffect(() => {
+    loadRestaurants(1);
+  }, [loadRestaurants]);
+
+  const fetchMore = () => {
+    if (!loading && hasMore) {
+      loadRestaurants(page + 1);
+    }
+  };
+
+  return { restaurants, loading, error, fetchMore, hasMore };
 }
 
 export function useGetRestaurantById(restaurantId: number) {
@@ -53,10 +68,10 @@ export function useGetRestaurantMenu(restaurantId: number) {
   useEffect(() => {
     if (!restaurantId) return;
 
-    getMenuByRestaurantId(restaurantId)
+    fetchAll((page, size) => getMenuByRestaurantId(restaurantId, page, size))
       .then(data => {
 
-        setMenu(data.items);
+        setMenu(data);
         setLoading(false);
       })
       .catch(err => {
@@ -75,9 +90,9 @@ export function useGetTablesByRestaurantId(restaurantId: number) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getTablesByRestaurantId(restaurantId)
+    fetchAll((page, size) => getTablesByRestaurantId(restaurantId, page, size))
         .then(data => {
-          setTables(data.items);
+          setTables(data);
           setLoading(false);
         })
         .catch(err => {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getReservationsByTableId, createReservation, getReservationById, updateReservation } from '../api/ReservationAPI';
+import { fetchAll } from '../api/PaginationHelper';
 import { IReservation, ICreateReservation, IUpdateReservation } from '../context/interfaces';
 
 export function useGetReservationsByTableId(tableId: number) {
@@ -11,8 +12,8 @@ export function useGetReservationsByTableId(tableId: number) {
             if (!tableId) return;
             setLoading(true);
             try {
-                const data = await getReservationsByTableId(tableId);
-                setReservations(data.items);
+                const data = await fetchAll((page, size) => getReservationsByTableId(tableId, page, size));
+                setReservations(data);
                 setError(null);
             } catch (err: any) {
                 console.error('useGetReservationsByTableId - error:', err);

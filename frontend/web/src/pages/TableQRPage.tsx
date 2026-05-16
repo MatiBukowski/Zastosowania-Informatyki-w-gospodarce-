@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useOutletContext } from 'react-router-dom';
 import { useAuth } from '../services/AuthProvider';
 import { getTablesByRestaurantId, getRestaurants} from '../api/RestaurantAPI';
+import { fetchAll } from '../api/PaginationHelper';
 import { TableQR } from '../components/TableQR';
 import { ITable, IRestaurant } from '../context/interfaces';
 import { Select, MenuItem, FormControl, InputLabel, Button, Box, Checkbox, FormControlLabel, Typography, Divider, Stack } from '@mui/material';
@@ -30,7 +31,7 @@ export const TableQRPage = () => {
 
   useEffect(() => {
     if (isAdmin && isAxiosReady) {
-      getRestaurants().then(res => setRestaurants(res.items)).catch(console.error);
+      fetchAll((page, size) => getRestaurants(page, size)).then(res => setRestaurants(res)).catch(console.error);
     }
   }, [isAdmin, isAxiosReady]);
 
@@ -39,13 +40,13 @@ export const TableQRPage = () => {
 
     if (urlRestaurantId) {
       const id = parseInt(urlRestaurantId, 10);
-      getTablesByRestaurantId(id)
+      fetchAll((page, size) => getTablesByRestaurantId(id, page, size))
         .then((res) => { 
-          setTables(res.items); 
+          setTables(res); 
           setSelectedTables([]);
           posthog.capture('tables_qr_generator_viewed', {
             restaurant_id: id,
-            tables_count: res.items.length
+            tables_count: res.length
           });
         })
         .catch((err) => {
@@ -59,13 +60,13 @@ export const TableQRPage = () => {
     if (!isAdmin || !isAxiosReady) return;
 
     if (selectedRestaurantId !== '') {
-      getTablesByRestaurantId(selectedRestaurantId as number)
+      fetchAll((page, size) => getTablesByRestaurantId(selectedRestaurantId as number, page, size))
         .then((res) => { 
-          setTables(res.items); 
+          setTables(res); 
           setSelectedTables([]);
           posthog.capture('tables_qr_generator_viewed', {
             restaurant_id: selectedRestaurantId,
-            tables_count: res.items.length
+            tables_count: res.length
           });
         })
         .catch((err) => {

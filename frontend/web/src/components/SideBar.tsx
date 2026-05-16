@@ -13,6 +13,7 @@ import { colors } from '../../theme/palette';
 import { useAuth } from '../services/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getRestaurantsByUser, getRestaurants } from '../api/RestaurantAPI';
+import { fetchAll } from '../api/PaginationHelper';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import { IRestaurant } from '../context/interfaces';
 import { usePostHog } from '@posthog/react';
@@ -135,9 +136,9 @@ useEffect(() => {
         let data;
 
         if (isAdmin) {
-          data = await getRestaurants();
+          data = await fetchAll((page, size) => getRestaurants(page, size));
         } else {
-          data = await getRestaurantsByUser();
+          data = await fetchAll((page, size) => getRestaurantsByUser(page, size));
         }
 
         setRestaurants(data);

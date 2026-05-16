@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '@/hooks/useRestaurants';
 import { getTablesByRestaurantId } from '@/api/RestaurantApi';
 import { getReservationsByTableId } from '@/api/ReservationAPI';
+import { fetchAll } from '@/api/PaginationHelper';
 import { IReservation } from '@/context/interfaces';
 import { useAuth } from '@/services/AuthProvider';
 import { Dimensions } from 'react-native';
@@ -51,7 +52,7 @@ const RestaurantCreateReservationView = () => {
                 const suitableTables = tables.filter((t: any) => t.capacity >= Number(guests));
 
                 const promises = suitableTables.map((t: any) =>
-                    getReservationsByTableId(t.table_id).catch(() => [])
+                    fetchAll((page, size) => getReservationsByTableId(t.table_id, page, size)).catch(() => [])
                 );
 
                 const results = await Promise.all(promises);

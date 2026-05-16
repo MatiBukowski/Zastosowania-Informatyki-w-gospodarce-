@@ -7,6 +7,7 @@ import { theme } from '@/ui/theme/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { IReservation } from '@context/interfaces';
 import { getReservationsByTableId, createReservation } from '@/api/ReservationAPI';
+import { fetchAll } from '@/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
 
 const RestaurantSelectTableView = () => {
@@ -26,11 +27,11 @@ const RestaurantSelectTableView = () => {
                     setIsLoading(true);
 
                     const promises = tables.map(t =>
-                        getReservationsByTableId(t.table_id)
+                        fetchAll((page, size) => getReservationsByTableId(t.table_id, page, size))
                             .then(data => {
 
-                                console.log(`Table ${t.table_id} API returned:`, data.items.length, "items");
-                                return data.items;
+                                console.log(`Table ${t.table_id} API returned:`, data.length, "items");
+                                return data;
                             })
                             .catch(err => {
                                 console.warn(`Error for table ${t.table_id}:`, err);

@@ -1,13 +1,13 @@
 import { useGetRestaurants } from '@/hooks/useRestaurants';
 import RestaurantCard from '@/components/RestaurantCard';
-import { View, Text, FlatList } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator } from 'react-native';
 import { usePostHog } from 'posthog-react-native';
 import { useEffect, useState } from 'react';
 import { theme } from '@/ui/theme/theme';
 
 
 function RestaurantView() {
-  const { restaurants, loading, error } = useGetRestaurants();
+  const { restaurants, loading, error, fetchMore, hasMore } = useGetRestaurants();
   const posthog = usePostHog();
   const [isScrolling, setIsScrolling] = useState(false);
 
@@ -18,6 +18,15 @@ function RestaurantView() {
       });
     }
   }, [restaurants]);
+
+  const renderFooter = () => {
+    if (!loading) return null;
+    return (
+      <View style={{ paddingVertical: 20 }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -42,8 +51,10 @@ function RestaurantView() {
         keyExtractor={(item) => 
           item.restaurant_id.toString()
         }
+        onEndReached={fetchMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={renderFooter}
       />
-      {loading && <Text>Loading restaurants...</Text>}
       {error && <Text>Error loading restaurants: {error}</Text>}
     </View>
   );
