@@ -1,5 +1,4 @@
 import { theme } from '@/ui/theme/theme';
-import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { withLayoutContext } from 'expo-router';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';

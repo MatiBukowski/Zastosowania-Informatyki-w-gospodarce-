@@ -14,6 +14,8 @@ export const theme = {
     accent: colors.tangerineDream,
     white: '#ffffff',
     gray: '#888888',
+    light_gray: '#dcdbdb',
+    giga_light_gray: '#f9f9f9',
   },
   spacing: 16,
   borderRadius: 16,
@@ -41,7 +43,7 @@ export const theme = {
     },
     caption: {
       fontSize: 14,
-      color: colors.gray
+      color: colors.light_gray,
     }
   },
 
