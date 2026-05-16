@@ -15,10 +15,10 @@ class TestRestaurantDataflow:
         assert response.status_code == 200
 
         data = response.json()        
-        assert isinstance(data, list)
+        assert isinstance(data["items"], list)
 
-        if len(data) > 0:
-            first_restaurant = data[0]
+        if len(data["items"]) > 0:
+            first_restaurant = data["items"][0]
             assert "restaurant_id" in first_restaurant
             assert "name" in first_restaurant
             assert "address" in first_restaurant
@@ -68,7 +68,7 @@ class TestRestaurantDataflow:
         assert response.status_code == 200
 
         data = response.json()
-        assert isinstance(data, list)
-        assert len(data) == 1
-        assert data[0]["restaurant_id"] == restaurant.restaurant_id
-        assert data[0]["name"] == restaurant.name
+        assert isinstance(data["items"], list)
+        assert len(data["items"]) == 1
+        assert data["items"][0]["restaurant_id"] == restaurant.restaurant_id
+        assert data["items"][0]["name"] == restaurant.name

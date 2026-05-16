@@ -32,7 +32,7 @@ class RestaurantRepository:
         # but let's see how it's defined. Assuming many-to-many or many-to-one.
         # If user.managed_restaurants is a list, we can manually slice it or use a query.
         
-        query = select(Restaurant).join(Restaurant.managers).where(AppUser.user_id == user_id)
+        query = select(Restaurant).join(Restaurant.admins).where(AppUser.user_id == user_id)
         total = self.db.execute(select(func.count()).select_from(query.subquery())).scalar_one()
         items = self.db.execute(query.offset(skip).limit(limit)).scalars().all()
         

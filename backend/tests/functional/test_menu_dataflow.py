@@ -11,10 +11,10 @@ class TestMenuDataflow:
         assert response.status_code == 200
 
         data = response.json()        
-        assert isinstance(data, list)
+        assert isinstance(data["items"], list)
 
-        if len(data) > 0:
-            first_restaurant = data[0]
+        if len(data["items"]) > 0:
+            first_restaurant = data["items"][0]
             assert "menu_item_id" in first_restaurant
             assert "restaurant_id" not in first_restaurant
             assert "name" in first_restaurant
@@ -28,4 +28,4 @@ class TestMenuDataflow:
         response = client.get("/api/restaurants/100/menu")
 
         data = response.json()
-        assert data["detail"] == "No menu found for restaurant id=100"
+        assert data["items"] == []

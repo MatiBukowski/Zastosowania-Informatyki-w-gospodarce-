@@ -21,7 +21,7 @@ class TestReservationService:
 
         assert result.items == mock_reservations
         mock_table_service.validate_table_exists.assert_called_once_with(table_id)
-        mock_repo.get_reservations_by_table_id.assert_called_once_with(table_id)
+        mock_repo.get_reservations_by_table_id.assert_called_once_with(table_id, 0, 10)
 
     def test_get_reservation_success(self):
         mock_repo = MagicMock()
