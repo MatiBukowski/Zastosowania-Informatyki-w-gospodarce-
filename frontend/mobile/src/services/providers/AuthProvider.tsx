@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
-import { apiClient } from "../api/API";
-import { loginUser } from "../api/AuthAPI";
-import { ILoginRequest}  from '../context/interfaces';
+import { apiClient } from "@/services/api/API";
+import { loginUser } from "@/services/api/AuthAPI";
+import { ILoginRequest}  from '@/services/interfaces/interfaces';
 
 export interface IJwtPayload {
     role: string;

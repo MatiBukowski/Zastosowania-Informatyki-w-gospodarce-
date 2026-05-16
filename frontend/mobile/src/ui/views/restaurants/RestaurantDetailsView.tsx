@@ -13,7 +13,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 
-import { useGetRestaurantById } from '@/hooks/useRestaurants';
+import { useGetRestaurantById } from '@/services/hooks/useRestaurants';
 import { theme } from '@/ui/theme/theme';
 
 export default function RestaurantDetailsView() {

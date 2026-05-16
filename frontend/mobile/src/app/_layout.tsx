@@ -1,10 +1,12 @@
 import { Stack, useGlobalSearchParams, usePathname } from "expo-router";
 import { PostHogProvider } from 'posthog-react-native'
 import { useEffect } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { posthogClient } from '@/analitics/analitics';
-import ThemeProvider from "@/ui/theme/ThemeProvider";
-import { AuthProvider } from '../services/AuthProvider';
+import { AuthProvider } from '@/services/providers/AuthProvider';
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const pathname = usePathname();
@@ -15,13 +17,13 @@ export default function RootLayout() {
   }, [pathname, params]);
 
   return (
-    <AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <PostHogProvider client={posthogClient}>
-          <ThemeProvider>
-            <Stack screenOptions={{ headerShown: false }}/>
-          </ThemeProvider>
+          <Stack screenOptions={{ headerShown: false }}/>
         </PostHogProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

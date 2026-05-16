@@ -1,13 +1,27 @@
+import logging
+
 from fastapi import Depends, HTTPException, status
-from ..repositories import RestaurantRepository
+
+from src.models.enums import CuisineTypeEnum
+from src.repositories import RestaurantRepository
+from src.schemas import RestaurantFilters, RestaurantFilterQuery
 
 class RestaurantService:
     def __init__(self, repo: RestaurantRepository = Depends()):
+        self.logger = logging.getLogger(__name__)
         self.repo = repo
 
-    def get_restaurants(self):
-        return self.repo.get_restaurants_list()
-    
+    def _parse_filters(self, filters: RestaurantFilterQuery | None) -> RestaurantFilters | None:
+        if filters is None:
+            return None
+        return RestaurantFilters(
+            cuisine = [CuisineTypeEnum(c) for c in filters.cuisine] if filters.cuisine else None
+        )
+
+    def get_restaurants(self, search: str = None, filters: RestaurantFilterQuery = None):
+        filters = self._parse_filters(filters)
+        return self.repo.get_restaurants(search=search, filters=filters)
+
     def get_restaurant(self, restaurant_id: int):
         restaurant = self.repo.get_restaurant_by_id(restaurant_id)
         if not restaurant:

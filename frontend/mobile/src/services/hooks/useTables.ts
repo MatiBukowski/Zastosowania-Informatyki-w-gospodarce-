@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-import { resolveTableByToken } from '../api/TablesAPI';
-import { ITable } from '@/context/interfaces';
+import { resolveTableByToken } from '@/services/api/TablesAPI';
+import { ITable } from '@/services/interfaces/interfaces';
 
 export function useResolveTableByToken(token: string) {
   const [table, setTable] = useState<ITable | null>(null);

@@ -11,8 +11,8 @@ import {
   StyleSheet,
 } from 'react-native';
 
-import { useGetTablesByRestaurantId } from '@/hooks/useRestaurants';
-import { ITable, TableStatus } from '@/context/interfaces';
+import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
+import { ITable, TableStatus } from '@/services/interfaces/interfaces';
 import { theme } from '@/ui/theme/theme';
 
 function statusColor(status: TableStatus): string {

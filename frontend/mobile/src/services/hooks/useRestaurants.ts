@@ -1,27 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId, postTable } from '../api/RestaurantAPI';
-import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/context/interfaces';
+import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId, postTable } from '@/services/api/RestaurantAPI';
+import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/services/interfaces/interfaces';
+import { IRestaurantFilters } from '@/services/interfaces/restaurants';
 
-export function useGetRestaurants() {
-  const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    getRestaurants()
-      .then(data => {
-        setRestaurants(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('useGetRestaurants - error:', err);
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
-
-  return { restaurants, loading, error };
+export function useGetRestaurants(params: { search: string | null } & IRestaurantFilters) {
+  return useQuery({
+    queryKey: ['restaurants', params],
+    queryFn: () => getRestaurants(params),
+  })
 }
 
 export function useGetRestaurantById(restaurantId: number) {

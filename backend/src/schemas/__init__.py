@@ -1,4 +1,4 @@
-from .restaurant import RestaurantPublicResponse, SingleRestaurantPublicResponse , RestaurantAdminResponse
+from .restaurant import RestaurantPublicResponse, SingleRestaurantPublicResponse, RestaurantAdminResponse, RestaurantFilters, RestaurantFilterQuery
 from .menu import MenuItemResponse
 from .table import TableResponse, TableCreate, TableUpdate
 from .reservation import ReservationResponse, ReservationCreate, ReservationUpdate

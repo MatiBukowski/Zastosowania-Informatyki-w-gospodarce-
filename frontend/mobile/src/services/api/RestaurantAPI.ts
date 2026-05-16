@@ -1,9 +1,9 @@
 import { apiClient } from './API';
-import { IRestaurant } from '@/context/interfaces';
-import { getReservationsByTableId, createReservation } from '../../../api/ReservationAPI';
+import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/services/interfaces/interfaces';
+import { IRestaurantFilters } from '@/services/interfaces/restaurants';
 
-export const getRestaurants = async (): Promise<IRestaurant[]> => {
-  const response = await apiClient.get<IRestaurant[]>('/api/restaurants');
+export const getRestaurants = async (params: {search? : string | null} & IRestaurantFilters): Promise<IRestaurant[]> => {
+  const response = await apiClient.get<IRestaurant[]>('/api/restaurants', { params });
   return response.data;
 };
 

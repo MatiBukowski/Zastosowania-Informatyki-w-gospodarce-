@@ -1,5 +1,5 @@
 import { apiClient } from './API';
-import { ILoginRequest, ILoginResponse } from '@/context/interfaces';
+import { ILoginRequest, ILoginResponse } from '@/services/interfaces/interfaces';
 
 
 export const loginUser = async (data: ILoginRequest): Promise<ILoginResponse> => {
