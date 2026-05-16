@@ -10,6 +10,7 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { usePostHog } from '@posthog/react';
 import { useAuth } from '../services/AuthProvider';
 import { useSearchParams, useOutletContext } from 'react-router-dom';
+import { fetchAll } from '../api/PaginationHelper';
 
 
 /** Returns the pixel width of a DOM element, updating on resize. */
@@ -50,7 +51,9 @@ export const ForecastPage = () => {
 
   useEffect(() => {
     if (isAdmin && isAxiosReady) {
-      getRestaurants().then(res => setRestaurants(res.items)).catch(console.error);
+      fetchAll((page, size) => getRestaurants(page, size))
+          .then(res => setRestaurants(res))
+          .catch(console.error);
     }
   }, [isAdmin, isAxiosReady]);
 
