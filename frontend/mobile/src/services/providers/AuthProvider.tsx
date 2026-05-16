@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 import { apiClient } from "@/services/api/API";
 import { loginUser } from "@/services/api/AuthAPI";
-import { ILoginRequest}  from '@/services/interfaces/interfaces';
+import { ILoginRequest, IRegisterRequest }  from '@/services/interfaces/user';
 
 export interface IJwtPayload {
     role: string;
@@ -18,6 +18,7 @@ interface AuthContextType {
     firstName: string | null;
     surname: string | null;
     login: (data: ILoginRequest) => Promise<void>;
+    register: (data: IRegisterRequest) => Promise<void>;
     logout: () => void;
     isAxiosReady: boolean;
 }
@@ -66,6 +67,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    const register = async (data: IRegisterRequest) => {
+        try {
+            const response = await apiClient.post('/api/auth/register', data);
+            const token = response.data.access_token;
+
+            await AsyncStorage.setItem('user_token', token);
+
+            setAccessToken(token);
+            await decodeAndSetTokenData(token);
+            setIsAxiosReady(true);
+        } catch (error) {
+            console.error("Registration error:", error);
+            throw error;
+        }
+    };
+
     const logout = async () => {
         try {
             await AsyncStorage.multiRemove(['user_token', 'user_id']);
@@ -109,7 +126,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ accessToken, userId, firstName, surname, login, logout, isAxiosReady }}>
+        <AuthContext.Provider value={{ accessToken, userId, firstName, surname, login, register, logout, isAxiosReady }}>
             {children}
         </AuthContext.Provider>
     );
