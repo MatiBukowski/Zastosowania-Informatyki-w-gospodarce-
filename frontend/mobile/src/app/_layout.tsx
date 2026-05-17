@@ -18,11 +18,11 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <PostHogProvider client={posthogClient}>
-          <Stack screenOptions={{ headerShown: false }}/>
-        </PostHogProvider>
-      </AuthProvider>
+      <PostHogProvider client={posthogClient}>
+        <AuthProvider>
+            <Stack screenOptions={{ headerShown: false }}/>
+        </AuthProvider>
+      </PostHogProvider>
     </QueryClientProvider>
   );
 }

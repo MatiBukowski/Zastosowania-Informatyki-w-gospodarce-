@@ -99,7 +99,7 @@ export default function RestaurantScreen() {
         showsVerticalScrollIndicator={false}
         data={restaurants}
         keyExtractor={(item) => item.restaurant_id.toString()}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={renderHeader()}
         renderItem={({ item }) => (
           <RestaurantCard restaurant={item} pressEnabled={!isScrolling} />
         )}
@@ -111,7 +111,7 @@ export default function RestaurantScreen() {
           if (hasNextPage && !isLoading) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={renderFooter}
+        ListFooterComponent={renderFooter()}
       />
 
       {error && (

@@ -4,7 +4,7 @@ import { IRestaurantFilters } from '@/services/interfaces/restaurants';
 
 export const getRestaurants = async (params: {search? : string | null} & IRestaurantFilters, page: number = 1, size: number = 10): Promise<IPaginatedResponse<IRestaurant>> => {
   const response = await apiClient.get<IPaginatedResponse<IRestaurant>>('/api/restaurants', {
-    params: { params, page, size }
+    params: { ...params, page, size }
   });
   return response.data;
 };
