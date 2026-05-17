@@ -1,13 +1,12 @@
  import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useGetTablesByRestaurantId } from '@/hooks/useRestaurants';
-import { useAuth } from '@/services/AuthProvider';
+import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
+import { useAuth } from '@/services/providers/AuthProvider';
 import { theme } from '@/ui/theme/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { IReservation } from '@context/interfaces';
-import { getReservationsByTableId, createReservation } from '@/api/ReservationAPI';
-import { fetchAll } from '@/api/PaginationHelper';
+import { getReservationsByTableId, createReservation } from '@/services/api/ReservationAPI';
+import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
 
 const RestaurantSelectTableView = () => {
@@ -228,7 +227,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     defaultCard: {
-        borderColor: '#eee',
         borderColor: 'rgba(0,0,0,0.08)',
     },
     selectedCard: {

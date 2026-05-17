@@ -1,7 +1,7 @@
 import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 
-import { useGetRestaurantMenu } from '@/hooks/useRestaurants';
+import { useGetRestaurantMenu } from '@/services/hooks/useRestaurants';
 import { theme } from '@/ui/theme/theme';
 import { usePostHog } from 'posthog-react-native';
 import { useEffect } from 'react';

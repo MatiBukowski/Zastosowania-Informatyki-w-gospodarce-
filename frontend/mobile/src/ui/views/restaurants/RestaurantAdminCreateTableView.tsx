@@ -15,7 +15,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 
 import { theme } from '@/ui/theme/theme';
-import { usePostTable } from '@/hooks/useRestaurants';
+import { usePostTable } from '@/services/hooks/useRestaurants';
 
 export default function RestaurantAdminCreateTableView() {
   const posthog = usePostHog();

@@ -1,9 +1,10 @@
 import { apiClient } from './API';
-import { IRestaurant, IMenuItem, ITable, ICreateTable, IPaginatedResponse } from '@/context/interfaces';
+import { IRestaurant, IMenuItem, ITable, ICreateTable, IPaginatedResponse } from '@/services/interfaces/interfaces';
+import { IRestaurantFilters } from '@/services/interfaces/restaurants';
 
-export const getRestaurants = async (page: number = 1, size: number = 10): Promise<IPaginatedResponse<IRestaurant>> => {
+export const getRestaurants = async (params: {search? : string | null} & IRestaurantFilters, page: number = 1, size: number = 10): Promise<IPaginatedResponse<IRestaurant>> => {
   const response = await apiClient.get<IPaginatedResponse<IRestaurant>>('/api/restaurants', {
-    params: { page, size }
+    params: { params, page, size }
   });
   return response.data;
 };

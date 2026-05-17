@@ -1,4 +1,4 @@
-import { IPaginatedResponse } from '../context/interfaces';
+import { IPaginatedResponse } from '@/services/interfaces/interfaces';
 
 export const fetchAll = async <T>(
   fetchPage: (page: number, size: number) => Promise<IPaginatedResponse<T>>,

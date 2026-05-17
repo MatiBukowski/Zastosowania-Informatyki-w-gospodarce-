@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Query
+
 from ..schemas import (
     RestaurantPublicResponse,
     SingleRestaurantPublicResponse,
     MenuItemResponse,
     TableResponse,
     TableCreate,
-    TableUpdate,
-    PaginatedResponse
+    PaginatedResponse,
+    RestaurantFilterQuery
 )
 from ..services import RestaurantService, MenuService, TableService
 from ..models import AppUser
@@ -17,6 +18,12 @@ from ..middleware.rate_limit import limiter
 router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 
 
+def get_restaurant_filter_query(
+    cuisine: list[str] | None = Query(None),
+) -> RestaurantFilterQuery:
+    return RestaurantFilterQuery(cuisine=cuisine)
+
+
 @router.get(
     "",
     response_model=PaginatedResponse[RestaurantPublicResponse],
@@ -25,9 +32,12 @@ router = APIRouter(prefix="/restaurants", tags=["Restaurants"])
 )
 def get_restaurants_endpoint(
     pagination: dict = Depends(get_pagination_params),
+    search: str = Query(None),
+    filters: RestaurantFilterQuery = Depends(get_restaurant_filter_query),
     service: RestaurantService = Depends()
 ):
-    return service.get_restaurants(**pagination)
+    return service.get_restaurants(**pagination, search=search, filters=filters)
+
 
 @router.get(
     "/my",
@@ -37,7 +47,7 @@ def get_restaurants_endpoint(
 )
 def get_restaurants_endpoint(
     pagination: dict = Depends(get_pagination_params),
-    service: RestaurantService = Depends(), 
+    service: RestaurantService = Depends(),
     current_user: AppUser = Depends(get_current_user)
 ):
     return service.get_restaurants_for_user(current_user.user_id, **pagination)
@@ -58,7 +68,7 @@ def get_restaurant_endpoint(restaurant_id: int, service: RestaurantService = Dep
     response_model=PaginatedResponse[MenuItemResponse]
 )
 def get_menu_endpoint(
-    restaurant_id: int, 
+    restaurant_id: int,
     pagination: dict = Depends(get_pagination_params),
     service: MenuService = Depends()
 ):
@@ -79,7 +89,7 @@ def post_table_endpoint(request: Request, restaurant_id: int, table_data: TableC
     response_model=PaginatedResponse[TableResponse]
 )
 def get_tables_endpoint(
-    restaurant_id: int, 
+    restaurant_id: int,
     pagination: dict = Depends(get_pagination_params),
     service: TableService = Depends()
 ):

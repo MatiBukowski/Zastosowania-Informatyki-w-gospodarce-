@@ -1,42 +1,23 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId, postTable } from '../api/RestaurantAPI';
-import { fetchAll, fetchNext } from '../api/PaginationHelper';
-import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/context/interfaces';
+import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId, postTable } from '@/services/api/RestaurantAPI';
+import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/services/interfaces/interfaces';
+import { IRestaurantFilters } from '@/services/interfaces/restaurants';
+import { fetchNext, fetchAll } from '@/services/api/PaginationHelper';
 
-export function useGetRestaurants() {
-  const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
-  const loadRestaurants = useCallback(async (pageNum: number) => {
-    setLoading(true);
-    try {
-      const response = await fetchNext((p, s) => getRestaurants(p, s), pageNum, 10);
-      setRestaurants(prev => pageNum === 1 ? response.items : [...prev, ...response.items]);
-      setHasMore(response.page < response.pages);
-      setPage(response.page);
-      setLoading(false);
-    } catch (err: any) {
-      console.error('useGetRestaurants - error:', err);
-      setError(err.message);
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadRestaurants(1);
-  }, [loadRestaurants]);
-
-  const fetchMore = () => {
-    if (!loading && hasMore) {
-      loadRestaurants(page + 1);
-    }
-  };
-
-  return { restaurants, loading, error, fetchMore, hasMore };
+export function useGetRestaurants(params: { search: string | null } & IRestaurantFilters) {
+  return useInfiniteQuery({
+    queryKey: ['restaurants', params],
+    queryFn: ({ pageParam }) => fetchNext((p, s) => getRestaurants(params, p, s), pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined,
+    select: (data) => ({
+      restaurants: data.pages.flatMap((page) => page.items),
+      hasMore: !!data.pageParams.at(-1),
+    }),
+  });
 }
 
 export function useGetRestaurantById(restaurantId: number) {

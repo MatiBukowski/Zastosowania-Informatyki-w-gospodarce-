@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getReservationsByTableId, createReservation, getReservationById, updateReservation } from '../api/ReservationAPI';
-import { fetchAll } from '../api/PaginationHelper';
-import { IReservation, ICreateReservation, IUpdateReservation } from '../context/interfaces';
+import { fetchAll } from '@/services/api/PaginationHelper';
+import { getReservationsByTableId, createReservation, getReservationById, updateReservation } from '@/services/api/ReservationAPI';
+import { IReservation, ICreateReservation, IUpdateReservation } from '@/services/interfaces/interfaces';
 
 export function useGetReservationsByTableId(tableId: number) {
     const [reservations, setReservations] = useState<IReservation[]>([]);

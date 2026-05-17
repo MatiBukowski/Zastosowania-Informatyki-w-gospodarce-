@@ -1,9 +1,9 @@
 import React, { useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
-import { useAuth } from '../../services/AuthProvider';
+import { useAuth } from '@/services/providers/AuthProvider';
 import { useRouter } from 'expo-router';
-import { theme } from '../../ui/theme/theme';
 import { usePostHog } from 'posthog-react-native';
+import { theme } from '@/ui/theme/theme';
 
 const LoginScreen = () => {
     const { login } = useAuth();

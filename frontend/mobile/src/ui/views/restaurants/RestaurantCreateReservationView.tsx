@@ -4,13 +4,11 @@ import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/ui/theme/theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useGetTablesByRestaurantId } from '@/hooks/useRestaurants';
-import { getTablesByRestaurantId } from '@/api/RestaurantApi';
-import { getReservationsByTableId } from '@/api/ReservationAPI';
-import { fetchAll } from '@/api/PaginationHelper';
-import { IReservation } from '@/context/interfaces';
-import { useAuth } from '@/services/AuthProvider';
-import { Dimensions } from 'react-native';
+import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
+import { getReservationsByTableId } from '@/services/api/ReservationAPI';
+import { IReservation } from '@/services/interfaces/interfaces';
+import { useAuth } from '@/services/providers/AuthProvider';
+import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
 
 const reservation_duration_in_min = 120;
@@ -450,14 +448,6 @@ const styles = StyleSheet.create({
         borderColor: '#eee',
         opacity: 0.5,
     },
-    /*footer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        paddingHorizontal: 24,
-        paddingBottom: 40,
-    },*/
     timeSectionContainer: {
         paddingHorizontal: 16,
         marginTop: 10,
