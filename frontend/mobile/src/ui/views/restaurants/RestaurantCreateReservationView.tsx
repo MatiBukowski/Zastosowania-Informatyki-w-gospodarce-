@@ -8,7 +8,7 @@ import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
 import { getReservationsByTableId } from '@/services/api/ReservationAPI';
 import { IReservation } from '@/services/interfaces/interfaces';
 import { useAuth } from '@/services/providers/AuthProvider';
-import { Dimensions } from 'react-native';
+import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
 
 const reservation_duration_in_min = 120;
@@ -50,7 +50,7 @@ const RestaurantCreateReservationView = () => {
                 const suitableTables = tables.filter((t: any) => t.capacity >= Number(guests));
 
                 const promises = suitableTables.map((t: any) =>
-                    getReservationsByTableId(t.table_id).catch(() => [])
+                    fetchAll((page, size) => getReservationsByTableId(t.table_id, page, size)).catch(() => [])
                 );
 
                 const results = await Promise.all(promises);
@@ -106,6 +106,13 @@ const RestaurantCreateReservationView = () => {
 
     const handleReservationSubmit = () => {
         if (!selectedDate || !selectedTime || !guests) {
+            posthog.capture('restaurant_reservation_params_missing', {
+                restaurant_id: id,
+                restaurant_name: name,
+                has_date: !!selectedDate,
+                has_time: !!selectedTime,
+                has_guests: !!guests
+            });
             Alert.alert("Missing Information", "Please select date, guests and time first.");
             return;
         }
@@ -441,14 +448,6 @@ const styles = StyleSheet.create({
         borderColor: '#eee',
         opacity: 0.5,
     },
-    /*footer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        paddingHorizontal: 24,
-        paddingBottom: 40,
-    },*/
     timeSectionContainer: {
         paddingHorizontal: 16,
         marginTop: 10,

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 from main import app
 from src.db import Base, get_session
+from src.middleware.rate_limit import limiter
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -30,8 +31,10 @@ def db():
 @pytest.fixture
 def client(db):
     app.dependency_overrides[get_session] = get_test_db
+    limiter.enabled = False
 
     client = TestClient(app)
     yield client
 
     app.dependency_overrides.clear()
+    limiter.enabled = True

@@ -1,7 +1,7 @@
 from fastapi import Depends
 from uuid import UUID
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, func
 from ..db import get_session
 from ..models import RestaurantTable
 
@@ -56,7 +56,8 @@ class TableRepository:
 
         return table
 
-    def get_tables_by_restaurant_id(self, restaurant_id: int):
-        return self.db.execute(
-            select(RestaurantTable).where(RestaurantTable.restaurant_id == restaurant_id)
-        ).scalars().all()
+    def get_tables_by_restaurant_id(self, restaurant_id: int, skip: int = 0, limit: int = 10):
+        query = select(RestaurantTable).where(RestaurantTable.restaurant_id == restaurant_id)
+        total = self.db.execute(select(func.count()).select_from(query.subquery())).scalar_one()
+        items = self.db.execute(query.offset(skip).limit(limit)).scalars().all()
+        return items, total

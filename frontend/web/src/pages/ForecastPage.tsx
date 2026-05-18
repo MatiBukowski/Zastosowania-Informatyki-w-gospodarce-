@@ -10,6 +10,7 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { usePostHog } from '@posthog/react';
 import { useAuth } from '../services/AuthProvider';
 import { useSearchParams, useOutletContext } from 'react-router-dom';
+import { fetchAll } from '../api/PaginationHelper';
 
 
 /** Returns the pixel width of a DOM element, updating on resize. */
@@ -33,7 +34,7 @@ interface ContextType {
 }
 
 export const ForecastPage = () => {
-  const { role } = useAuth();
+  const { role, isAxiosReady } = useAuth();
   const { restaurantName } = useOutletContext<ContextType>();
   const [searchParams] = useSearchParams();
   const urlRestaurantId = searchParams.get('restaurantId');
@@ -49,13 +50,15 @@ export const ForecastPage = () => {
   const isAdmin = role === "ADMIN";
 
   useEffect(() => {
-    if (isAdmin) {
-      getRestaurants().then(setRestaurants).catch(console.error);
+    if (isAdmin && isAxiosReady) {
+      fetchAll((page, size) => getRestaurants(page, size))
+          .then(res => setRestaurants(res))
+          .catch(console.error);
     }
-  }, [isAdmin]);
+  }, [isAdmin, isAxiosReady]);
 
   useEffect(() => {
-    if (!role || isAdmin) return;
+    if (!role || isAdmin || !isAxiosReady) return;
 
     if (urlRestaurantId) {
       const id = parseInt(urlRestaurantId, 10);
@@ -76,10 +79,10 @@ export const ForecastPage = () => {
         })
         .finally(() => setLoading(false));
     }
-  }, [role, isAdmin, urlRestaurantId, posthog]);
+  }, [role, isAdmin, urlRestaurantId, posthog, isAxiosReady]);
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isAdmin || !isAxiosReady) return;
 
     if (selectedRestaurantId !== '') {
       setLoading(true);
@@ -99,7 +102,7 @@ export const ForecastPage = () => {
         })
         .finally(() => setLoading(false));
     }
-  }, [isAdmin, selectedRestaurantId, posthog]);
+  }, [isAdmin, selectedRestaurantId, posthog, isAxiosReady]);
 
   const chartData = useMemo(() => {
     if (!forecastData) return { xAxis: [], series: [] };

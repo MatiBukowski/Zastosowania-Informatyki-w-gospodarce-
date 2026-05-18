@@ -4,12 +4,14 @@ import { jwtDecode } from "jwt-decode";
 import { apiClient } from "@/services/api/API";
 import { loginUser } from "@/services/api/AuthAPI";
 import { ILoginRequest}  from '@/services/interfaces/interfaces';
+import { usePostHog } from "posthog-react-native";
 
 export interface IJwtPayload {
     role: string;
     user_id: string;
     first_name: string;
     surname: string;
+    email: string;
 }
 
 interface AuthContextType {
@@ -32,6 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAxiosReady, setIsAxiosReady] = useState(false);
 
     const initRef = useRef(false);
+    const posthog = usePostHog();
 
 
     const decodeAndSetTokenData = async (token: string) => {
@@ -43,6 +46,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUserId(idToSave);
         setFirstName(decoded.first_name);
         setSurname(decoded.surname);
+
+        posthog.identify(idToSave, {
+            email: decoded.email,
+            name: `${decoded.first_name} ${decoded.surname}`,
+            role: decoded.role
+        });
 
         if (idToSave) {
             await AsyncStorage.setItem('user_id', idToSave);
@@ -70,6 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             await AsyncStorage.multiRemove(['user_token', 'user_id']);
         } finally {
+            posthog.reset();
             setAccessToken(null);
             setUserId(null);
             setIsAxiosReady(false);

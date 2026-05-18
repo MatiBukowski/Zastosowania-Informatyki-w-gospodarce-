@@ -5,8 +5,8 @@ import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { theme } from '@/ui/theme/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { IReservation } from '@/services/interfaces/interfaces';
 import { getReservationsByTableId, createReservation } from '@/services/api/ReservationAPI';
+import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
 
 const RestaurantSelectTableView = () => {
@@ -26,7 +26,7 @@ const RestaurantSelectTableView = () => {
                     setIsLoading(true);
 
                     const promises = tables.map(t =>
-                        getReservationsByTableId(t.table_id)
+                        fetchAll((page, size) => getReservationsByTableId(t.table_id, page, size))
                             .then(data => {
 
                                 console.log(`Table ${t.table_id} API returned:`, data.length, "items");
@@ -111,6 +111,14 @@ const RestaurantSelectTableView = () => {
             router.dismissAll();
             router.replace('/');
         } catch (error: any) {
+            const errorMessage = error.response?.data?.detail || error.message || "Unknown error";
+            posthog.capture('restaurant_reservation_failed', {
+                restaurant_id: id,
+                restaurant_name: name,
+                table_id: selectedTableId,
+                error: errorMessage,
+                guest_count: guests
+            });
             console.error("Reservation error details:", error.response?.data || error.message);
             alert("Error creating reservation. Check console for details.");
         }
@@ -219,7 +227,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     defaultCard: {
-        borderColor: '#eee',
         borderColor: 'rgba(0,0,0,0.08)',
     },
     selectedCard: {

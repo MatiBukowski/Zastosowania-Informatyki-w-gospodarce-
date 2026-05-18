@@ -18,14 +18,14 @@ export function useRestaurantSearch() {
   const debouncedSearch = useDebounce(search, 300);
   const debouncedFilters = useDebounce(filters, 300);
 
-  const serializedFilters = serializeFilters(
-    debouncedFilters
-  );
+  const serializedFilters = serializeFilters(debouncedFilters);
 
   const {
-    data: restaurants,
+    data,
     isLoading,
     error,
+    fetchNextPage,
+    hasNextPage,
   } = useGetRestaurants({
     search: debouncedSearch || null,
     ...serializedFilters,
@@ -40,8 +40,10 @@ export function useRestaurantSearch() {
     clearFilter,
     clearAllFilters,
 
-    restaurants,
+    restaurants: data?.restaurants,
     isLoading,
     error,
+    fetchNextPage,
+    hasNextPage,
   };
 }

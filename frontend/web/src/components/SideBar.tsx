@@ -13,6 +13,7 @@ import { colors } from '../../theme/palette';
 import { useAuth } from '../services/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getRestaurantsByUser, getRestaurants } from '../api/RestaurantAPI';
+import { fetchAll } from '../api/PaginationHelper';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import { IRestaurant } from '../context/interfaces';
 import { usePostHog } from '@posthog/react';
@@ -110,7 +111,7 @@ interface SideBarProps {
 }
 
 const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProps) => {
-  const { accessToken, role, firstName, surname, logout } = useAuth();
+  const { accessToken, role, firstName, surname, logout, isAxiosReady } = useAuth();
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   
   const [isQrMenuOpen, setIsQrMenuOpen] = useState(false); 
@@ -129,15 +130,15 @@ const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProp
 
 useEffect(() => {
     const fetchRestaurants = async () => {
-      if (!role) return;
+      if (!role || !isAxiosReady) return;
       console.log("Fetching restaurants for role: ", role);
       try {
         let data;
 
         if (isAdmin) {
-          data = await getRestaurants();
+          data = await fetchAll((page, size) => getRestaurants(page, size));
         } else {
-          data = await getRestaurantsByUser();
+          data = await fetchAll((page, size) => getRestaurantsByUser(page, size));
         }
 
         setRestaurants(data);
@@ -147,7 +148,7 @@ useEffect(() => {
     };
 
     fetchRestaurants();
-  }, [role]);
+  }, [role, isAxiosReady, isAdmin]);
 
   useEffect(() => {
     if (isCollapsed) {

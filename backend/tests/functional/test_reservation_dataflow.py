@@ -22,7 +22,7 @@ class TestReservationDataflow:
             "status": ReservationStatusEnum.PENDING
         }
         
-        response = client.post(f"/api/tables/{table_id}/reservation", json=payload)
+        response = client.post(f"/api/tables/{table_id}/reservation", json=payload, headers={"X-Forwarded-For": "192.168.1.102"})
         assert response.status_code == 200
         data = response.json()
         assert data["table_id"] == table_id
@@ -63,17 +63,18 @@ class TestReservationDataflow:
             "reservation_time": res_time_1,
             "status": ReservationStatusEnum.PENDING
         }
-        resp = client.post("/api/tables/1/reservation", json=payload)
+        headers = {"X-Forwarded-For": "192.168.1.101"}
+        resp = client.post("/api/tables/1/reservation", json=payload, headers=headers)
         assert resp.status_code == 200
 
         payload_collision = payload.copy()
         payload_collision["reservation_time"] = res_time_2
-        resp_col = client.post("/api/tables/1/reservation", json=payload_collision)
+        resp_col = client.post("/api/tables/1/reservation", json=payload_collision, headers=headers)
         assert resp_col.status_code == 409
 
         payload_ok = payload.copy()
         payload_ok["reservation_time"] = res_time_3
-        resp_ok = client.post("/api/tables/1/reservation", json=payload_ok)
+        resp_ok = client.post("/api/tables/1/reservation", json=payload_ok, headers=headers)
         assert resp_ok.status_code == 200
 
     def test_canceled_reservation_does_not_block(self, client, db):
@@ -89,12 +90,13 @@ class TestReservationDataflow:
             "reservation_time": res_time,
             "status": ReservationStatusEnum.PENDING
         }
-        resp = client.post("/api/tables/1/reservation", json=payload)
+        headers = {"X-Forwarded-For": "192.168.1.100"}
+        resp = client.post("/api/tables/1/reservation", json=payload, headers=headers)
         assert resp.status_code == 200
         reservation_id = resp.json()["reservation_id"]
         
         patch_resp = client.patch(f"/api/reservations/{reservation_id}", json={"status": ReservationStatusEnum.CANCELED})
         assert patch_resp.status_code == 200
 
-        resp_retry = client.post("/api/tables/1/reservation", json=payload)
+        resp_retry = client.post("/api/tables/1/reservation", json=payload, headers=headers)
         assert resp_retry.status_code == 200

@@ -1,15 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRestaurantId, postTable } from '@/services/api/RestaurantAPI';
 import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/services/interfaces/interfaces';
 import { IRestaurantFilters } from '@/services/interfaces/restaurants';
+import { fetchNext, fetchAll } from '@/services/api/PaginationHelper';
 
 export function useGetRestaurants(params: { search: string | null } & IRestaurantFilters) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['restaurants', params],
-    queryFn: () => getRestaurants(params),
-  })
+    queryFn: ({ pageParam }) => fetchNext((p, s) => getRestaurants(params, p, s), pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined,
+    select: (data) => ({
+      restaurants: data.pages.flatMap((page) => page.items),
+      hasMore: !!data.pageParams.at(-1),
+    }),
+  });
 }
 
 export function useGetRestaurantById(restaurantId: number) {
@@ -41,7 +49,7 @@ export function useGetRestaurantMenu(restaurantId: number) {
   useEffect(() => {
     if (!restaurantId) return;
 
-    getMenuByRestaurantId(restaurantId)
+    fetchAll((page, size) => getMenuByRestaurantId(restaurantId, page, size))
       .then(data => {
 
         setMenu(data);
@@ -63,7 +71,7 @@ export function useGetTablesByRestaurantId(restaurantId: number) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getTablesByRestaurantId(restaurantId)
+    fetchAll((page, size) => getTablesByRestaurantId(restaurantId, page, size))
         .then(data => {
           setTables(data);
           setLoading(false);

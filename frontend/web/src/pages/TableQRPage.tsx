@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useOutletContext } from 'react-router-dom';
 import { useAuth } from '../services/AuthProvider';
 import { getTablesByRestaurantId, getRestaurants} from '../api/RestaurantAPI';
+import { fetchAll } from '../api/PaginationHelper';
 import { TableQR } from '../components/TableQR';
 import { ITable, IRestaurant } from '../context/interfaces';
 import { Select, MenuItem, FormControl, InputLabel, Button, Box, Checkbox, FormControlLabel, Typography, Divider, Stack } from '@mui/material';
@@ -12,7 +13,7 @@ interface ContextType {
 }
 
 export const TableQRPage = () => {
-  const { role } = useAuth();
+  const { role, isAxiosReady } = useAuth();
   const { restaurantName } = useOutletContext<ContextType>();
   const [tables, setTables] = useState<ITable[]>([]);
   const [selectedTables, setSelectedTables] = useState<number[]>([]);
@@ -29,23 +30,23 @@ export const TableQRPage = () => {
   const hasNoTables = currentId && tables.length === 0;
 
   useEffect(() => {
-    if (isAdmin) {
-      getRestaurants().then(setRestaurants).catch(console.error);
+    if (isAdmin && isAxiosReady) {
+      fetchAll((page, size) => getRestaurants(page, size)).then(res => setRestaurants(res)).catch(console.error);
     }
-  }, [isAdmin]);
+  }, [isAdmin, isAxiosReady]);
 
   useEffect(() => {
-    if (!role || isAdmin) return;
+    if (!role || isAdmin || !isAxiosReady) return;
 
     if (urlRestaurantId) {
       const id = parseInt(urlRestaurantId, 10);
-      getTablesByRestaurantId(id)
-        .then((data) => { 
-          setTables(data); 
+      fetchAll((page, size) => getTablesByRestaurantId(id, page, size))
+        .then((res) => { 
+          setTables(res); 
           setSelectedTables([]);
           posthog.capture('tables_qr_generator_viewed', {
             restaurant_id: id,
-            tables_count: data.length
+            tables_count: res.length
           });
         })
         .catch((err) => {
@@ -53,19 +54,19 @@ export const TableQRPage = () => {
           posthog.capture('failed_tables_qr_generator_view', { restaurant_id: id });
         });
     }
-  }, [role, isAdmin, urlRestaurantId, posthog]);
+  }, [role, isAdmin, urlRestaurantId, posthog, isAxiosReady]);
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isAdmin || !isAxiosReady) return;
 
     if (selectedRestaurantId !== '') {
-      getTablesByRestaurantId(selectedRestaurantId as number)
-        .then((data) => { 
-          setTables(data); 
+      fetchAll((page, size) => getTablesByRestaurantId(selectedRestaurantId as number, page, size))
+        .then((res) => { 
+          setTables(res); 
           setSelectedTables([]);
           posthog.capture('tables_qr_generator_viewed', {
             restaurant_id: selectedRestaurantId,
-            tables_count: data.length
+            tables_count: res.length
           });
         })
         .catch((err) => {
@@ -73,7 +74,7 @@ export const TableQRPage = () => {
           posthog.capture('failed_tables_qr_generator_view', { restaurant_id: selectedRestaurantId });
         });
     }
-  }, [isAdmin, selectedRestaurantId, posthog]);
+  }, [isAdmin, selectedRestaurantId, posthog, isAxiosReady]);
 
   const toggleTableSelection = (tableId: number) => {
     setSelectedTables((prev) =>

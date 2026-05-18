@@ -1,10 +1,10 @@
 import logging
-
+import math
 from fastapi import Depends, HTTPException, status
 
 from src.models.enums import CuisineTypeEnum
 from src.repositories import RestaurantRepository
-from src.schemas import RestaurantFilters, RestaurantFilterQuery
+from src.schemas import RestaurantFilters, RestaurantFilterQuery, PaginatedResponse
 
 class RestaurantService:
     def __init__(self, repo: RestaurantRepository = Depends()):
@@ -18,9 +18,29 @@ class RestaurantService:
             cuisine = [CuisineTypeEnum(c) for c in filters.cuisine] if filters.cuisine else None
         )
 
-    def get_restaurants(self, search: str = None, filters: RestaurantFilterQuery = None):
+    def get_restaurants(
+            self,
+            skip: int = 0,
+            limit: int = 10,
+            page: int = 1,
+            size: int = 10,
+            search: str = None,
+            filters: RestaurantFilterQuery = None
+    ):
         filters = self._parse_filters(filters)
-        return self.repo.get_restaurants(search=search, filters=filters)
+
+        items, total = self.repo.get_restaurants(
+            skip=skip,
+            limit=limit,
+            search=search,
+            filters=filters)
+        return PaginatedResponse(
+            items=items,
+            total=total,
+            page=page,
+            size=size,
+            pages=math.ceil(total / size) if size > 0 else 1
+        )
 
     def get_restaurant(self, restaurant_id: int):
         restaurant = self.repo.get_restaurant_by_id(restaurant_id)
@@ -31,5 +51,12 @@ class RestaurantService:
             )
         return restaurant
 
-    def get_restaurants_for_user(self, user_id: int):
-        return self.repo.get_restaurants_by_user_id(user_id)
+    def get_restaurants_for_user(self, user_id: int, skip: int = 0, limit: int = 10, page: int = 1, size: int = 10):
+        items, total = self.repo.get_restaurants_by_user_id(user_id, skip, limit)
+        return PaginatedResponse(
+            items=items,
+            total=total,
+            page=page,
+            size=size,
+            pages=math.ceil(total / size) if size > 0 else 1
+        )

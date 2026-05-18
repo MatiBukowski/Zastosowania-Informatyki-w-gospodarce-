@@ -15,13 +15,13 @@ class TestReservationService:
 
         table_id = 1
         mock_reservations = [MagicMock(spec=Reservation), MagicMock(spec=Reservation)]
-        mock_repo.get_reservations_by_table_id.return_value = mock_reservations
+        mock_repo.get_reservations_by_table_id.return_value = (mock_reservations, 2)
 
         result = service.get_reservations_for_table(table_id)
 
-        assert result == mock_reservations
+        assert result.items == mock_reservations
         mock_table_service.validate_table_exists.assert_called_once_with(table_id)
-        mock_repo.get_reservations_by_table_id.assert_called_once_with(table_id)
+        mock_repo.get_reservations_by_table_id.assert_called_once_with(table_id, 0, 10)
 
     def test_get_reservation_success(self):
         mock_repo = MagicMock()
@@ -59,6 +59,7 @@ class TestReservationService:
             status=ReservationStatusEnum.PENDING
         )
         mock_repo.get_overlapping_reservations.return_value = []
+        mock_repo.count_active_reservations_for_user.return_value = 0
         mock_reservation = Reservation(reservation_id=10, **data.model_dump())
         mock_repo.create_reservation.return_value = mock_reservation
 
@@ -81,6 +82,7 @@ class TestReservationService:
             reservation_time=datetime.now(timezone.utc) + timedelta(days=1)
         )
         mock_repo.get_overlapping_reservations.return_value = [MagicMock(spec=Reservation)]
+        mock_repo.count_active_reservations_for_user.return_value = 0
 
         with pytest.raises(HTTPException) as exc_info:
             service.create_new_reservation(data)
@@ -100,6 +102,7 @@ class TestReservationService:
             table_id=999,
             reservation_time=datetime.now(timezone.utc) + timedelta(days=1)
         )
+        mock_repo.count_active_reservations_for_user.return_value = 0
         mock_table_service.validate_table_exists.side_effect = HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Table not found"

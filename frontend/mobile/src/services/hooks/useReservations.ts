@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { fetchAll } from '@/services/api/PaginationHelper';
 import { getReservationsByTableId, createReservation, getReservationById, updateReservation } from '@/services/api/ReservationAPI';
 import { IReservation, ICreateReservation, IUpdateReservation } from '@/services/interfaces/interfaces';
 
@@ -11,7 +12,7 @@ export function useGetReservationsByTableId(tableId: number) {
             if (!tableId) return;
             setLoading(true);
             try {
-                const data = await getReservationsByTableId(tableId);
+                const data = await fetchAll((page, size) => getReservationsByTableId(tableId, page, size));
                 setReservations(data);
                 setError(null);
             } catch (err: any) {

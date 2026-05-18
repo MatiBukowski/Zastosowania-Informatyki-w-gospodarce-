@@ -13,9 +13,18 @@ class ReservationService:
         self.repo = repo
         self.table_service = table_service
 
-    def get_reservations_for_table(self, table_id: int):
+    def get_reservations_for_table(self, table_id: int, skip: int = 0, limit: int = 10, page: int = 1, size: int = 10):
+        import math
+        from ..schemas import PaginatedResponse
         self.table_service.validate_table_exists(table_id)
-        return self.repo.get_reservations_by_table_id(table_id)
+        items, total = self.repo.get_reservations_by_table_id(table_id, skip, limit)
+        return PaginatedResponse(
+            items=items,
+            total=total,
+            page=page,
+            size=size,
+            pages=math.ceil(total / size) if size > 0 else 1
+        )
 
     def get_reservation(self, reservation_id: int):
         reservation = self.repo.get_reservation_by_id(reservation_id)
@@ -34,6 +43,13 @@ class ReservationService:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Table is already reserved for this time slot (2h window collision)."
+            )
+            
+        active_count = self.repo.count_active_reservations_for_user(data.user_id)
+        if active_count >= 15:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="User has reached the maximum allowed number of active reservations (15)."
             )
             
         new_reservation = Reservation(**data.model_dump())

@@ -25,25 +25,24 @@ class TestMenuService:
                 "is_available": True
             }
         ]
-        mock_repo.get_menu_list_for_restaurant.return_value = test_data
+        mock_repo.get_menu_list_for_restaurant.return_value = (test_data, len(test_data))
         service = MenuService(repo=mock_repo)
         result = service.get_menu_for_restaurant(restaurant_id=1)
 
-        assert result == test_data
-        assert result[0]["name"] == "Pizza Margherita"
-        assert result[1]["description"] == "28-day aged 300g USDA Certified Prime Ribeye, rosemary-thyme garlic butter, with choice of two sides"
-        assert result[1]["price"] == 188.39
-        mock_repo.get_menu_list_for_restaurant.assert_called_once_with(1)
+        assert result.items == test_data
+        assert result.items[0]["name"] == "Pizza Margherita"
+        assert result.items[1]["description"] == "28-day aged 300g USDA Certified Prime Ribeye, rosemary-thyme garlic butter, with choice of two sides"
+        assert result.items[1]["price"] == 188.39
+        mock_repo.get_menu_list_for_restaurant.assert_called_once_with(1, 0, 10)
 
-    def test_get_menu_for_restaurant_error(self):
+    def test_get_menu_for_restaurant_empty(self):
         mock_repo = MagicMock()
 
-        mock_repo.get_menu_list_for_restaurant.return_value = None
+        mock_repo.get_menu_list_for_restaurant.return_value = ([], 0)
         service = MenuService(repo=mock_repo)
 
-        with pytest.raises(HTTPException) as exception:
-            service.get_menu_for_restaurant(restaurant_id=1)
+        result = service.get_menu_for_restaurant(restaurant_id=1)
 
-        assert exception.value.status_code == status.HTTP_404_NOT_FOUND
-        assert "No menu found for restaurant id=1" in exception.value.detail
-        mock_repo.get_menu_list_for_restaurant.assert_called_once_with(1)
+        assert result.items == []
+        assert result.total == 0
+        mock_repo.get_menu_list_for_restaurant.assert_called_once_with(1, 0, 10)
