@@ -1,11 +1,13 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 
 import ScanQrButton from '@/ui/components/buttons/ScanQrButton';
 import { ScreenLayout } from '@/ui/layouts/ScreenLayout';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { useRestaurantSearch } from '@/services/hooks/restaurants/useRestaurantSearch';
+import { IRestaurant } from '@/services/interfaces/interfaces';
 import { theme } from '@/ui/theme/theme';
 
 function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
@@ -18,13 +20,46 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string
     );
 }
 
+function FeaturedCard({ restaurant, onPress }: { restaurant: IRestaurant; onPress: () => void }) {
+    return (
+        <TouchableOpacity style={styles.featuredCard} onPress={onPress} activeOpacity={0.8}>
+            <View style={styles.featuredImageBox}>
+                {restaurant.photo ? (
+                    <Image
+                        source={{ uri: restaurant.photo }}
+                        style={styles.featuredImage}
+                        resizeMode="cover"
+                    />
+                ) : (
+                    <MaterialCommunityIcons name="silverware-fork-knife" size={32} color={theme.colors.primary} />
+                )}
+            </View>
+            <View style={styles.featuredBody}>
+                <Text style={styles.featuredName} numberOfLines={1}>{restaurant.name}</Text>
+                <View style={styles.featuredMeta}>
+                    <MaterialCommunityIcons name="earth" size={12} color={theme.colors.gray} />
+                    <Text style={styles.featuredCuisine}>{restaurant.cuisine}</Text>
+                </View>
+                {restaurant.has_kiosk && (
+                    <View style={styles.kioskBadge}>
+                        <MaterialCommunityIcons name="tablet" size={10} color={theme.colors.primary} />
+                        <Text style={styles.kioskBadgeText}>Kiosk</Text>
+                    </View>
+                )}
+            </View>
+        </TouchableOpacity>
+    );
+}
+
 export default function HomeScreen() {
     const { firstName } = useAuth();
     const { restaurants = [] } = useRestaurantSearch();
+    const router = useRouter();
 
     const restaurantCount = restaurants.length;
     const cuisineCount = new Set(restaurants.map(r => r.cuisine)).size;
     const kioskCount = restaurants.filter(r => r.has_kiosk).length;
+    const featured = restaurants.slice(0, 5);
 
     return (
         <ScreenLayout>
@@ -63,6 +98,31 @@ export default function HomeScreen() {
                             value={String(kioskCount)}
                             label="Restaurants With Kiosk"
                         />
+                    </View>
+                )}
+
+                {/* Featured restaurants */}
+                {featured.length > 0 && (
+                    <View style={styles.featuredSection}>
+                        <View style={styles.featuredHeader}>
+                            <Text style={styles.sectionTitle}>Featured Restaurants</Text>
+                            <TouchableOpacity onPress={() => router.push('/tabs/restaurants')}>
+                                <Text style={styles.seeAll}>See all</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.featuredList}
+                        >
+                            {featured.map(r => (
+                                <FeaturedCard
+                                    key={r.restaurant_id}
+                                    restaurant={r}
+                                    onPress={() => router.push(`/restaurants/${r.restaurant_id}`)}
+                                />
+                            ))}
+                        </ScrollView>
                     </View>
                 )}
 
@@ -146,6 +206,87 @@ const styles = StyleSheet.create({
         width: 1,
         height: 40,
         backgroundColor: 'rgba(0,0,0,0.08)',
+    },
+    featuredSection: {
+        marginBottom: 16,
+    },
+    featuredHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: theme.colors.text,
+    },
+    seeAll: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: theme.colors.primary,
+    },
+    featuredList: {
+        gap: 12,
+        paddingRight: 4,
+    },
+    featuredCard: {
+        width: 150,
+        backgroundColor: theme.colors.surface,
+        borderRadius: 14,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.07)',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
+    },
+    featuredImageBox: {
+        height: 90,
+        backgroundColor: 'rgba(229,75,75,0.08)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    featuredImage: {
+        width: '100%',
+        height: '100%',
+    },
+    featuredBody: {
+        padding: 10,
+        gap: 4,
+    },
+    featuredName: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: theme.colors.text,
+    },
+    featuredMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    featuredCuisine: {
+        fontSize: 11,
+        color: theme.colors.gray,
+        textTransform: 'capitalize',
+    },
+    kioskBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 3,
+        backgroundColor: 'rgba(229,75,75,0.1)',
+        borderRadius: 4,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        alignSelf: 'flex-start',
+        marginTop: 2,
+    },
+    kioskBadgeText: {
+        fontSize: 10,
+        fontWeight: '700',
+        color: theme.colors.primary,
     },
     scanCard: {
         alignItems: 'center',
