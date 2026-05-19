@@ -1,13 +1,30 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 
 import ScanQrButton from '@/ui/components/buttons/ScanQrButton';
 import { ScreenLayout } from '@/ui/layouts/ScreenLayout';
 import { useAuth } from '@/services/providers/AuthProvider';
+import { useRestaurantSearch } from '@/services/hooks/restaurants/useRestaurantSearch';
 import { theme } from '@/ui/theme/theme';
+
+function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+    return (
+        <View style={styles.statCard}>
+            {icon}
+            <Text style={styles.statValue}>{value}</Text>
+            <Text style={styles.statLabel}>{label}</Text>
+        </View>
+    );
+}
 
 export default function HomeScreen() {
     const { firstName } = useAuth();
+    const { restaurants = [] } = useRestaurantSearch();
+
+    const restaurantCount = restaurants.length;
+    const cuisineCount = new Set(restaurants.map(r => r.cuisine)).size;
+    const kioskCount = restaurants.filter(r => r.has_kiosk).length;
 
     return (
         <ScreenLayout>
@@ -25,6 +42,29 @@ export default function HomeScreen() {
                         <MaterialCommunityIcons name="silverware-fork-knife" size={28} color={theme.colors.primary} />
                     </View>
                 </View>
+
+                {/* Stats */}
+                {restaurantCount > 0 && (
+                    <View style={[theme.common.card, styles.statsCard]}>
+                        <StatCard
+                            icon={<MaterialCommunityIcons name="silverware-fork-knife" size={22} color={theme.colors.primary} />}
+                            value={String(restaurantCount)}
+                            label="Available Restaurants"
+                        />
+                        <View style={styles.statDivider} />
+                        <StatCard
+                            icon={<MaterialCommunityIcons name="earth" size={22} color={theme.colors.primary} />}
+                            value={String(cuisineCount)}
+                            label="Cuisines"
+                        />
+                        <View style={styles.statDivider} />
+                        <StatCard
+                            icon={<MaterialCommunityIcons name="tablet" size={22} color={theme.colors.primary} />}
+                            value={String(kioskCount)}
+                            label="Restaurants With Kiosk"
+                        />
+                    </View>
+                )}
 
                 {/* QR scan card */}
                 <View style={[theme.common.card, styles.scanCard]}>
@@ -79,10 +119,38 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'rgba(0,0,0,0.07)',
     },
+    statsCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 16,
+        marginBottom: 16,
+    },
+    statCard: {
+        flex: 1,
+        alignItems: 'center',
+        gap: 4,
+    },
+    statValue: {
+        fontSize: 22,
+        fontWeight: '800',
+        color: theme.colors.text,
+    },
+    statLabel: {
+        fontSize: 11,
+        color: theme.colors.gray,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    statDivider: {
+        width: 1,
+        height: 40,
+        backgroundColor: 'rgba(0,0,0,0.08)',
+    },
     scanCard: {
         alignItems: 'center',
         paddingVertical: 24,
-        marginBottom: 20,
+        marginBottom: 16,
     },
     scanTitle: {
         fontSize: 18,
