@@ -78,28 +78,17 @@ export default function HomeScreen() {
                     </View>
                 </View>
 
-                {/* Stats */}
-                {restaurantCount > 0 && (
-                    <View style={[theme.common.card, styles.statsCard]}>
-                        <StatCard
-                            icon={<MaterialCommunityIcons name="silverware-fork-knife" size={22} color={theme.colors.primary} />}
-                            value={String(restaurantCount)}
-                            label="Available Restaurants"
-                        />
-                        <View style={styles.statDivider} />
-                        <StatCard
-                            icon={<MaterialCommunityIcons name="earth" size={22} color={theme.colors.primary} />}
-                            value={String(cuisineCount)}
-                            label="Cuisines"
-                        />
-                        <View style={styles.statDivider} />
-                        <StatCard
-                            icon={<MaterialCommunityIcons name="tablet" size={22} color={theme.colors.primary} />}
-                            value={String(kioskCount)}
-                            label="Restaurants With Kiosk"
-                        />
+                {/* QR scan card */}
+                <View style={[theme.common.card, styles.scanCard]}>
+                    <MaterialCommunityIcons name="qrcode-scan" size={36} color={theme.colors.primary} style={{ marginBottom: 10 }} />
+                    <Text style={styles.scanTitle}>Scan a table QR code</Text>
+                    <Text style={styles.scanDesc}>
+                        Scan the QR code at your table to access the menu and order food directly from your phone.
+                    </Text>
+                    <View style={{ marginTop: 16 }}>
+                        <ScanQrButton />
                     </View>
-                )}
+                </View>
 
                 {/* Featured restaurants */}
                 {featured.length > 0 && (
@@ -126,17 +115,28 @@ export default function HomeScreen() {
                     </View>
                 )}
 
-                {/* QR scan card */}
-                <View style={[theme.common.card, styles.scanCard]}>
-                    <MaterialCommunityIcons name="qrcode-scan" size={36} color={theme.colors.primary} style={{ marginBottom: 10 }} />
-                    <Text style={styles.scanTitle}>Scan a table QR code</Text>
-                    <Text style={styles.scanDesc}>
-                        Scan the QR code at your table to access the menu and order food directly from your phone.
-                    </Text>
-                    <View style={{ marginTop: 16 }}>
-                        <ScanQrButton />
+                {/* Stats */}
+                {restaurantCount > 0 && (
+                    <View style={[theme.common.card, styles.statsCard]}>
+                        <StatCard
+                            icon={<MaterialCommunityIcons name="silverware-fork-knife" size={22} color={theme.colors.primary} />}
+                            value={String(restaurantCount)}
+                            label="Available Restaurants"
+                        />
+                        <View style={styles.statDivider} />
+                        <StatCard
+                            icon={<MaterialCommunityIcons name="earth" size={22} color={theme.colors.primary} />}
+                            value={String(cuisineCount)}
+                            label="Cuisines"
+                        />
+                        <View style={styles.statDivider} />
+                        <StatCard
+                            icon={<MaterialCommunityIcons name="tablet" size={22} color={theme.colors.primary} />}
+                            value={String(kioskCount)}
+                            label="Restaurants With Kiosk"
+                        />
                     </View>
-                </View>
+                )}
 
                 {/* Onboarding hint */}
                 <View style={[theme.common.card, styles.hintCard]}>
