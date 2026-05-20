@@ -14,6 +14,7 @@ import {
 import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
 import { ITable, TableStatus } from '@/services/interfaces/interfaces';
 import { theme } from '@/ui/theme/theme';
+import StyledButton from "@/ui/components/buttons/StyledButton";
 
 function statusColor(status: TableStatus): string {
   switch (status) {
@@ -56,9 +57,13 @@ function TableCard({ table, onReserve }: { table: ITable; onReserve: () => void 
         Capacity: {table.capacity} {table.capacity === 1 ? 'person' : 'people'}
       </Text>
 
-      <TouchableOpacity style={[styles.reserveBtn, !isFree && styles.reserveBtnDisabled]} onPress={onReserve} disabled={!isFree}>
-        <Text style={styles.reserveBtnText}>{isFree ? 'Reserve this table' : 'Not free'}</Text>
-      </TouchableOpacity>
+      <StyledButton
+          onPress={onReserve}
+          disabled={!isFree}
+          accessibilityLabel={isFree ? "Reserve this table" : "Not free"}
+      >
+        {isFree ? "Reserve this table" : "Not free"}
+      </StyledButton>
     </View>
   );
 }
