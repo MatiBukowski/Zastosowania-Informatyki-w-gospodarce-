@@ -10,6 +10,7 @@ import { IReservation } from '@/services/interfaces/interfaces';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
+import StyledButton from '@/ui/components/buttons/StyledButton';
 
 const reservation_duration_in_min = 120;
 const durationMs = reservation_duration_in_min * 60 * 1000;
@@ -291,18 +292,13 @@ const RestaurantCreateReservationView = () => {
             </ScrollView>
 
             <View style={styles.footerContainer}>
-                <TouchableOpacity
-                    style={[
-                        styles.confirmButton,
-                        !isComplete && styles.disabledButton
-                    ]}
+                <StyledButton
                     onPress={handleReservationSubmit}
                     disabled={!isComplete}
+                    accessibilityLabel={isComplete ? "Confirm Reservation" : "Complete Selections"}
                 >
-                    <Text style={[styles.confirmButtonText, !isComplete]}>
-                        {isComplete ? "Confirm Reservation" : "Complete Selections"}
-                    </Text>
-                </TouchableOpacity>
+                    {isComplete ? "Confirm Reservation" : "Complete Selections"}
+                </StyledButton>
             </View>
         </View>
     );
