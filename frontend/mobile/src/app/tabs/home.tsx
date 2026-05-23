@@ -1,10 +1,10 @@
-import ScanQrButton from '@/ui/components/buttons/ScanQrButton';
+import HomeView from '@/ui/views/HomeView'
 import { ScreenLayout } from '@/ui/layouts/ScreenLayout';
 
-export default function HomeScreen() {
-  return (
-    <ScreenLayout>
-      <ScanQrButton />
-    </ScreenLayout>
-  );
+export default function HomePage() {
+    return (
+        <ScreenLayout>
+            <HomeView />
+        </ScreenLayout>
+    );
 }
