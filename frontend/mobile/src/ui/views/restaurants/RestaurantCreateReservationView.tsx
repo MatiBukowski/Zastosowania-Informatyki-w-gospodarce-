@@ -28,7 +28,8 @@ const generateTimeSlots = (startHour: number, endHour: number) => {
 
 const RestaurantCreateReservationView = () => {
     const { id, name } = useLocalSearchParams();
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const { userId, accessToken } = useAuth();
     const router = useRouter();
 
@@ -71,7 +72,7 @@ const RestaurantCreateReservationView = () => {
         if (!selectedDate || !guests || tables.length === 0) return false;
 
 
-        const slotStart = new Date(`${selectedDate}T${slotTime}:00Z`).getTime();
+        const slotStart = new Date(`${selectedDate}T${slotTime}:00`).getTime();
         const slotEnd = slotStart + durationMs;
 
         const suitableTables = tables.filter(t => t.capacity >= Number(guests));
@@ -123,11 +124,11 @@ const RestaurantCreateReservationView = () => {
         }
 
         posthog.capture('restaurant_reservation_params_confirmed', {
-        restaurant_id: id,
-        restaurant_name: name,
-        selected_date: selectedDate,
-        selected_time: selectedTime,
-        guest_count: guests
+            restaurant_id: id,
+            restaurant_name: name,
+            selected_date: selectedDate,
+            selected_time: selectedTime,
+            guest_count: guests
         });
 
         router.push({
