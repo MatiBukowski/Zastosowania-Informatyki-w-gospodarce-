@@ -9,23 +9,26 @@ import { AuthProvider } from './services/AuthProvider';
 import { theme } from '../theme/theme';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useState } from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
-        <Routes>
-          <Route path="/auth" element={<LoginPage/>}/>
-          <Route element={<Root isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/qr" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><TableQRPage /></ProtectedRoute>} />
-            <Route path="/forecast" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><ForecastPage /></ProtectedRoute>} />
-          </Route>
-        </Routes>
-      </AuthProvider>
+      <ErrorBoundary>
+        <CssBaseline />
+        <AuthProvider>
+          <Routes>
+            <Route path="/auth" element={<LoginPage/>}/>
+            <Route element={<Root isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/qr" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><TableQRPage /></ProtectedRoute>} />
+              <Route path="/forecast" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><ForecastPage /></ProtectedRoute>} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </ErrorBoundary>
     </ThemeProvider>
   );
 }

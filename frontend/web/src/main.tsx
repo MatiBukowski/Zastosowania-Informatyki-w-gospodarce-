@@ -30,7 +30,8 @@ style.textContent = `
 document.head.appendChild(style);
 
 posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
-  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  capture_exceptions: true,
 })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
