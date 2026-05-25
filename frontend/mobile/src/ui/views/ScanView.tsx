@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Text, Dimensions, TouchableOpacity } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { useResolveTableByToken } from '@/services/hooks/useTables';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/ui/theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -208,6 +208,17 @@ export default function ScanView() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const { table, loading, error } = useResolveTableByToken(qrToken || '');
   const hasNavigatedRef = useRef(false);
+
+  const { token } = useLocalSearchParams<{ token?: string }>();
+  const initialTokenHandled = useRef(false);
+
+  useEffect(() => {
+    if (token && !initialTokenHandled.current) {
+      initialTokenHandled.current = true;
+      setQrToken(token);
+      setScanned(true);
+    }
+  }, [token]);
 
   const resetScan = useCallback(() => {
     setScanned(false);
