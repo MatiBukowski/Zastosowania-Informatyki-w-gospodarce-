@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class RestaurantSchedule(Base):
     __tablename__ = "restaurant_schedules"
     
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    restaurant_schedule_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     restaurant_id: Mapped[int] = mapped_column(ForeignKey("restaurant.restaurant_id", ondelete="CASCADE"), nullable=False)
     
     day_of_week: Mapped[DayOfWeekEnum] = mapped_column(SAEnum(DayOfWeekEnum, name="day_of_week_enum"), nullable=False)
