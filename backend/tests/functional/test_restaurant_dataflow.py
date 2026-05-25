@@ -21,7 +21,11 @@ class TestRestaurantDataflow:
             first_restaurant = data["items"][0]
             assert "restaurant_id" in first_restaurant
             assert "name" in first_restaurant
-            assert "address" in first_restaurant
+            assert "city" in first_restaurant
+            assert "street" in first_restaurant
+            assert "building_number" in first_restaurant
+            assert "postal_code" in first_restaurant
+            assert "phone_number" in first_restaurant
             assert "has_kiosk" in first_restaurant
             assert "cuisine" in first_restaurant
             assert "photo" in first_restaurant
@@ -38,7 +42,11 @@ class TestRestaurantDataflow:
 
         assert data["restaurant_id"] == 1
         assert data["name"] == "Test Restaurant"
-        assert "address" in data
+        assert "city" in data
+        assert "street" in data
+        assert "building_number" in data
+        assert "postal_code" in data
+        assert "phone_number" in data
         assert "has_kiosk" in data
         assert "cuisine" in data
         assert "photo" in data

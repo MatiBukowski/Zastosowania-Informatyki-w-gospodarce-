@@ -5,7 +5,11 @@ from ..models.enums import CuisineTypeEnum
 
 class RestaurantBase(BaseModel):
     name: str
-    address: str
+    city: str
+    street: str
+    building_number: str
+    postal_code: str
+    phone_number: str
     has_kiosk: bool
     cuisine: CuisineTypeEnum
     photo: Optional[str] = None

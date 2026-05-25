@@ -11,7 +11,11 @@ from src.security import PasswordHandler
 def create_restaurants(db):
     restaurant = Restaurant(
         name="Test Restaurant",
-        address="Test Address",
+        city="Test City",
+        street="Test Street",
+        building_number="123",
+        postal_code="12345",
+        phone_number="123-456-7890",
         has_kiosk=True,
         cuisine=CuisineTypeEnum.ITALIAN,
         photo="test.jpg",
