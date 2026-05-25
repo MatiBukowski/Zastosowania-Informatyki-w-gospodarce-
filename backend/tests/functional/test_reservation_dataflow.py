@@ -100,3 +100,88 @@ class TestReservationDataflow:
 
         resp_retry = client.post("/api/tables/1/reservation", json=payload, headers=headers)
         assert resp_retry.status_code == 200
+
+    def test_get_my_reservations_success(self, client, db):
+        create_restaurants(db)
+        
+        # 1. Create a user (User 1) and register to get their token
+        user1_payload = {
+            "email": "user1@example.com",
+            "password": "password123",
+            "first_name": "User",
+            "surname": "One"
+        }
+        resp = client.post("/api/auth/register", json=user1_payload)
+        assert resp.status_code == 201
+        token1 = resp.json()["access_token"]
+        
+        # 2. Create another user (User 2) and get their token
+        user2_payload = {
+            "email": "user2@example.com",
+            "password": "password123",
+            "first_name": "User",
+            "surname": "Two"
+        }
+        resp = client.post("/api/auth/register", json=user2_payload)
+        assert resp.status_code == 201
+        token2 = resp.json()["access_token"]
+        
+        create_tables(db, restaurant_id=1)
+        
+        # Create a reservation for User 1
+        res_time_1 = (datetime.now(timezone.utc) + timedelta(days=5)).isoformat()
+        payload_1 = {
+            "user_id": 1,
+            "restaurant_id": 1,
+            "table_id": 1,
+            "reservation_time": res_time_1,
+            "status": ReservationStatusEnum.PENDING
+        }
+        resp = client.post("/api/tables/1/reservation", json=payload_1)
+        assert resp.status_code == 200
+        
+        # Create another reservation for User 1
+        res_time_2 = (datetime.now(timezone.utc) + timedelta(days=15)).isoformat()
+        payload_2 = {
+            "user_id": 1,
+            "restaurant_id": 1,
+            "table_id": 1,
+            "reservation_time": res_time_2,
+            "status": ReservationStatusEnum.PENDING
+        }
+        resp = client.post("/api/tables/1/reservation", json=payload_2)
+        assert resp.status_code == 200
+        
+        # Create a reservation for User 2
+        res_time_3 = (datetime.now(timezone.utc) + timedelta(days=25)).isoformat()
+        payload_3 = {
+            "user_id": 2,
+            "restaurant_id": 1,
+            "table_id": 1,
+            "reservation_time": res_time_3,
+            "status": ReservationStatusEnum.PENDING
+        }
+        resp = client.post("/api/tables/1/reservation", json=payload_3)
+        assert resp.status_code == 200
+        
+        # 3. Call GET /api/reservations/me without credentials -> should be 401
+        resp = client.get("/api/reservations/me")
+        assert resp.status_code == 401
+        
+        # 4. Call GET /api/reservations/me with User 1 token -> should return User 1's 2 reservations
+        headers1 = {"Authorization": f"Bearer {token1}"}
+        resp = client.get("/api/reservations/me", headers=headers1)
+        assert resp.status_code == 200
+        data1 = resp.json()
+        assert len(data1) == 2
+        for res in data1:
+            assert res["user_id"] == 1
+            
+        # 5. Call GET /api/reservations/me with User 2 token -> should return User 2's 1 reservation
+        headers2 = {"Authorization": f"Bearer {token2}"}
+        resp = client.get("/api/reservations/me", headers=headers2)
+        assert resp.status_code == 200
+        data2 = resp.json()
+        assert len(data2) == 1
+        assert data2[0]["user_id"] == 2
+
