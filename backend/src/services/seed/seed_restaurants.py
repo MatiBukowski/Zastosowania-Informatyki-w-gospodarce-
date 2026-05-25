@@ -6,7 +6,18 @@ import random
 fake = Faker('pl_PL')
 
 RESTAURANTS_DATA = [
-    {"name": "Abecadło z pieca spadło,O ziemię się hukło,Rozsypało się po kątach,Strasznie się potłukło:", "address": "ul. Włoska 1, Kraków", "cuisine": CuisineTypeEnum.ITALIAN, "has_kiosk": True, "description": "Authentic Italian cuisine with fresh ingredients.", "photo": "https://minio.xederro.tech/prod/restaurant/0.jpg"},
+    {
+        "name": "Abecadło z pieca spadło,O ziemię się hukło,Rozsypało się po kątach,Strasznie się potłukło:",
+        "city": "Kraków",
+        "street": "Włoska",
+        "building_number": "1",
+        "postal_code": "30-001",
+        "phone_number": "123456789",
+        "cuisine": CuisineTypeEnum.ITALIAN,
+        "has_kiosk": True,
+        "description": "Authentic Italian cuisine with fresh ingredients.",
+        "photo": "https://minio.xederro.tech/prod/restaurant/0.jpg"
+        },
 ]
 
 def generate_fake_restaurant() -> dict:
@@ -31,7 +42,11 @@ def generate_fake_restaurant() -> dict:
     
     return {
         "name": name,
-        "address": f"{fake.street_name()} {fake.building_number()}, {fake.city()}",
+        "city": fake.city(),
+        "street": fake.street_name(),
+        "building_number": fake.building_number(),
+        "postal_code": fake.postcode(),
+        "phone_number": fake.phone_number(),
         "cuisine": cuisine,
         "has_kiosk": random.choice([True, False]),
         "description": fake.sentence(nb_words=10),
