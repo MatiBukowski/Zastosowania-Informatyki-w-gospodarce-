@@ -71,7 +71,7 @@ const RestaurantCreateReservationView = () => {
         if (!selectedDate || !guests || tables.length === 0) return false;
 
 
-        const slotStart = new Date(`${selectedDate}T${slotTime}:00Z`).getTime();
+        const slotStart = new Date(`${selectedDate}T${slotTime}:00`).getTime();
         const slotEnd = slotStart + durationMs;
 
         const suitableTables = tables.filter(t => t.capacity >= Number(guests));

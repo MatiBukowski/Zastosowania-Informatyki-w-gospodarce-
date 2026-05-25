@@ -59,7 +59,7 @@ const RestaurantSelectTableView = () => {
 
     if (!hasEnoughCapacity) return false;
 
-    const selectedStart = new Date(`${date}T${time}:00Z`).getTime();
+    const selectedStart = new Date(`${date}T${time}:00`).getTime();
     //const durationMs = 120 * 60 * 1000; // 2h
     const selectedEnd = selectedStart + durationMs;
 
