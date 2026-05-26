@@ -5,6 +5,7 @@ import { ForecastPage } from './pages/ForecastPage';
 import { Routes, Route } from 'react-router-dom';
 import Root from './Root';
 import { LoginPage } from './pages/LoginPage';
+import { SupportPage } from './pages/SupportPage';
 import { AuthProvider } from './services/AuthProvider';
 import { theme } from '../theme/theme';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -21,6 +22,7 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<LoginPage/>}/>
+            <Route path="/support" element={<SupportPage/>}/>
             <Route element={<Root isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>}>
               <Route path="/" element={<HomePage />} />
               <Route path="/qr" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><TableQRPage /></ProtectedRoute>} />
