@@ -143,7 +143,11 @@ erDiagram
   RESTAURANT {
     int restaurant_id PK
     varchar name
-    varchar address
+    varchar city
+    varchar street
+    varchar building_number
+    varchar postal_code
+    varchar phone_number
     boolean has_kiosk
     enum cuisine "ITALIAN|AMERICAN|POLISH|MEDITERRANEAN|GREEK|FRENCH|SPANISH|ASIAN|JAPANESE|INDIAN|KEBAB|MEXICAN|VEGAN|FUSION|OTHER"
     varchar photo
@@ -151,9 +155,18 @@ erDiagram
     boolean is_active
   }
 
+  RESTAURANT_SCHEDULE {
+    int restaurant_schedule_id PK
+    int restaurant_id FK
+    int restaurant_id FK
+  }
+  
   RESTAURANT_USER {
     int user_id FK
     int restaurant_id FK
+    enum day_of_week "MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY"
+    time open_time
+    time close_time
   }
 
   TABLE {
@@ -206,6 +219,7 @@ erDiagram
 
   USER ||--o{ RESTAURANT_USER : "is assigned to"
   RESTAURANT ||--o{ RESTAURANT_USER : "has staff"
+  RESTAURANT_SCHEDULE ||--o{ RESTAURANT : "belongs to"
 
   RESTAURANT ||--o{ TABLE : has
   RESTAURANT ||--o{ MENU_ITEM : offers

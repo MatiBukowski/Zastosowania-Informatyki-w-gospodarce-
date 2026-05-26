@@ -4,7 +4,8 @@ from .enums import (
     ReservationStatusEnum,
     TableStatusEnum,
     UserRoleEnum,
-    CuisineTypeEnum
+    CuisineTypeEnum,
+    DayOfWeekEnum
 )
 from .app_user import AppUser
 from .restaurant import Restaurant
@@ -14,6 +15,7 @@ from .reservation import Reservation
 from .order import Order
 from .order_item import OrderItem
 from .restaurant_user import RestaurantUser
+from .restaurant_schedule import RestaurantSchedule
 
 __all__ = [
     "OrderSourceEnum",
@@ -22,6 +24,7 @@ __all__ = [
     "TableStatusEnum",
     "UserRoleEnum",
     "CuisineTypeEnum",
+    "DayOfWeekEnum",
     "AppUser",
     "Restaurant",
     "RestaurantTable",
@@ -29,5 +32,6 @@ __all__ = [
     "Reservation",
     "Order",
     "OrderItem",
-    "RestaurantUser"
+    "RestaurantUser",
+    "RestaurantSchedule"
 ]
