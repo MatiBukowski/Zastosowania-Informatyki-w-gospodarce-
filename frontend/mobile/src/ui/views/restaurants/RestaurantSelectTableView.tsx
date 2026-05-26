@@ -71,7 +71,10 @@ const RestaurantSelectTableView = () => {
     console.log(`- Reservations found in DB for this table: ${tableReservations.length}`);
 
     const hasCollision = tableReservations.some(res => {
-        const resStart = new Date(res.reservation_time).getTime();
+        const utcString = res.reservation_time.endsWith('Z')
+            ? res.reservation_time
+            : `${res.reservation_time}Z`;
+        const resStart = new Date(utcString).getTime();
         const resEnd = resStart + durationMs;
 
         // collision condition
@@ -88,10 +91,11 @@ const RestaurantSelectTableView = () => {
 
         try {
             const localDateTime = new Date(`${date}T${time}:00`);
+            const formattedForBackend = localDateTime.toISOString().split('.')[0];
             const reservationData = {
                 restaurant_id: Number(id),
                 table_id: selectedTableId,
-                reservation_time: localDateTime.toISOString(),
+                reservation_time: formattedForBackend,
                 user_id: Number(userId),
             };
 

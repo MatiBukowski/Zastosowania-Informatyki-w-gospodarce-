@@ -87,8 +87,11 @@ const RestaurantCreateReservationView = () => {
             const hasCollision = tableRes.some(res => {
                 if (!res.reservation_time) return false;
 
+                const utcString = res.reservation_time.endsWith('Z')
+                    ? res.reservation_time
+                    : `${res.reservation_time}Z`;
 
-                const resStart = new Date(res.reservation_time).getTime();
+                const resStart = new Date(utcString).getTime();
                 const resEnd = resStart + durationMs;
 
                 // 2h slot
