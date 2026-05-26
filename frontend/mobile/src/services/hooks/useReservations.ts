@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchAll } from '@/services/api/PaginationHelper';
-import { getReservationsByTableId, createReservation, getReservationById, updateReservation } from '@/services/api/ReservationAPI';
+import { getReservationsByTableId, createReservation, getReservationById, updateReservation, getMyReservations } from '@/services/api/ReservationAPI';
 import { IReservation, ICreateReservation, IUpdateReservation } from '@/services/interfaces/interfaces';
-
+import { useAuth } from '@/services/providers/AuthProvider';
 export function useGetReservationsByTableId(tableId: number) {
     const [reservations, setReservations] = useState<IReservation[]>([]);
     const [loading, setLoading] = useState(true);
@@ -101,4 +101,46 @@ export function useUpdateReservation() {
     };
 
     return { update, loading, error };
+}
+
+export function useGetMyReservations() {
+    const [reservations, setReservations] = useState<IReservation[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const { accessToken } = useAuth();
+
+    const fetchMyReservations = useCallback(async () => {
+        if (!accessToken) {
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const data = await getMyReservations(accessToken);
+            console.log("Reservations from z API:", data);
+
+            const normalizedData = data.map(res => ({
+                ...res,
+                reservation_time: res.reservation_time.endsWith('Z')
+                    ? res.reservation_time
+                    : `${res.reservation_time}Z`
+            }));
+
+            setReservations(normalizedData);
+            setError(null);
+        } catch (err: any) {
+            console.error('useGetMyReservations - error:', err);
+            setError(err.message || 'Failed to fetch user reservations');
+        } finally {
+            setLoading(false);
+        }
+    }, [accessToken]);
+
+    useEffect(() => {
+        fetchMyReservations();
+    }, [fetchMyReservations]);
+
+    return { reservations, loading, error, refresh: fetchMyReservations };
 }

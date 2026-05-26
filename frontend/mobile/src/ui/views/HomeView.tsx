@@ -77,6 +77,20 @@ export default function HomeView() {
                     </View>
                 </View>
 
+                {/* MY RESERVATIONS */}
+                <TouchableOpacity
+                    style={[theme.common.card, { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.primary, marginBottom: 16, paddingVertical: 16 }]}
+                    onPress={() => router.push('/user/UserReservations')}
+                    activeOpacity={0.8}
+                >
+                    <Ionicons name="calendar-outline" size={28} color="#fff" style={{ marginRight: 12 }} />
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>My Reservations</Text>
+                        <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>Check your upcoming tables</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="#fff" />
+                </TouchableOpacity>
+
                 {/* QR scan card */}
                 <View style={[theme.common.card, styles.scanCard]}>
                     <MaterialCommunityIcons name="qrcode-scan" size={36} color={theme.colors.primary} style={{ marginBottom: 10 }} />
