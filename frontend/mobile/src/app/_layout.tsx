@@ -1,4 +1,4 @@
-import { Stack, useGlobalSearchParams, usePathname } from "expo-router";
+import { Stack, useGlobalSearchParams, usePathname, useRootNavigationState } from "expo-router";
 import { PostHogProvider } from 'posthog-react-native'
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -33,7 +33,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   );
 }
 
-export default function RootLayout() {
+function PostHogTracker() {
   const pathname = usePathname();
   const params = useGlobalSearchParams();
 
@@ -41,10 +41,18 @@ export default function RootLayout() {
     posthogClient.screen(pathname, params)
   }, [pathname, params]);
 
+  return null;
+}
+
+export default function RootLayout() {
+  const navigationState = useRootNavigationState();
+  const isNavigationReady = !!navigationState?.key;
+
   return (
     <QueryClientProvider client={queryClient}>
       <PostHogProvider client={posthogClient}>
         <AuthProvider>
+            {isNavigationReady && <PostHogTracker />}
             <Stack screenOptions={{ headerShown: false }}/>
         </AuthProvider>
       </PostHogProvider>

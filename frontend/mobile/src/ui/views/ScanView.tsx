@@ -210,11 +210,11 @@ export default function ScanView() {
   const hasNavigatedRef = useRef(false);
 
   const { token } = useLocalSearchParams<{ token?: string }>();
-  const initialTokenHandled = useRef(false);
+  const lastHandledTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (token && !initialTokenHandled.current) {
-      initialTokenHandled.current = true;
+    if (token && token !== lastHandledTokenRef.current) {
+      lastHandledTokenRef.current = token;
       setQrToken(token);
       setScanned(true);
     }
@@ -226,6 +226,7 @@ export default function ScanView() {
     setScanStatus('default');
     setErrorMessage('');
     hasNavigatedRef.current = false;
+    lastHandledTokenRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -242,7 +243,9 @@ export default function ScanView() {
       // When coming back from the menu (or refocusing this view), clear previous scan state
       // so the camera callback is re-enabled and we don't stick in "loading".
       resetScan();
-      return () => {};
+      return () => {
+        lastHandledTokenRef.current = null;
+      };
     }, [resetScan])
   );
 
