@@ -6,13 +6,8 @@ import { useRouter } from 'expo-router';
 import { theme } from '@/ui/theme/theme';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { IReservation, ReservationStatus } from '@/services/interfaces/interfaces';
-import { useGetMyReservations } from '@/services/hooks/useReservations';
-
-export default function UserReservationsView() {
-  const router = useRouter();
-  const { accessToken } = useAuth();
-
-  const { reservations, loading: isLoading, refresh } = useGetMyReservations();
+import { useGetMyReservations} from '@/services/hooks/useReservations';
+import { useGetRestaurantById } from '@/services/hooks/useRestaurants';
 
   const getStatusConfig = (status: ReservationStatus) => {
     switch (status) {
@@ -29,24 +24,30 @@ export default function UserReservationsView() {
     }
   };
 
-  const renderReservationCard = ({ item }: { item: IReservation }) => {
+
+
+  const ReservationCard = ({ item }: { item: IReservation }) => {
+    const router = useRouter();
+    const { restaurant, loading } = useGetRestaurantById(item.restaurant_id);
+
     const utcString = item.reservation_time.endsWith('Z')
       ? item.reservation_time
       : `${item.reservation_time}Z`;
     const dateObj = new Date(utcString);
-
     const formattedDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     const formattedTime = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     const statusConfig = getStatusConfig(item.status);
 
     return (
       <TouchableOpacity
-        style={styles.card}
+        style={[theme.common.card, styles.cardLayoutOverride]}
         activeOpacity={0.7}
         onPress={() => router.push(`/reservations/${item.reservation_id}` as any)}
       >
         <View style={styles.cardHeader}>
-          <Text style={styles.restaurantName}>Restaurant #{item.restaurant_id}</Text>
+          <Text style={styles.restaurantName} numberOfLines={1}>
+            {loading ? 'Loading...' : (restaurant?.name || `Restaurant #${item.restaurant_id}`)}
+          </Text>
           <View style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}>
             <Text style={[styles.statusText, { color: statusConfig.color }]}>
               {statusConfig.label}
@@ -72,6 +73,17 @@ export default function UserReservationsView() {
     );
   };
 
+
+export default function UserReservationsView() {
+  const router = useRouter();
+  const { accessToken } = useAuth();
+
+  const { reservations, loading: isLoading, refresh } = useGetMyReservations();
+
+
+
+
+
   if (!accessToken) {
     return (
       <View style={styles.center}>
@@ -90,14 +102,14 @@ export default function UserReservationsView() {
         <FlatList
           data={reservations}
           keyExtractor={(item) => item.reservation_id.toString()}
-          renderItem={renderReservationCard}
+          renderItem={({ item }) => <ReservationCard item={item} />}
           contentContainerStyle={{ paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
           onRefresh={refresh}
           refreshing={isLoading}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Ionicons name="receipt-outline" size={48} color="#ccc" />
+              <Ionicons name="receipt-outline" size={48} color={theme.colors.gray}/>
               <Text style={styles.emptyStateText}>You don't have any reservations yet.</Text>
             </View>
           }
@@ -112,32 +124,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 20,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: theme.colors.background,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
   },
   pageTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1A1A1A',
+    ...theme.typography.h4,
     marginBottom: 20,
     marginLeft: 4,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+  cardLayoutOverride: {
   },
   cardHeader: {
     flexDirection: 'row',
@@ -146,9 +146,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   restaurantName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
+    ...theme.typography.h6,
+    color: theme.colors.text,
     flex: 1,
     marginRight: 10,
   },
@@ -174,8 +173,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   detailText: {
-    fontSize: 14,
-    color: '#555',
+    ...theme.typography.caption,
+    color: theme.colors.text,
     fontWeight: '500',
   },
   emptyState: {
@@ -185,7 +184,7 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     marginTop: 12,
-    fontSize: 16,
-    color: '#888',
+    ...theme.typography.body,
+    color: theme.colors.gray,
   }
 });

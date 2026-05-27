@@ -51,7 +51,7 @@ function FeaturedCard({ restaurant, onPress }: { restaurant: IRestaurant; onPres
 }
 
 export default function HomeView() {
-    const { firstName } = useAuth();
+    const { firstName, accessToken, logout } = useAuth();
     const { restaurants = [] } = useRestaurantSearch();
     const router = useRouter();
 
@@ -59,6 +59,14 @@ export default function HomeView() {
     const cuisineCount = new Set(restaurants.map(r => r.cuisine)).size;
     const kioskCount = restaurants.filter(r => r.has_kiosk).length;
     const featured = restaurants.slice(0, 5);
+
+    const handleAuthAction = () => {
+        if (accessToken) {
+            logout();
+        } else {
+            router.push('/user/login');
+        }
+    };
 
     return (
         <ScreenLayout>
@@ -72,6 +80,13 @@ export default function HomeView() {
                         </Text>
                         <Text style={styles.subtitle}>What would you like to do today?</Text>
                     </View>
+                    <TouchableOpacity style={styles.logoBox} onPress={handleAuthAction} activeOpacity={0.7}>
+                        {accessToken ? (
+                            <MaterialCommunityIcons name="logout" size={28} color={theme.colors.primary} />
+                        ) : (
+                            <MaterialCommunityIcons name="login" size={28} color={theme.colors.primary} />
+                        )}
+                    </TouchableOpacity>
                     <View style={styles.logoBox}>
                         <MaterialCommunityIcons name="silverware-fork-knife" size={28} color={theme.colors.primary} />
                     </View>

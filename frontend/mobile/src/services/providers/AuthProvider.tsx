@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useRef } from "r
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 import { apiClient } from "@/services/api/API";
-import { loginUser } from "@/services/api/AuthAPI";
+import { loginUser, logoutUser } from "@/services/api/AuthAPI";
 import { ILoginRequest}  from '@/services/interfaces/interfaces';
 import { usePostHog } from "posthog-react-native";
 
@@ -14,17 +14,17 @@ export interface IJwtPayload {
     email: string;
 }
 
-interface AuthContextType {
+interface IAuthContextType {
     accessToken: string | null;
     userId: string | null;
     firstName: string | null;
     surname: string | null;
     login: (data: ILoginRequest) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
     isAxiosReady: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<IAuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -77,8 +77,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = async () => {
         try {
+            await logoutUser();
             await AsyncStorage.multiRemove(['user_token', 'user_id']);
+        }catch (error){
+            console.error("Server logout error:", error);
+
         } finally {
+            delete apiClient.defaults.headers.common['Authorization'];
             posthog.reset();
             setAccessToken(null);
             setUserId(null);
