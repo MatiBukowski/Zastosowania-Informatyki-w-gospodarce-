@@ -56,8 +56,32 @@
 15. **POST /api/auth/login/{user}**
     - Returns: {"access_token"} with HTTP only cookie with refresh token in it set.
 
-165. **POST /api/auth/refresh**
+16. **POST /api/auth/refresh**
     - Returns: {"access_token"}
 
 17. **POST /api/auth/logout**
     - Returns empty HTTP only cookie
+
+18. **POST /api/orders**
+    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
+      - Proposed schema name: **"OrderResponse"**
+
+19. **GET /api/orders/my**
+    - Returns a list: List[{"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}]
+      - Proposed schema name: **"OrderResponse"**
+
+20. **GET /api/orders/restaurant/{restaurant_id}**
+    - Returns a list: List[{"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}]
+      - Proposed schema name: **"OrderResponse"**
+
+21. **GET /api/orders/{order_id}**
+    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
+      - Proposed schema name: **"OrderResponse"**
+
+22. **PATCH /api/orders/{order_id}**
+    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
+      - Proposed schema name: **"OrderResponse"**
+
+23. **PATCH /api/orders/{order_id}/cancel**
+    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
+      - Proposed schema name: **"OrderResponse"**
