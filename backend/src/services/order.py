@@ -299,7 +299,17 @@ class OrderService:
                 detail="You do not have enough permissions to access this restaurant's orders."
             )
         elif current_user.role in [UserRoleEnum.MANAGER, UserRoleEnum.WAITER]:
-            if not self.restaurant_repo.is_staff_member(restaurant_id, current_user.user_id):
+            from sqlalchemy import select
+            from ..models import RestaurantUser
+            is_staff = self.restaurant_repo.db.execute(
+                select(1)
+                .select_from(RestaurantUser)
+                .where(
+                    RestaurantUser.user_id == current_user.user_id,
+                    RestaurantUser.restaurant_id == restaurant_id
+                )
+            ).scalar() is not None
+            if not is_staff:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="You do not have enough permissions to access this restaurant's orders."
