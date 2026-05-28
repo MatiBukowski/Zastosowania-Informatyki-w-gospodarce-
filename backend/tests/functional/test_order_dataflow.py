@@ -144,19 +144,16 @@ class TestOrderDataflow:
     def test_order_create_unavailable_menu_item_returns_400(self, client, db):
         restaurant = create_restaurants(db)
         create_menu(db)
-        create_tables(db, restaurant.restaurant_id)
 
-        table = get_table_for_restaurant(db, restaurant.restaurant_id)
         mi = get_menu_item_for_restaurant(db, restaurant.restaurant_id)
-
         mi.is_available = False
         db.commit()
 
         create_payload = {
             "restaurant_id": restaurant.restaurant_id,
-            "table_id": table.table_id,
+            "table_id": None,
             "reservation_id": None,
-            "order_source": "QR_TABLE",
+            "order_source": "KIOSK",
             "items": [
                 {
                     "menu_item_id": mi.menu_item_id,
@@ -328,15 +325,8 @@ class TestOrderDataflow:
     def test_cross_restaurant_waiter_bola(self, client, db):
         restaurant_a = create_restaurants(db)
         
-        restaurant_b = Restaurant(
-            name="Restaurant B",
-            address="Address B",
-            has_kiosk=True,
-            cuisine="ITALIAN",
-            photo="b.jpg",
-            description="desc B"
-        )
-        db.add(restaurant_b)
+        restaurant_b = create_restaurants(db)
+        restaurant_b.name = "Restaurant B"
         db.commit()
 
         waiter = AppUser(

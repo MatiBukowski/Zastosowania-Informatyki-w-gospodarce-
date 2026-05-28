@@ -75,7 +75,15 @@ class OrderService:
                         )
 
             now = datetime.now()
-            active_res = self.reservation_repo.get_active_reservation_for_table(order_data.table_id, now)
+            from datetime import timedelta
+            window_start = now - timedelta(hours=2)
+            window_end = now + timedelta(hours=2)
+            active_res = self.reservation_repo.db.query(Reservation).filter(
+                Reservation.table_id == order_data.table_id,
+                Reservation.status == ReservationStatusEnum.CONFIRMED,
+                Reservation.reservation_time >= window_start,
+                Reservation.reservation_time <= window_end
+            ).first()
 
             if active_res:
                 if current_user_id is None:
@@ -140,7 +148,7 @@ class OrderService:
         items_to_create = []
 
         for item_data in order_data.items:
-            mi = self.menu_repo.get_menu_item_by_id(item_data.menu_item_id)
+            mi = self.menu_repo.db.query(MenuItem).filter(MenuItem.menu_item_id == item_data.menu_item_id).first()
             if not mi or mi.restaurant_id != order_data.restaurant_id:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

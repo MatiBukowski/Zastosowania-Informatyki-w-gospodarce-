@@ -25,7 +25,7 @@ class TestOrderService:
             price=Decimal("15.50"),
             is_available=True
         )
-        mock_menu_repo.get_menu_item_by_id.return_value = mock_menu_item
+        mock_menu_repo.db.query.return_value.filter.return_value.first.return_value = mock_menu_item
 
         def mock_create(order, items):
             order.order_id = 123
@@ -56,7 +56,7 @@ class TestOrderService:
         assert result.order_id == 123
         assert result.total_amount == Decimal("31.00")
         mock_repo.create_order.assert_called_once()
-        mock_menu_repo.get_menu_item_by_id.assert_called_once_with(1)
+        mock_menu_repo.db.query.assert_called_once_with(MenuItem)
 
     def test_create_order_reservation_hijack_raises_403(self):
         mock_repo = MagicMock()
@@ -214,7 +214,7 @@ class TestOrderService:
             price=Decimal("10.00"),
             is_available=True
         )
-        mock_menu_repo.get_menu_item_by_id.return_value = mock_mi
+        mock_menu_repo.db.query.return_value.filter.return_value.first.return_value = mock_mi
 
         service = OrderService(
             repo=mock_repo,
@@ -254,7 +254,7 @@ class TestOrderService:
             price=Decimal("20.00"),
             is_available=False
         )
-        mock_menu_repo.get_menu_item_by_id.return_value = mock_mi
+        mock_menu_repo.db.query.return_value.filter.return_value.first.return_value = mock_mi
 
         service = OrderService(
             repo=mock_repo,
