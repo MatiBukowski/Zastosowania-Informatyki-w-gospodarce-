@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchAll } from '@/services/api/PaginationHelper';
-import { getReservationsByTableId, createReservation, getReservationById, updateReservation } from '@/services/api/ReservationAPI';
+import { getReservationsByTableId, createReservation, getReservationById, updateReservation, getMyReservations } from '@/services/api/ReservationAPI';
 import { IReservation, ICreateReservation, IUpdateReservation } from '@/services/interfaces/interfaces';
+import {apiClient} from "@/services/api/API";
 
 export function useGetReservationsByTableId(tableId: number) {
     const [reservations, setReservations] = useState<IReservation[]>([]);
@@ -101,4 +102,30 @@ export function useUpdateReservation() {
     };
 
     return { update, loading, error };
+}
+
+export function useGetMyReservations() {
+    const [reservations, setReservations] = useState<IReservation[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchReservations = useCallback(async () => {
+        setLoading(true);
+        try {
+            const data = await getMyReservations();
+            setReservations(data);
+            setError(null);
+        } catch (err: any) {
+            console.error('useGetMyReservations - error:', err);
+            setError(err.message || 'Failed to fetch reservations');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchReservations();
+    }, [fetchReservations]);
+
+    return { reservations, loading, error, refresh: fetchReservations };
 }
