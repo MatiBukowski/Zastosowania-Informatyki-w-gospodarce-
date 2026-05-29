@@ -171,7 +171,7 @@ export default function HomeView() {
                                 key={r.reservation_id}
                                 reservation={r}
                                 restaurantName={restaurantNames[r.restaurant_id] ?? null}
-                                onPress={() => router.push(`/reservations/${r.reservation_id}`)}
+                                // onPress={() => router.push(``)}
                             />
                         ))}
                     </View>
