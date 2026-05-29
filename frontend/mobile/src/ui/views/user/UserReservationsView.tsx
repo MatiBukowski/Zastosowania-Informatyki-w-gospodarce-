@@ -42,7 +42,14 @@ import { useGetRestaurantById } from '@/services/hooks/useRestaurants';
       <TouchableOpacity
         style={[theme.common.card, styles.cardLayoutOverride]}
         activeOpacity={0.7}
-        onPress={() => router.push(`/reservations/${item.reservation_id}` as any)}
+        onPress={() => router.push({
+                pathname: "/tabs/profile/reservationDetails",
+                params: {
+                  id: item.reservation_id,
+                  restaurantId: item.restaurant_id
+                }
+              })}
+        //onPress={() => router.push(`/reservations/${item.reservation_id}` as any)}
       >
         <View style={styles.cardHeader}>
           <Text style={styles.restaurantName} numberOfLines={1}>
