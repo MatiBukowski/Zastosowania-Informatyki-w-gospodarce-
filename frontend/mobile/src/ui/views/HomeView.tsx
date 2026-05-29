@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -6,7 +6,8 @@ import ScanQrButton from '@/ui/components/buttons/ScanQrButton';
 import { ScreenLayout } from '@/ui/layouts/ScreenLayout';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { useRestaurantSearch } from '@/services/hooks/restaurants/useRestaurantSearch';
-import { IRestaurant } from '@/services/interfaces/interfaces';
+import { useGetMyReservations } from '@/services/hooks/useReservations';
+import { IReservation, ReservationStatus } from '@/services/interfaces/interfaces';
 import { theme } from '@/ui/theme/theme';
 
 function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
@@ -19,33 +20,37 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string
     );
 }
 
-function FeaturedCard({ restaurant, onPress }: { restaurant: IRestaurant; onPress: () => void }) {
+function statusColor(status: ReservationStatus): string {
+    switch (status) {
+        case ReservationStatus.CONFIRMED: return '#2e7d32';
+        case ReservationStatus.PENDING:   return '#e65100';
+        case ReservationStatus.COMPLETED: return '#555';
+        case ReservationStatus.CANCELED:  return '#c62828';
+        default: return '#888';
+    }
+}
+
+function ReservationCard({ reservation, onPress }: { reservation: IReservation; onPress: () => void }) {
+    const date = new Date(reservation.reservation_time);
+    const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
     return (
-        <TouchableOpacity style={styles.featuredCard} onPress={onPress} activeOpacity={0.8}>
-            <View style={styles.featuredImageBox}>
-                {restaurant.photo ? (
-                    <Image
-                        source={{ uri: restaurant.photo }}
-                        style={styles.featuredImage}
-                        resizeMode="cover"
-                    />
-                ) : (
-                    <MaterialCommunityIcons name="silverware-fork-knife" size={32} color={theme.colors.primary} />
-                )}
+        <TouchableOpacity style={styles.reservationCard} onPress={onPress} activeOpacity={0.8}>
+            <View style={styles.reservationDateBox}>
+                <Text style={styles.reservationDay}>{date.getDate()}</Text>
+                <Text style={styles.reservationMonth}>
+                    {date.toLocaleString('en-GB', { month: 'short' }).toUpperCase()}
+                </Text>
             </View>
-            <View style={styles.featuredBody}>
-                <Text style={styles.featuredName} numberOfLines={1}>{restaurant.name}</Text>
-                <View style={styles.featuredMeta}>
-                    <MaterialCommunityIcons name="earth" size={12} color={theme.colors.gray} />
-                    <Text style={styles.featuredCuisine}>{restaurant.cuisine}</Text>
-                </View>
-                {restaurant.has_kiosk && (
-                    <View style={styles.kioskBadge}>
-                        <MaterialCommunityIcons name="tablet" size={10} color={theme.colors.primary} />
-                        <Text style={styles.kioskBadgeText}>Kiosk</Text>
-                    </View>
-                )}
+            <View style={styles.reservationBody}>
+                <Text style={styles.reservationTitle} numberOfLines={1}>
+                    Reservation #{reservation.reservation_id}
+                </Text>
+                <Text style={styles.reservationSub}>{dateStr} at {timeStr}</Text>
+                <Text style={styles.reservationSub}>Table #{reservation.table_id}</Text>
             </View>
+            <View style={[styles.statusDot, { backgroundColor: statusColor(reservation.status) }]} />
         </TouchableOpacity>
     );
 }
@@ -53,12 +58,20 @@ function FeaturedCard({ restaurant, onPress }: { restaurant: IRestaurant; onPres
 export default function HomeView() {
     const { firstName } = useAuth();
     const { restaurants = [] } = useRestaurantSearch();
+    const { reservations, loading: reservationsLoading } = useGetMyReservations();
     const router = useRouter();
 
     const restaurantCount = restaurants.length;
     const cuisineCount = new Set(restaurants.map(r => r.cuisine)).size;
     const kioskCount = restaurants.filter(r => r.has_kiosk).length;
-    const featured = restaurants.slice(0, 5);
+
+    const upcomingReservations = reservations
+        .filter(r =>
+            new Date(r.reservation_time) >= new Date() &&
+            r.status !== ReservationStatus.CANCELED &&
+            r.status !== ReservationStatus.COMPLETED
+        )
+        .slice(0, 3);
 
     return (
         <ScreenLayout>
@@ -89,28 +102,35 @@ export default function HomeView() {
                     </View>
                 </View>
 
-                {/* Featured restaurants */}
-                {featured.length > 0 && (
-                    <View style={styles.featuredSection}>
-                        <View style={styles.featuredHeader}>
-                            <Text style={styles.sectionTitle}>Featured Restaurants</Text>
-                            <TouchableOpacity onPress={() => router.push('/tabs/restaurants')}>
-                                <Text style={styles.seeAll}>See all</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.featuredList}
-                        >
-                            {featured.map(r => (
-                                <FeaturedCard
-                                    key={r.restaurant_id}
-                                    restaurant={r}
-                                    onPress={() => router.push(`/restaurants/${r.restaurant_id}`)}
-                                />
-                            ))}
-                        </ScrollView>
+                {/* My Reservations */}
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>My Reservations</Text>
+                    <TouchableOpacity /* onPress={() => router.push('') */>
+                        <Text style={styles.seeAll}>See all</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {reservationsLoading ? (
+                    <View style={styles.reservationsLoading}>
+                        <ActivityIndicator size="small" color={theme.colors.primary} />
+                    </View>
+                ) : upcomingReservations.length === 0 ? (
+                    <View style={[theme.common.card, styles.emptyReservations]}>
+                        <Ionicons name="calendar-outline" size={28} color={theme.colors.gray} style={{ opacity: 0.4 }} />
+                        <Text style={styles.emptyText}>No upcoming reservations</Text>
+                        <TouchableOpacity onPress={() => router.push('/tabs/restaurants')}>
+                            <Text style={styles.emptyAction}>Browse restaurants →</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <View style={styles.reservationsList}>
+                        {upcomingReservations.map(r => (
+                            <ReservationCard
+                                key={r.reservation_id}
+                                reservation={r}
+                                onPress={() => router.push(`/reservations/${r.reservation_id}`)}
+                            />
+                        ))}
                     </View>
                 )}
 
@@ -178,6 +198,111 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'rgba(0,0,0,0.07)',
     },
+    scanCard: {
+        alignItems: 'center',
+        paddingVertical: 24,
+        marginBottom: 16,
+    },
+    scanTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: theme.colors.text,
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    scanDesc: {
+        fontSize: 14,
+        color: theme.colors.gray,
+        textAlign: 'center',
+        lineHeight: 20,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+        marginTop: 4,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: theme.colors.text,
+    },
+    seeAll: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: theme.colors.primary,
+    },
+    reservationsLoading: {
+        paddingVertical: 24,
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    emptyReservations: {
+        alignItems: 'center',
+        paddingVertical: 20,
+        gap: 8,
+        marginBottom: 16,
+    },
+    emptyText: {
+        fontSize: 14,
+        color: theme.colors.gray,
+        fontWeight: '500',
+    },
+    emptyAction: {
+        fontSize: 13,
+        color: theme.colors.primary,
+        fontWeight: '600',
+    },
+    reservationsList: {
+        gap: 10,
+        marginBottom: 16,
+    },
+    reservationCard: {
+        ...theme.common.card,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        padding: 14,
+        marginBottom: 0,
+    },
+    reservationDateBox: {
+        width: 44,
+        height: 48,
+        borderRadius: 10,
+        backgroundColor: 'rgba(229,75,75,0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    reservationDay: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: theme.colors.primary,
+        lineHeight: 20,
+    },
+    reservationMonth: {
+        fontSize: 10,
+        fontWeight: '700',
+        color: theme.colors.primary,
+    },
+    reservationBody: {
+        flex: 1,
+        gap: 2,
+    },
+    reservationTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: theme.colors.text,
+    },
+    reservationSub: {
+        fontSize: 12,
+        color: theme.colors.gray,
+    },
+    statusDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+    },
     statsCard: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -205,105 +330,6 @@ const styles = StyleSheet.create({
         width: 1,
         height: 40,
         backgroundColor: 'rgba(0,0,0,0.08)',
-    },
-    featuredSection: {
-        marginBottom: 16,
-    },
-    featuredHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: theme.colors.text,
-    },
-    seeAll: {
-        fontSize: 13,
-        fontWeight: '600',
-        color: theme.colors.primary,
-    },
-    featuredList: {
-        gap: 12,
-        paddingRight: 4,
-    },
-    featuredCard: {
-        width: 150,
-        backgroundColor: theme.colors.surface,
-        borderRadius: 14,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.07)',
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 3,
-    },
-    featuredImageBox: {
-        height: 90,
-        backgroundColor: 'rgba(229,75,75,0.08)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    featuredImage: {
-        width: '100%',
-        height: '100%',
-    },
-    featuredBody: {
-        padding: 10,
-        gap: 4,
-    },
-    featuredName: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: theme.colors.text,
-    },
-    featuredMeta: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    featuredCuisine: {
-        fontSize: 11,
-        color: theme.colors.gray,
-        textTransform: 'capitalize',
-    },
-    kioskBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 3,
-        backgroundColor: 'rgba(229,75,75,0.1)',
-        borderRadius: 4,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        alignSelf: 'flex-start',
-        marginTop: 2,
-    },
-    kioskBadgeText: {
-        fontSize: 10,
-        fontWeight: '700',
-        color: theme.colors.primary,
-    },
-    scanCard: {
-        alignItems: 'center',
-        paddingVertical: 24,
-        marginBottom: 16,
-    },
-    scanTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: theme.colors.text,
-        marginBottom: 8,
-        textAlign: 'center',
-    },
-    scanDesc: {
-        fontSize: 14,
-        color: theme.colors.gray,
-        textAlign: 'center',
-        lineHeight: 20,
     },
     hintCard: {
         flexDirection: 'row',
