@@ -14,6 +14,7 @@ from src.controllers import (
     health_router,
     restaurant_router,
     table_router,
+    reservation_router,
     forecast_router,
     user_router,
     support_router,
