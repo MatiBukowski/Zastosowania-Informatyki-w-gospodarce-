@@ -32,7 +32,7 @@ const LoginScreen = ({ embedded = false }: { embedded?: boolean }) => {
         <SafeAreaView style={styles.container}>
             <View style={styles.formCard}>
                 <Text style={styles.title}>Welcome Back</Text>
-                <Text style={styles.subtitle}>Please login to continue your reservation</Text>
+                <Text style={styles.subtitle}>Please log in to see more details</Text>
 
                 <TextInput
                     style={styles.input}

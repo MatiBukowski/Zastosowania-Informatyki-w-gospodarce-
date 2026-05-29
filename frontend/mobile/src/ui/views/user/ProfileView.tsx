@@ -8,7 +8,7 @@ import { IReservation, ReservationStatus } from '@/services/interfaces/interface
 import { useGetMyReservations} from '@/services/hooks/useReservations';
 import { useGetRestaurantById } from '@/services/hooks/useRestaurants';
 
-import LoginScreen from '@/app/user/login';
+import LoginScreen from '@/app/tabs/profile/login';
 
 export default function ProfileTab() {
   const { accessToken } = useAuth();
@@ -26,7 +26,7 @@ export default function ProfileTab() {
       {/* MY RESERVATIONS */}
       <TouchableOpacity
         style={[theme.common.card, { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.primary, marginBottom: 16, paddingVertical: 16 }]}
-        onPress={() => router.push('/user/UserReservations')}
+        onPress={() => router.push('/tabs/profile/UserReservations')}
         activeOpacity={0.8}
       >
         <Ionicons name="calendar-outline" size={28} color="#fff" style={{ marginRight: 12 }} />

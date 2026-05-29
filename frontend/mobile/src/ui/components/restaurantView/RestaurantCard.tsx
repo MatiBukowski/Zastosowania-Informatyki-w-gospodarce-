@@ -61,7 +61,11 @@ function RestaurantCard({
       restaurant_name: restaurant.name,
       cuisine: restaurant.cuisine
     });
-    router.push(`/restaurants/${restaurant.restaurant_id}` as any);
+    router.push({
+      pathname: "/tabs/restaurants/[id]",
+      params: { id: restaurant.restaurant_id }
+    });
+    //router.push(`/restaurants/${restaurant.restaurant_id}` as any);
   };
 
   return (

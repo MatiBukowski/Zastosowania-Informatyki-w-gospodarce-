@@ -64,7 +64,7 @@ export default function HomeView() {
         if (accessToken) {
             logout();
         } else {
-            router.push('/user/login');
+            router.push('/tabs/profile/login');
         }
     };
 
@@ -95,7 +95,7 @@ export default function HomeView() {
                 {/* MY RESERVATIONS */}
                 <TouchableOpacity
                     style={[theme.common.card, { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.primary, marginBottom: 16, paddingVertical: 16 }]}
-                    onPress={() => router.push('/user/UserReservations')}
+                    onPress={() => router.push('/tabs/profile/UserReservations')}
                     activeOpacity={0.8}
                 >
                     <Ionicons name="calendar-outline" size={28} color="#fff" style={{ marginRight: 12 }} />
@@ -136,7 +136,11 @@ export default function HomeView() {
                                 <FeaturedCard
                                     key={r.restaurant_id}
                                     restaurant={r}
-                                    onPress={() => router.push(`/restaurants/${r.restaurant_id}`)}
+                                    onPress={() => router.push({
+                                      pathname: "/tabs/restaurants/[id]",
+                                      params: { id: r.restaurant_id }
+                                    })}
+                                    //onPress={() => router.push(`/tabs/restaurants/${r.restaurant_id}`)}
                                 />
                             ))}
                         </ScrollView>

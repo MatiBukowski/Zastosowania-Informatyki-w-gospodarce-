@@ -121,7 +121,7 @@ const RestaurantCreateReservationView = () => {
         }
 
         if (!accessToken || !userId) {
-            router.push('/user/login');
+            router.push('/tabs/profile/login');
             return;
         }
 
@@ -134,7 +134,7 @@ const RestaurantCreateReservationView = () => {
         });
 
         router.push({
-            pathname: "/restaurants/[id]/selectTable",
+            pathname: "/tabs/restaurants/[id]/selectTable",
             params: {
                 id: id,
                 date: selectedDate,
@@ -143,16 +143,7 @@ const RestaurantCreateReservationView = () => {
                 name: name
             }
         });
-        router.push({
-            pathname: "/restaurants/[id]/selectTable",
-            params: {
-                id: id,
-                date: selectedDate,
-                time: selectedTime,
-                guests: guests,
-                name: name
-            }
-        });
+
     };
 
     return (

@@ -111,7 +111,12 @@ export default function RestaurantDetailsView() {
             restaurant_id: restaurant.restaurant_id,
             restaurant_name: restaurant.name,
           });
-          router.push(`/restaurants/${restaurant.restaurant_id}/reservation`);
+
+          //router.push(`/restaurants/${restaurant.restaurant_id}/reservation`);
+            router.push({
+                  pathname: "/tabs/restaurants/[id]/reservation",
+                  params: { id: restaurant.restaurant_id }
+            });
         }}
       >
         <Text style={styles.buttonTextPrimary}>Reserve a table</Text>
@@ -124,7 +129,11 @@ export default function RestaurantDetailsView() {
             restaurant_id: restaurant.restaurant_id,
             restaurant_name: restaurant.name,
           });
-          router.push(`/restaurants/${restaurant.restaurant_id}/menu`);
+            router.push({
+                  pathname: "/tabs/restaurants/[id]/menu",
+                  params: { id: restaurant.restaurant_id }
+            });
+          //router.push(`/restaurants/${restaurant.restaurant_id}/menu`);
         }}
       >
         <Text style={styles.buttonTextSecondary}>See menu</Text>
