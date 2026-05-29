@@ -1,13 +1,15 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 
 import ScanQrButton from '@/ui/components/buttons/ScanQrButton';
 import { ScreenLayout } from '@/ui/layouts/ScreenLayout';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { useRestaurantSearch } from '@/services/hooks/restaurants/useRestaurantSearch';
 import { useGetMyReservations } from '@/services/hooks/useReservations';
-import { IReservation, ReservationStatus } from '@/services/interfaces/interfaces';
+import { getRestaurantById } from '@/services/api/RestaurantAPI';
+import { IReservation, IRestaurant, ReservationStatus } from '@/services/interfaces/interfaces';
 import { theme } from '@/ui/theme/theme';
 
 function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
@@ -20,37 +22,58 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string
     );
 }
 
-function statusColor(status: ReservationStatus): string {
+function statusConfig(status: ReservationStatus): { color: string; label: string } {
     switch (status) {
-        case ReservationStatus.CONFIRMED: return '#2e7d32';
-        case ReservationStatus.PENDING:   return '#e65100';
-        case ReservationStatus.COMPLETED: return '#555';
-        case ReservationStatus.CANCELED:  return '#c62828';
-        default: return '#888';
+        case ReservationStatus.CONFIRMED: return { color: '#2e7d32', label: 'Confirmed' };
+        case ReservationStatus.PENDING:   return { color: '#e65100', label: 'Pending' };
+        case ReservationStatus.COMPLETED: return { color: '#555',    label: 'Completed' };
+        case ReservationStatus.CANCELED:  return { color: '#c62828', label: 'Canceled' };
+        default: return { color: '#888', label: status };
     }
 }
 
-function ReservationCard({ reservation, onPress }: { reservation: IReservation; onPress: () => void }) {
+function ReservationCard({
+                             reservation,
+                             restaurantName,
+                             onPress,
+                         }: {
+    reservation: IReservation;
+    restaurantName: string | null;
+    onPress: () => void;
+}) {
     const date = new Date(reservation.reservation_time);
-    const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const { color, label } = statusConfig(reservation.status);
 
     return (
         <TouchableOpacity style={styles.reservationCard} onPress={onPress} activeOpacity={0.8}>
-            <View style={styles.reservationDateBox}>
-                <Text style={styles.reservationDay}>{date.getDate()}</Text>
-                <Text style={styles.reservationMonth}>
+
+            {/* Date box */}
+            <View style={styles.dateBox}>
+                <Text style={styles.dateDay}>{date.getDate()}</Text>
+                <Text style={styles.dateMonth}>
                     {date.toLocaleString('en-GB', { month: 'short' }).toUpperCase()}
                 </Text>
             </View>
-            <View style={styles.reservationBody}>
-                <Text style={styles.reservationTitle} numberOfLines={1}>
-                    Reservation #{reservation.reservation_id}
+
+            {/* Info */}
+            <View style={styles.cardInfo}>
+                <Text style={styles.restaurantName} numberOfLines={1}>
+                    {restaurantName ?? `Restaurant #${reservation.restaurant_id}`}
                 </Text>
-                <Text style={styles.reservationSub}>{dateStr} at {timeStr}</Text>
-                <Text style={styles.reservationSub}>Table #{reservation.table_id}</Text>
+                <View style={styles.cardMeta}>
+                    <Ionicons name="time-outline" size={12} color={theme.colors.gray} />
+                    <Text style={styles.metaText}>{timeStr}</Text>
+                    <MaterialCommunityIcons name="table-chair" size={12} color={theme.colors.gray} />
+                    <Text style={styles.metaText}>Table #{reservation.table_id}</Text>
+                </View>
             </View>
-            <View style={[styles.statusDot, { backgroundColor: statusColor(reservation.status) }]} />
+
+            {/* Status badge */}
+            <View style={[styles.statusBadge, { backgroundColor: color }]}>
+                <Text style={styles.statusText}>{label}</Text>
+            </View>
+
         </TouchableOpacity>
     );
 }
@@ -60,6 +83,8 @@ export default function HomeView() {
     const { restaurants = [] } = useRestaurantSearch();
     const { reservations, loading: reservationsLoading } = useGetMyReservations();
     const router = useRouter();
+
+    const [restaurantNames, setRestaurantNames] = useState<Record<number, string>>({});
 
     const restaurantCount = restaurants.length;
     const cuisineCount = new Set(restaurants.map(r => r.cuisine)).size;
@@ -72,6 +97,23 @@ export default function HomeView() {
             r.status !== ReservationStatus.COMPLETED
         )
         .slice(0, 3);
+
+    // Fetch restaurant names for upcoming reservations
+    useEffect(() => {
+        if (upcomingReservations.length === 0) return;
+
+        const uniqueIds = [...new Set(upcomingReservations.map(r => r.restaurant_id))];
+        const missingIds = uniqueIds.filter(id => !restaurantNames[id]);
+        if (missingIds.length === 0) return;
+
+        Promise.all(missingIds.map(id => getRestaurantById(id)))
+            .then(results => {
+                const map: Record<number, string> = {};
+                results.forEach(r => { map[r.restaurant_id] = r.name; });
+                setRestaurantNames(prev => ({ ...prev, ...map }));
+            })
+            .catch(console.error);
+    }, [upcomingReservations.length]);
 
     return (
         <ScreenLayout>
@@ -128,6 +170,7 @@ export default function HomeView() {
                             <ReservationCard
                                 key={r.reservation_id}
                                 reservation={r}
+                                restaurantName={restaurantNames[r.restaurant_id] ?? null}
                                 onPress={() => router.push(`/reservations/${r.reservation_id}`)}
                             />
                         ))}
@@ -266,42 +309,54 @@ const styles = StyleSheet.create({
         padding: 14,
         marginBottom: 0,
     },
-    reservationDateBox: {
-        width: 44,
-        height: 48,
+    dateBox: {
+        width: 46,
+        height: 50,
         borderRadius: 10,
         backgroundColor: 'rgba(229,75,75,0.1)',
         alignItems: 'center',
         justifyContent: 'center',
     },
-    reservationDay: {
-        fontSize: 18,
+    dateDay: {
+        fontSize: 20,
         fontWeight: '800',
         color: theme.colors.primary,
-        lineHeight: 20,
+        lineHeight: 22,
     },
-    reservationMonth: {
+    dateMonth: {
         fontSize: 10,
         fontWeight: '700',
         color: theme.colors.primary,
     },
-    reservationBody: {
+    cardInfo: {
         flex: 1,
-        gap: 2,
+        gap: 4,
     },
-    reservationTitle: {
-        fontSize: 14,
+    restaurantName: {
+        fontSize: 15,
         fontWeight: '700',
         color: theme.colors.text,
     },
-    reservationSub: {
+    cardMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    metaText: {
         fontSize: 12,
         color: theme.colors.gray,
+        marginRight: 6,
     },
-    statusDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+    statusBadge: {
+        borderRadius: 6,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        alignSelf: 'flex-start',
+    },
+    statusText: {
+        color: '#fff',
+        fontSize: 11,
+        fontWeight: '700',
     },
     statsCard: {
         flexDirection: 'row',
