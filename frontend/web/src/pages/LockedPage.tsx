@@ -40,7 +40,15 @@ export const LockedPage = () => {
           }}>
             log in
           </Link>
-          {' '}or contact support to unlock it
+          {' '}or{' '}
+          <Link to="/support" viewTransition style={{
+            color: '#E54B4B',
+            textDecoration: 'none',
+            fontWeight: 600,
+            borderBottom: '2px solid #E54B4B'
+          }}>
+            request manager access
+          </Link>
         </Typography>
       </Box>
     </Box>

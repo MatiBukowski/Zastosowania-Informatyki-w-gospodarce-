@@ -80,3 +80,7 @@ class ReservationService:
             setattr(reservation, key, value)
             
         return self.repo.update_reservation(reservation)
+
+    def get_reservations_by_user(self, user_id: int):
+        return self.repo.get_reservations_by_user_id(user_id)
+

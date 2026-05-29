@@ -3,8 +3,7 @@ import { ITableQRProps } from '../context/interfaces';
 import { Box, Typography, Button, Paper } from '@mui/material';
 
 export const TableQR = ({ token, table_number }: ITableQRProps) => {
-  const baseUrl = import.meta.env.VITE_API_URL;
-  const scanUrl = `${baseUrl}/api/qr?token=${token}`;
+  const scanUrl = `mobile://scan?token=${token}`;
 
   const downloadPNG = () => {
     const canvas = document.getElementById(`qr-${token}`) as HTMLCanvasElement;

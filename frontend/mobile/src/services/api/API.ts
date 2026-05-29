@@ -20,3 +20,20 @@ apiClient.interceptors.request.use((config) => {
 
   return config
 })
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Capture 500+ and connection/network errors to PostHog
+    if (!error.response || error.response.status >= 500) {
+      posthogClient.captureException(error, {
+        type: 'api_error',
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        message: error.message,
+      });
+    }
+    return Promise.reject(error);
+  }
+);
