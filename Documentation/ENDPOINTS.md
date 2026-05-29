@@ -62,26 +62,27 @@
 17. **POST /api/auth/logout**
     - Returns empty HTTP only cookie
 
-18. **POST /api/orders**
-    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
-      - Proposed schema name: **"OrderResponse"**
+18. **GET /api/support/info**
+    - Returns: {"contact_email", "onboarding_steps": string[]}
 
-19. **GET /api/orders/my**
+19. **POST /api/support/contact**
+    - Body: {"name", "email", "request_type", "message", "restaurant_name"?, "source"?}
+    - Returns: {"message"}
+
+20. **POST /api/orders**
+    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
+
+21. **GET /api/orders/my**
     - Returns a list: List[{"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}]
-      - Proposed schema name: **"OrderResponse"**
 
-20. **GET /api/orders/restaurant/{restaurant_id}**
+22. **GET /api/orders/restaurant/{restaurant_id}**
     - Returns a list: List[{"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}]
-      - Proposed schema name: **"OrderResponse"**
 
-21. **GET /api/orders/{order_id}**
+23. **GET /api/orders/{order_id}**
     - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
-      - Proposed schema name: **"OrderResponse"**
 
-22. **PATCH /api/orders/{order_id}**
+24. **PATCH /api/orders/{order_id}**
     - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
-      - Proposed schema name: **"OrderResponse"**
 
-23. **PATCH /api/orders/{order_id}/cancel**
+25. **PATCH /api/orders/{order_id}/cancel**
     - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
-      - Proposed schema name: **"OrderResponse"**

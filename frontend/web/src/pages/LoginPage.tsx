@@ -12,6 +12,7 @@ import {
     IconButton,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../services/AuthProvider';
 import { colors } from '../../theme/palette';
 
@@ -251,14 +252,16 @@ export const LoginPage = () => {
                         >
                             Don't have an account?{' '}
                             <Typography
-                                component="span"
+                                component={RouterLink}
+                                to="/support"
                                 sx={{
                                     color: colors.strawberryRed,
                                     fontWeight: 600,
-                                    cursor: 'pointer',
+                                    textDecoration: 'none',
+                                    '&:hover': { textDecoration: 'underline' },
                                 }}
                             >
-                                Contact support
+                                Request manager access
                             </Typography>
                         </Typography>
                     </Box>

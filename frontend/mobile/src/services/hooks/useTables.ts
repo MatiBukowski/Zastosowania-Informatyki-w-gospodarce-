@@ -26,7 +26,8 @@ export function useResolveTableByToken(token: string) {
       })
       .catch(err => {
         console.error('useResolveTableByToken - error:', err);
-        setError(err.message);
+        const msg = err.response?.data?.detail || err.message || 'Failed to resolve table';
+        setError(msg);
         setLoading(false);
       });
   }, [token]);
