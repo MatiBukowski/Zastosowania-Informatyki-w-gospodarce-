@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, field_validator
 from typing import Optional, List
 from ..models.enums import CuisineTypeEnum
-
+from .schedules import RestaurantScheduleBase
 
 class RestaurantBase(BaseModel):
     name: str
@@ -13,6 +13,7 @@ class RestaurantBase(BaseModel):
     has_kiosk: bool
     cuisine: CuisineTypeEnum
     photo: Optional[str] = None
+    schedules: List[RestaurantScheduleBase] = []
 
 
 class RestaurantPublicResponse(RestaurantBase):
