@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthProvider';
 import { ISingleRestaurant, IRestaurantSchedule, CuisineType, DayOfWeek } from '../context/interfaces';
-import { getSingleRestaurantById } from '../api/RestaurantAPI'; 
+import { getSingleRestaurantById, updateRestaurant } from '../api/RestaurantAPI'; 
 import { 
   Box, Typography, TextField, Button, Grid, Paper, 
   FormControlLabel, Switch, Divider, CircularProgress, Alert
@@ -21,7 +21,6 @@ export const RestaurantModifyPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
 
-  // Stan formularza z domyślnymi, pustymi wartościami, aby uniknąć błędów Reacta
   const [formData, setFormData] = useState<ISingleRestaurant>({
     name: '',
     city: '',
@@ -36,7 +35,6 @@ export const RestaurantModifyPage = () => {
     description: ''
   });
 
-  // 1. Pobieranie danych restauracji przy starcie
   useEffect(() => {
     if (!isAxiosReady || !restaurantId) return;
 
@@ -76,9 +74,7 @@ export const RestaurantModifyPage = () => {
     let newValue = value;
 
     if (name === 'postal_code') {
-      // Usuń wszystko co nie jest cyfrą
       const digits = value.replace(/\D/g, '');
-      // Dodaj myślnik po drugich znaku (format XX-XXX)
       if (digits.length > 2) {
         newValue = `${digits.slice(0, 2)}-${digits.slice(2, 5)}`;
       } else {
@@ -103,7 +99,6 @@ export const RestaurantModifyPage = () => {
     setFormData(prev => ({ ...prev, schedules: updatedSchedules }));
   };
 
-  // 5. Zapisywanie danych do bazy
   const handleSave = async () => {
     if (!restaurantId) return;
     
@@ -112,12 +107,11 @@ export const RestaurantModifyPage = () => {
       setError(null);
       setSuccess(false);
 
-    //   await updateRestaurant(Number(restaurantId), formData);
+      await updateRestaurant(Number(restaurantId), formData);
       
       setSuccess(true);
       posthog.capture('restaurant_modified_success', { restaurant_id: restaurantId });
       
-      // Opcjonalnie: Powrót do listy po 2 sekundach
       setTimeout(() => navigate('/restaurants'), 2000);
       
     } catch (err) {
@@ -130,7 +124,6 @@ export const RestaurantModifyPage = () => {
   };
 
   const handleAddDefaultSchedules = () => {
-    // Generujemy 7 pustych dni. Dopasuj wartości day_of_week do swojego enuma DayOfWeek
     const defaultSchedules: IRestaurantSchedule[] = [
       { day_of_week: "MONDAY" as DayOfWeek, open_time: '', close_time: '' },
       { day_of_week: "TUESDAY" as DayOfWeek, open_time: '', close_time: '' },

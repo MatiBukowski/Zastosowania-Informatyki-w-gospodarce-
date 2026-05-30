@@ -32,3 +32,8 @@ export const getTablesByRestaurantId = async (restaurantId: number, page: number
   });
   return response.data;
 };
+
+export const updateRestaurant = async (restaurant_id: number, data: Partial<ISingleRestaurant>): Promise<ISingleRestaurant> => {
+  const response = await apiClient.patch<ISingleRestaurant>(`/api/restaurants/${restaurant_id}`, data);
+  return response.data;
+};
