@@ -30,6 +30,29 @@ async def posthog_middleware(request: Request, call_next):
     )
     return response
 
+import logging
+import traceback
+
+logger = logging.getLogger("fastapi")
+
 async def http_exception_handler(request: Request, exc: Exception):
-    posthog.capture_exception(exc)
-    return JSONResponse(status_code=500, content={'message': str(exc)})
+    # Log the full exception traceback on the server
+    logger.error(f"Unhandled exception during {request.method} {request.url.path}: {exc}\n{traceback.format_exc()}")
+    
+    # Capture the exception in PostHog with request details
+    distinct_id = request.headers.get("x-posthog-distinct-id", "anonymous")
+    posthog.capture_exception(
+        exc,
+        distinct_id=distinct_id,
+        properties={
+            "path": request.url.path,
+            "method": request.method,
+        }
+    )
+    
+    # Return a generic error message, standardizing on the 'detail' key
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An unexpected error occurred. Please try again later."}
+    )
+

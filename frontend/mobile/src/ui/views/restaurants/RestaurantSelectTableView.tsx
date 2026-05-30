@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getReservationsByTableId, createReservation } from '@/services/api/ReservationAPI';
 import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
+ import StyledButton from "@/ui/components/buttons/StyledButton";
 
 const RestaurantSelectTableView = () => {
     const { id, date, time, guests, name } = useLocalSearchParams();
@@ -164,16 +165,16 @@ const RestaurantSelectTableView = () => {
                         })}
                     </ScrollView>
 
-                    <View style={styles.footerContainer}>
-                        <TouchableOpacity
-                            style={[styles.confirmButton, !selectedTableId && styles.disabledButton]}
-                            onPress={handleConfirm}
-                            disabled={!selectedTableId}
-                        >
-                            <Text style={styles.buttonText}>Confirm My Selection</Text>
-                        </TouchableOpacity>
-                    </View>
-                </>
+                <View style={styles.footerContainer}>
+                    <StyledButton
+                        onPress={handleConfirm}
+                        disabled={!selectedTableId}
+                        accessibilityLabel="Confirm My Selection"
+                    >
+                        Confirm My Selection
+                    </StyledButton>
+                </View>
+            </>
             )}
         </View>
     );

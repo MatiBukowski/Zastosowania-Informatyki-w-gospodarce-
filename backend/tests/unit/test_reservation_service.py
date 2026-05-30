@@ -178,3 +178,17 @@ class TestReservationService:
         assert mock_res.reservation_time == new_time
         mock_repo.update_reservation.assert_called_once_with(mock_res)
 
+    def test_get_reservations_by_user_success(self):
+        mock_repo = MagicMock()
+        service = ReservationService(repo=mock_repo, table_service=MagicMock())
+
+        user_id = 42
+        mock_reservations = [MagicMock(spec=Reservation), MagicMock(spec=Reservation)]
+        mock_repo.get_reservations_by_user_id.return_value = mock_reservations
+
+        result = service.get_reservations_by_user(user_id)
+
+        assert result == mock_reservations
+        mock_repo.get_reservations_by_user_id.assert_called_once_with(user_id)
+
+

@@ -59,3 +59,9 @@ class ReservationRepository:
             query = query.where(Reservation.reservation_id != exclude_id)
             
         return self.db.execute(query).scalars().all()
+
+    def get_reservations_by_user_id(self, user_id: int) -> list[Reservation]:
+        return self.db.execute(
+            select(Reservation).where(Reservation.user_id == user_id)
+        ).scalars().all()
+

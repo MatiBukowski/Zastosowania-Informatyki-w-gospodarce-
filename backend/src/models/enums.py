@@ -50,3 +50,13 @@ class CuisineTypeEnum(str, Enum):
     VEGAN = "VEGAN"
     FUSION = "FUSION"
     OTHER = "OTHER"
+
+
+class DayOfWeekEnum(str, Enum):
+    MONDAY = "MONDAY"
+    TUESDAY = "TUESDAY"
+    WEDNESDAY = "WEDNESDAY"
+    THURSDAY = "THURSDAY"
+    FRIDAY = "FRIDAY"
+    SATURDAY = "SATURDAY"
+    SUNDAY = "SUNDAY"

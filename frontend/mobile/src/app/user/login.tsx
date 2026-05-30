@@ -4,6 +4,7 @@ import { useAuth } from '@/services/providers/AuthProvider';
 import { useRouter } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import { theme } from '@/ui/theme/theme';
+import StyledButton from "@/ui/components/buttons/StyledButton";
 
 const LoginScreen = () => {
     const { login } = useAuth();
@@ -48,16 +49,21 @@ const LoginScreen = () => {
                     secureTextEntry
                 />
 
-                <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                    <Text style={styles.buttonText}>Login</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={{ marginTop: 15 }}
-                    onPress={() => router.back()}
+                <StyledButton
+                    variant="primary"
+                    onPress={handleLogin}
+                    accessibilityLabel="Login"
                 >
-                    <Text style={{ color: '#666', textAlign: 'center' }}>Cancel</Text>
-                </TouchableOpacity>
+                    Login
+                </StyledButton>
+
+                <StyledButton
+                    variant="secondary"
+                    onPress={() => router.back()}
+                    accessibilityLabel="Cancel"
+                >
+                    Cancel
+                </StyledButton>
             </View>
         </SafeAreaView>
     );

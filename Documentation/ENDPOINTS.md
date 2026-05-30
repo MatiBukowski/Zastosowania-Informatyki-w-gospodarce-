@@ -61,3 +61,10 @@
 
 17. **POST /api/auth/logout**
     - Returns empty HTTP only cookie
+
+18. **GET /api/support/info**
+    - Returns: {"contact_email", "onboarding_steps": string[]}
+
+19. **POST /api/support/contact**
+    - Body: {"name", "email", "request_type", "message", "restaurant_name"?, "source"?}
+    - Returns: {"message"}
