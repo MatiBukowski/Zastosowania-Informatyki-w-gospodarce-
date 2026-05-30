@@ -7,7 +7,8 @@ from ..schemas import (
     TableResponse,
     TableCreate,
     PaginatedResponse,
-    RestaurantFilterQuery
+    RestaurantFilterQuery,
+    UpdateSingleRestaurante
 )
 from ..services import RestaurantService, MenuService, TableService
 from ..models import AppUser
@@ -60,6 +61,15 @@ def get_restaurants_endpoint(
 )
 def get_restaurant_endpoint(restaurant_id: int, service: RestaurantService = Depends()):
     return service.get_restaurant(restaurant_id)
+
+@router.patch(
+    "/{restaurant_id}",
+    summary="Update specific restaurant details",
+    description="Update information about specific restaurant",
+    response_model=UpdateSingleRestaurante
+)
+def patch_restaurant_endpoint(restaurant_id: int, restaurant_data: UpdateSingleRestaurante, service: RestaurantService = Depends()):
+    return service.patch_restaurant(restaurant_id, restaurant_data)
 
 @router.get(
     "/{restaurant_id}/menu",
