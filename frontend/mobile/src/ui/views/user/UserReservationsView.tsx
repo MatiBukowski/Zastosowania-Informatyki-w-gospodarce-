@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
+import { useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { theme } from '@/ui/theme/theme';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { IReservation, ReservationStatus } from '@/services/interfaces/interfaces';
@@ -87,9 +88,11 @@ export default function UserReservationsView() {
 
   const { reservations, loading: isLoading, refresh } = useGetMyReservations();
 
-
-
-
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
 
   if (!accessToken) {
     return (

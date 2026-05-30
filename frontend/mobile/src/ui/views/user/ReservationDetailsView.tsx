@@ -1,23 +1,48 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { theme } from '@/ui/theme/theme';
-import { useGetMyReservations } from '@/services/hooks/useReservations';
+import { useGetMyReservations, useUpdateReservation } from '@/services/hooks/useReservations';
 import { useGetRestaurantById, useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
 import { ScreenLayout } from '@/ui/layouts/ScreenLayout';
+import { ReservationStatus } from '@/services/interfaces/interfaces';
+
 export default function ReservationDetailsView() {
   const router = useRouter();
   const { id, restaurantId } = useLocalSearchParams();
 
-  const { reservations, loading: resLoading } = useGetMyReservations();
+  const { reservations, loading: resLoading, refresh: refreshReservations } = useGetMyReservations();
   const reservation = reservations?.find(r => r.reservation_id.toString() === id);
 
   const { restaurant, loading: restLoading } = useGetRestaurantById(Number(restaurantId));
   const { tables, loading: tablesLoading } = useGetTablesByRestaurantId(Number(restaurantId));
   const table = tables?.find(t => t.table_id === reservation?.table_id);
+  const { update, loading: updateLoading } = useUpdateReservation();
 
+  const handleCancel = () => {
+      Alert.alert(
+        "Cancel Reservation",
+        "Are you sure you want to cancel this reservation?",
+        [
+          { text: "Keep it", style: "cancel" },
+          {
+            text: "Yes, cancel",
+            style: "destructive",
+            onPress: async () => {
+              if (!reservation) return;
+              const success = await update(reservation.reservation_id, { status: ReservationStatus.CANCELED });
+              if (success) {
+                router.back();
+              } else {
+                Alert.alert("Error", "Failed to cancel reservation.");
+              }
+            }
+          }
+        ]
+      );
+    };
   if (resLoading || restLoading || tablesLoading) {
     return (
       <ScreenLayout>
@@ -72,12 +97,12 @@ export default function ReservationDetailsView() {
             {restaurant ? `${restaurant.street} ${restaurant.building_number}, ${restaurant.postal_code} ${restaurant.city}` : ''}
           </Text>
 
-          {restaurant?.phone_number && (
+          {restaurant?.phone_number && restaurant.phone_number.trim() !== '' ? (
             <View style={[styles.detailRow, { marginTop: 8 }]}>
               <Ionicons name="call-outline" size={16} color={theme.colors.gray} />
               <Text style={[styles.infoText, { marginLeft: 6 }]}>{restaurant.phone_number}</Text>
             </View>
-          )}
+          ) : null}
           <View style={styles.divider} />
 
           <Text style={styles.sectionTitle}>Booking Info</Text>
@@ -114,7 +139,25 @@ export default function ReservationDetailsView() {
           <Ionicons name="restaurant-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.menuButtonText}>See Menu</Text>
         </TouchableOpacity>
+        {(reservation.status === ReservationStatus.PENDING || reservation.status === ReservationStatus.CONFIRMED) ? (
+          <TouchableOpacity
+            style={styles.cancelButton}
+            activeOpacity={0.8}
+            onPress={handleCancel}
+            disabled={updateLoading}
+          >
+            {updateLoading ? (
+              <ActivityIndicator color="#F44336" />
+            ) : (
+              <View style={styles.cancelButtonContent}>
+                <Ionicons name="close-circle-outline" size={24} color="#F44336" />
+                <Text style={styles.cancelButtonText}>Cancel Reservation</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        ) : null}
 
+        )}
       </View>
     </ScreenLayout>
   );
@@ -199,5 +242,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
+  },
+  cancelButton: {
+    backgroundColor: '#FFEBEE',
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#FFCDD2',
+  },
+  cancelButtonContent: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#F44336',
+    fontSize: 16,
+    fontWeight: '700',
+    marginLeft: 8,
   }
 });

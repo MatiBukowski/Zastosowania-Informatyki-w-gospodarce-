@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 40,
 
   },
   pageTitle: {
