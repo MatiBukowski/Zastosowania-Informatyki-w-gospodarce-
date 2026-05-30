@@ -9,6 +9,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import { colors } from '../../theme/palette';
 import { useAuth } from '../services/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -125,6 +126,7 @@ const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProp
   
   const isQrActive = location.pathname.startsWith('/qr');
   const isStatsActive = location.pathname === '/' || location.pathname.startsWith('/forecast');
+  const isRestaurantsActive = location.pathname.startsWith('/restaurants');
 
   const isAdmin = role === "ADMIN";
 
@@ -276,8 +278,17 @@ useEffect(() => {
             </Collapse>
           )}
 
+          <SideBarMenuItem
+            href="/restaurants"
+            icon={<StorefrontIcon sx={{ fontSize: '28px' }} />} 
+            label="Restaurants" 
+            collapsed={isCollapsed} 
+            isActive={isRestaurantsActive} 
+          />
+
         </Stack>
       </Box>
+      
 
       {/* Account Box */}
       <Box sx={{ padding: '10px', borderTop: '1px solid', borderColor: 'divider' }}>
