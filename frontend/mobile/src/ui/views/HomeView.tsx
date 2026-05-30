@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 import ScanQrButton from '@/ui/components/buttons/ScanQrButton';
-import { ScreenLayout } from '@/ui/layouts/ScreenLayout';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { useRestaurantSearch } from '@/services/hooks/restaurants/useRestaurantSearch';
 import { useGetMyReservations } from '@/services/hooks/useReservations';
@@ -116,100 +115,98 @@ export default function HomeView() {
     }, [upcomingReservations.length]);
 
     return (
-        <ScreenLayout>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
 
-                {/* Header */}
-                <View style={styles.header}>
-                    <View>
-                        <Text style={styles.greeting}>
-                            {firstName ? `Hello, ${firstName}!` : 'Welcome!'}
-                        </Text>
-                        <Text style={styles.subtitle}>What would you like to do today?</Text>
-                    </View>
-                    <View style={styles.logoBox}>
-                        <MaterialCommunityIcons name="silverware-fork-knife" size={28} color={theme.colors.primary} />
-                    </View>
-                </View>
-
-                {/* QR scan card */}
-                <View style={[theme.common.card, styles.scanCard]}>
-                    <MaterialCommunityIcons name="qrcode-scan" size={36} color={theme.colors.primary} style={{ marginBottom: 10 }} />
-                    <Text style={styles.scanTitle}>Scan a table QR code</Text>
-                    <Text style={styles.scanDesc}>
-                        Scan the QR code at your table to access the menu and order food directly from your phone.
+            {/* Header */}
+            <View style={styles.header}>
+                <View>
+                    <Text style={styles.greeting}>
+                        {firstName ? `Hello, ${firstName}!` : 'Welcome!'}
                     </Text>
-                    <View style={{ marginTop: 16 }}>
-                        <ScanQrButton />
-                    </View>
+                    <Text style={styles.subtitle}>What would you like to do today?</Text>
                 </View>
+                <View style={styles.logoBox}>
+                    <MaterialCommunityIcons name="silverware-fork-knife" size={28} color={theme.colors.primary} />
+                </View>
+            </View>
 
-                {/* My Reservations */}
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>My Reservations</Text>
-                    <TouchableOpacity /* onPress={() => router.push('') */>
-                        <Text style={styles.seeAll}>See all</Text>
+            {/* QR scan card */}
+            <View style={[theme.common.card, styles.scanCard]}>
+                <MaterialCommunityIcons name="qrcode-scan" size={36} color={theme.colors.primary} style={{ marginBottom: 10 }} />
+                <Text style={styles.scanTitle}>Scan a table QR code</Text>
+                <Text style={styles.scanDesc}>
+                    Scan the QR code at your table to access the menu and order food directly from your phone.
+                </Text>
+                <View style={{ marginTop: 16 }}>
+                    <ScanQrButton />
+                </View>
+            </View>
+
+            {/* My Reservations */}
+            <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>My Reservations</Text>
+                <TouchableOpacity /* onPress={() => router.push('') */>
+                    <Text style={styles.seeAll}>See all</Text>
+                </TouchableOpacity>
+            </View>
+
+            {reservationsLoading ? (
+                <View style={styles.reservationsLoading}>
+                    <ActivityIndicator size="small" color={theme.colors.primary} />
+                </View>
+            ) : upcomingReservations.length === 0 ? (
+                <View style={[theme.common.card, styles.emptyReservations]}>
+                    <Ionicons name="calendar-outline" size={28} color={theme.colors.gray} style={{ opacity: 0.4 }} />
+                    <Text style={styles.emptyText}>No upcoming reservations</Text>
+                    <TouchableOpacity onPress={() => router.push('/tabs/restaurants')}>
+                        <Text style={styles.emptyAction}>Browse restaurants →</Text>
                     </TouchableOpacity>
                 </View>
-
-                {reservationsLoading ? (
-                    <View style={styles.reservationsLoading}>
-                        <ActivityIndicator size="small" color={theme.colors.primary} />
-                    </View>
-                ) : upcomingReservations.length === 0 ? (
-                    <View style={[theme.common.card, styles.emptyReservations]}>
-                        <Ionicons name="calendar-outline" size={28} color={theme.colors.gray} style={{ opacity: 0.4 }} />
-                        <Text style={styles.emptyText}>No upcoming reservations</Text>
-                        <TouchableOpacity onPress={() => router.push('/tabs/restaurants')}>
-                            <Text style={styles.emptyAction}>Browse restaurants →</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <View style={styles.reservationsList}>
-                        {upcomingReservations.map(r => (
-                            <ReservationCard
-                                key={r.reservation_id}
-                                reservation={r}
-                                restaurantName={restaurantNames[r.restaurant_id] ?? null}
-                                // onPress={() => router.push(``)}
-                            />
-                        ))}
-                    </View>
-                )}
-
-                {/* Stats */}
-                {restaurantCount > 0 && (
-                    <View style={[theme.common.card, styles.statsCard]}>
-                        <StatCard
-                            icon={<MaterialCommunityIcons name="silverware-fork-knife" size={22} color={theme.colors.primary} />}
-                            value={String(restaurantCount)}
-                            label="Available Restaurants"
+            ) : (
+                <View style={styles.reservationsList}>
+                    {upcomingReservations.map(r => (
+                        <ReservationCard
+                            key={r.reservation_id}
+                            reservation={r}
+                            restaurantName={restaurantNames[r.restaurant_id] ?? null}
+                            // onPress={() => router.push(``)}
                         />
-                        <View style={styles.statDivider} />
-                        <StatCard
-                            icon={<MaterialCommunityIcons name="earth" size={22} color={theme.colors.primary} />}
-                            value={String(cuisineCount)}
-                            label="Cuisines"
-                        />
-                        <View style={styles.statDivider} />
-                        <StatCard
-                            icon={<MaterialCommunityIcons name="tablet" size={22} color={theme.colors.primary} />}
-                            value={String(kioskCount)}
-                            label="Restaurants With Kiosk"
-                        />
-                    </View>
-                )}
-
-                {/* Onboarding hint */}
-                <View style={[theme.common.card, styles.hintCard]}>
-                    <Ionicons name="information-circle-outline" size={20} color={theme.colors.accent} style={{ marginRight: 8 }} />
-                    <Text style={styles.hintText}>
-                        Browse restaurants or scan the QR code at your seat to get started.
-                    </Text>
+                    ))}
                 </View>
+            )}
 
-            </ScrollView>
-        </ScreenLayout>
+            {/* Stats */}
+            {restaurantCount > 0 && (
+                <View style={[theme.common.card, styles.statsCard]}>
+                    <StatCard
+                        icon={<MaterialCommunityIcons name="silverware-fork-knife" size={22} color={theme.colors.primary} />}
+                        value={String(restaurantCount)}
+                        label="Available Restaurants"
+                    />
+                    <View style={styles.statDivider} />
+                    <StatCard
+                        icon={<MaterialCommunityIcons name="earth" size={22} color={theme.colors.primary} />}
+                        value={String(cuisineCount)}
+                        label="Cuisines"
+                    />
+                    <View style={styles.statDivider} />
+                    <StatCard
+                        icon={<MaterialCommunityIcons name="tablet" size={22} color={theme.colors.primary} />}
+                        value={String(kioskCount)}
+                        label="Restaurants With Kiosk"
+                    />
+                </View>
+            )}
+
+            {/* Onboarding hint */}
+            <View style={[theme.common.card, styles.hintCard]}>
+                <Ionicons name="information-circle-outline" size={20} color={theme.colors.accent} style={{ marginRight: 8 }} />
+                <Text style={styles.hintText}>
+                    Browse restaurants or scan the QR code at your seat to get started.
+                </Text>
+            </View>
+
+        </ScrollView>
     );
 }
 
