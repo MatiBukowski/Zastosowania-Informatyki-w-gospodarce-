@@ -113,14 +113,14 @@ export default function RestaurantTablesView() {
           </Text>
         </View>
 
-        <TouchableOpacity
+        {/*<TouchableOpacity
           style={styles.adminIconButton}
           onPress={() => router.push(`/restaurants/${restaurantId}/restaurant_admin/createTable`)}
           activeOpacity={0.7}
         >
           <MaterialIcons name="admin-panel-settings" size={26} color={theme.colors.primary} />
           <Text style={styles.adminLinkText}>Admin</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
       </View>
 
       {tables.length === 0 ? (
