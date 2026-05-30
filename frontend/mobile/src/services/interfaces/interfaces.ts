@@ -20,7 +20,11 @@ export enum CuisineType {
 // base restaurant properties
 interface IRestaurantBase {
   name: string;
-  address: string;
+  city: string;
+  street: string;
+  building_number: string;
+  postal_code: string;
+  phone_number: string;
   has_kiosk: boolean;
   cuisine: CuisineType; 
   photo: string | null;

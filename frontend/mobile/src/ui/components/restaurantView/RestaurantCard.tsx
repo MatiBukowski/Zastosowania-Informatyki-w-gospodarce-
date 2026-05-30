@@ -84,7 +84,7 @@ function RestaurantCard({
           >
             {restaurant.name}
           </Text>
-          <LocationBox address={restaurant.address} />
+          <LocationBox address={`${restaurant.street} ${restaurant.building_number}, ${restaurant.city}`} />
           <CuisineBox cuisine={restaurant.cuisine} />
         </View>
       </TouchableOpacity>

@@ -68,8 +68,16 @@ export default function ReservationDetailsView() {
         <View style={theme.common.card}>
           <Text style={styles.sectionTitle}>Restaurant Info</Text>
           <Text style={styles.restaurantName}>{restaurant?.name || 'Loading...'}</Text>
-          <Text style={styles.infoText}>{restaurant?.address}</Text>
+          <Text style={styles.infoText}>
+            {restaurant ? `${restaurant.street} ${restaurant.building_number}, ${restaurant.postal_code} ${restaurant.city}` : ''}
+          </Text>
 
+          {restaurant?.phone_number && (
+            <View style={[styles.detailRow, { marginTop: 8 }]}>
+              <Ionicons name="call-outline" size={16} color={theme.colors.gray} />
+              <Text style={[styles.infoText, { marginLeft: 6 }]}>{restaurant.phone_number}</Text>
+            </View>
+          )}
           <View style={styles.divider} />
 
           <Text style={styles.sectionTitle}>Booking Info</Text>
@@ -142,6 +150,7 @@ const styles = StyleSheet.create({
   pageTitle: {
     ...theme.typography.h4,
     marginBottom: 20,
+    textAlign: 'center',
   },
   sectionTitle: {
     ...theme.typography.caption,

@@ -83,7 +83,21 @@ export default function RestaurantDetailsView() {
         <Text style={[theme.typography.h4, { color: theme.colors.text }]} numberOfLines={3} ellipsizeMode="tail">
           {restaurant.name}
         </Text>
-        <Text style={[theme.typography.body, styles.address]}>{restaurant.address}</Text>
+
+        <Text style={[theme.typography.body, styles.address]}>
+          {`${restaurant.street} ${restaurant.building_number}, ${restaurant.postal_code} ${restaurant.city}`}
+        </Text>
+
+        {restaurant.phone_number && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+            <Ionicons name="call-outline" size={16} color={theme.colors.gray} />
+            <Text style={[theme.typography.body, { color: theme.colors.text, marginLeft: 6 }]}>
+              {restaurant.phone_number}
+            </Text>
+          </View>
+        )}
+
+
 
         <View style={styles.tags}>
           <View style={[styles.tag, styles.tagPrimary]}>
