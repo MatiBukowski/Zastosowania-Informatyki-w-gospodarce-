@@ -15,7 +15,6 @@ export const RestaurantModifyPage = () => {
     const { isAxiosReady } = useAuth();
     const posthog = usePostHog();
 
-    // Stany komponentu
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -49,7 +48,6 @@ export const RestaurantModifyPage = () => {
             const data = await getSingleRestaurantById(Number(restaurantId));
             console.log("Fetched restaurant details:", data);
 
-            // MAPOWANIE GODZIN: Łączymy godziny z bazy (nawet jeśli są tylko 2) z 7 dniami tygodnia
             const fetchedSchedules = data.schedules || [];
             const completeSchedules = ALL_DAYS.map(day => {
                 const existingDay = fetchedSchedules.find(s => s.day_of_week === day);

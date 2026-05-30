@@ -75,7 +75,11 @@ class RestaurantService:
                 detail=f"Restaurant with id={restaurant_id} not found"
             )
 
-        updated_restaurant_data = restaurant_data.model_dump(exclude_unset=True)
+        if isinstance(restaurant_data, dict):
+            updated_restaurant_data = restaurant_data
+        else:
+            updated_restaurant_data = restaurant_data.model_dump(exclude_unset=True)
+
         schedules_data = updated_restaurant_data.pop("schedules", None)
 
         for key, value in updated_restaurant_data.items():
