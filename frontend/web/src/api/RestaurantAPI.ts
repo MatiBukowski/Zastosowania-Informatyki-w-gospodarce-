@@ -37,3 +37,8 @@ export const updateRestaurant = async (restaurant_id: number, data: Partial<ISin
   const response = await apiClient.patch<ISingleRestaurant>(`/api/restaurants/${restaurant_id}`, data);
   return response.data;
 };
+
+export const regenerateQrCode = async (tableId: number): Promise<ITable> => {
+  const response = await apiClient.patch<ITable>(`/api/tables/${tableId}/regenerate-qr-code`);
+  return response.data;
+};
