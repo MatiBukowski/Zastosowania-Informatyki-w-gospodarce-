@@ -290,7 +290,7 @@ export default function ScanView() {
   useEffect(() => {
     if (table?.restaurant_id && qrToken && !hasNavigatedRef.current) {
       hasNavigatedRef.current = true;
-      router.push(`/restaurants/${table.restaurant_id}/menu`);
+      router.push(`/restaurants/${table.restaurant_id}/qr-landing?tableId=${table.table_id}&tableNumber=${table.table_number}&capacity=${table.capacity}&token=${qrToken}`);
     }
   }, [table, qrToken]);
 
