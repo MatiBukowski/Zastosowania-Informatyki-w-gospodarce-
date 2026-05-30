@@ -4,7 +4,7 @@ from .restaurant import (
     RestaurantAdminResponse,
     RestaurantFilters,
     RestaurantFilterQuery,
-    UpdateSingleRestaurante
+    UpdateSingleRestaurant
 )
 from .menu import MenuItemResponse
 from .table import TableResponse, TableCreate, TableUpdate

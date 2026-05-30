@@ -8,7 +8,7 @@ from ..schemas import (
     TableCreate,
     PaginatedResponse,
     RestaurantFilterQuery,
-    UpdateSingleRestaurante
+    UpdateSingleRestaurant
 )
 from ..services import RestaurantService, MenuService, TableService
 from ..models import AppUser
@@ -66,9 +66,9 @@ def get_restaurant_endpoint(restaurant_id: int, service: RestaurantService = Dep
     "/{restaurant_id}",
     summary="Update specific restaurant details",
     description="Update information about specific restaurant",
-    response_model=UpdateSingleRestaurante
+    response_model=UpdateSingleRestaurant
 )
-def patch_restaurant_endpoint(restaurant_id: int, restaurant_data: UpdateSingleRestaurante, service: RestaurantService = Depends()):
+def patch_restaurant_endpoint(restaurant_id: int, restaurant_data: UpdateSingleRestaurant, service: RestaurantService = Depends()):
     return service.patch_restaurant(restaurant_id, restaurant_data)
 
 @router.get(

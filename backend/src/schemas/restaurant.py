@@ -25,7 +25,7 @@ class SingleRestaurantPublicResponse(RestaurantPublicResponse):
     description: str
 
 
-class UpdateSingleRestaurante(BaseModel):
+class UpdateSingleRestaurant(BaseModel):
     name: Optional[str] = None
     city: Optional[str] = None
     street: Optional[str] = None
