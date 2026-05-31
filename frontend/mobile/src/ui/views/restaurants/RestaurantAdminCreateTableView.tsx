@@ -16,6 +16,7 @@ import { usePostHog } from 'posthog-react-native';
 
 import { theme } from '@/ui/theme/theme';
 import { usePostTable } from '@/services/hooks/useRestaurants';
+import StyledButton from "@/ui/components/buttons/StyledButton";
 
 export default function RestaurantAdminCreateTableView() {
   const posthog = usePostHog();
@@ -109,18 +110,23 @@ export default function RestaurantAdminCreateTableView() {
           />
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[theme.common.button, styles.submitBtn, loading && styles.btnDisabled]}
-              onPress={onCreate}
-              disabled={loading}
-              activeOpacity={0.8}
+            <StyledButton
+                variant="primary"
+                onPress={onCreate}
+                disabled={loading}
+                accessibilityLabel="Create"
             >
-              {loading ? <ActivityIndicator color={theme.colors.white} /> : <Text style={styles.btnText}>Create</Text>}
-            </TouchableOpacity>
+              {loading ? <ActivityIndicator color={theme.colors.white} /> : "Create"}
+            </StyledButton>
 
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => router.back()} disabled={loading}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
+            <StyledButton
+                variant="secondary"
+                onPress={() => router.back()}
+                disabled={loading}
+                accessibilityLabel="Cancel"
+            >
+              Cancel
+            </StyledButton>
           </View>
 
           <Text style={styles.helperText}>Restaurant ID: {restaurantId}</Text>

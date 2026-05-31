@@ -14,6 +14,7 @@ import {
 import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
 import { ITable, TableStatus } from '@/services/interfaces/interfaces';
 import { theme } from '@/ui/theme/theme';
+import StyledButton from "@/ui/components/buttons/StyledButton";
 
 function statusColor(status: TableStatus): string {
   switch (status) {
@@ -56,9 +57,13 @@ function TableCard({ table, onReserve }: { table: ITable; onReserve: () => void 
         Capacity: {table.capacity} {table.capacity === 1 ? 'person' : 'people'}
       </Text>
 
-      <TouchableOpacity style={[styles.reserveBtn, !isFree && styles.reserveBtnDisabled]} onPress={onReserve} disabled={!isFree}>
-        <Text style={styles.reserveBtnText}>{isFree ? 'Reserve this table' : 'Not free'}</Text>
-      </TouchableOpacity>
+      <StyledButton
+          onPress={onReserve}
+          disabled={!isFree}
+          accessibilityLabel={isFree ? "Reserve this table" : "Not free"}
+      >
+        {isFree ? "Reserve this table" : "Not free"}
+      </StyledButton>
     </View>
   );
 }
@@ -108,14 +113,14 @@ export default function RestaurantTablesView() {
           </Text>
         </View>
 
-        <TouchableOpacity
+        {/*<TouchableOpacity
           style={styles.adminIconButton}
           onPress={() => router.push(`/restaurants/${restaurantId}/restaurant_admin/createTable`)}
           activeOpacity={0.7}
         >
           <MaterialIcons name="admin-panel-settings" size={26} color={theme.colors.primary} />
           <Text style={styles.adminLinkText}>Admin</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
       </View>
 
       {tables.length === 0 ? (

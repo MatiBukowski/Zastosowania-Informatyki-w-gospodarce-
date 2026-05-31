@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useGetRestaurantById } from '@/services/hooks/useRestaurants';
 import { theme } from '@/ui/theme/theme';
+import StyledButton from '@/ui/components/buttons/StyledButton';
 
 export default function RestaurantDetailsView() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -104,31 +105,33 @@ export default function RestaurantDetailsView() {
         </Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.buttonPrimary}
-        onPress={() => {
-          posthog.capture('reservation_button_clicked', {
-            restaurant_id: restaurant.restaurant_id,
-            restaurant_name: restaurant.name,
-          });
-          router.push(`/restaurants/${restaurant.restaurant_id}/reservation`);
-        }}
+      <StyledButton
+          variant="primary"
+          accessibilityLabel="Reserve a table"
+          onPress={() => {
+            posthog.capture('reservation_button_clicked', {
+              restaurant_id: restaurant.restaurant_id,
+              restaurant_name: restaurant.name,
+            });
+            router.push(`/restaurants/${restaurant.restaurant_id}/reservation`);
+          }}
       >
-        <Text style={styles.buttonTextPrimary}>Reserve a table</Text>
-      </TouchableOpacity>
+        Reserve a table
+      </StyledButton>
 
-      <TouchableOpacity
-        style={styles.buttonSecondary}
-        onPress={() => {
-          posthog.capture('menu_button_clicked', {
-            restaurant_id: restaurant.restaurant_id,
-            restaurant_name: restaurant.name,
-          });
-          router.push(`/restaurants/${restaurant.restaurant_id}/menu`);
-        }}
+      <StyledButton
+          variant="secondary"
+          accessibilityLabel="See menu"
+          onPress={() => {
+            posthog.capture('menu_button_clicked', {
+              restaurant_id: restaurant.restaurant_id,
+              restaurant_name: restaurant.name,
+            });
+            router.push(`/restaurants/${restaurant.restaurant_id}/menu`);
+          }}
       >
-        <Text style={styles.buttonTextSecondary}>See menu</Text>
-      </TouchableOpacity>
+        See menu
+      </StyledButton>
     </ScrollView>
   );
 }
@@ -182,20 +185,4 @@ const styles = StyleSheet.create({
   descriptionCard: {
     marginBottom: 16,
   },
-  buttonPrimary: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 10,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  buttonTextPrimary: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  buttonSecondary: {
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-    borderRadius: 10,
-    padding: 16,
-    alignItems: 'center',
-  },
-  buttonTextSecondary: { color: theme.colors.primary, fontSize: 16, fontWeight: '700' },
 });

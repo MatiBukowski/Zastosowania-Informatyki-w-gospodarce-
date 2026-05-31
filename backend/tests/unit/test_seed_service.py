@@ -1,14 +1,22 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.models import Restaurant, MenuItem, AppUser, RestaurantTable, Reservation, Order, OrderItem
+from src.models import (
+    Restaurant,
+    MenuItem,
+    AppUser,
+    RestaurantTable,
+    Reservation,
+    RestaurantSchedule
+)
 from src.services import (
     seed_restaurants,
     seed_menu_items,
     seed_users,
     seed_tables,
     seed_reservations,
-    seed_orders
+    seed_orders,
+    seed_schedules
 )
 from src.db import Base
 from tests.utils import create_restaurants
@@ -116,6 +124,23 @@ class TestSeedService:
         
         assert orders_count == 10
         assert order_items_count > 0
+
+        session.close()
+        Base.metadata.drop_all(bind=engine)
+        
+    def test_seed_schedules(self):
+        Base.metadata.create_all(bind=engine)
+        session = TestingSessionLocal()
+        
+        seed_restaurants(session, count=5)
+
+        assert session.query(RestaurantSchedule).count() == 0
+
+        seed_schedules(session, number_of_restaurants=5)
+        assert session.query(RestaurantSchedule).count() == 35
+
+        seed_schedules(session, number_of_restaurants=30)
+        assert session.query(RestaurantSchedule).count() == 35
 
         session.close()
         Base.metadata.drop_all(bind=engine)

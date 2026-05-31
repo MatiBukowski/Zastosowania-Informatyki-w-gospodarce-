@@ -27,3 +27,8 @@ export const getTablesByRestaurantId = async (restaurantId: number, page: number
   });
   return response.data;
 };
+
+export const regenerateQrCode = async (tableId: number): Promise<ITable> => {
+  const response = await apiClient.patch<ITable>(`/api/tables/${tableId}/regenerate-qr-code`);
+  return response.data;
+};
