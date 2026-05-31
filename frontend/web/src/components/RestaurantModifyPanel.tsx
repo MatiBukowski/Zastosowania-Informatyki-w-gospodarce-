@@ -164,7 +164,7 @@ const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 3 }}>Zmiany zostały zapisane pomyślnie!</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 3 }}>Changes saved successfully!</Alert>}
 
       <Paper sx={{ p: 4 }}>
         <Grid container spacing={3}>
@@ -175,13 +175,13 @@ const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField fullWidth label="Nazwa Restauracji" name="name" value={formData.name} onChange={handleInputChange} />
+            <TextField fullWidth label="Restaurant Name" name="name" value={formData.name} onChange={handleInputChange} />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField 
               select
               fullWidth 
-              label="Rodzaj Kuchni (Cuisine)" 
+              label="Cuisine Type" 
               name="cuisine" 
               value={formData.cuisine} 
               onChange={handleInputChange}
@@ -194,12 +194,12 @@ const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
             </TextField>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField fullWidth label="Numer Telefonu" name="phone_number" value={formData.phone_number} onChange={handleInputChange} placeholder="+48123456789"/>
+            <TextField fullWidth label="Phone Number" name="phone_number" value={formData.phone_number} onChange={handleInputChange} placeholder="+48123456789"/>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <FormControlLabel 
               control={<Switch checked={formData.has_kiosk} onChange={handleSwitchChange} name="has_kiosk" color="primary" />} 
-              label="Posiada Kiosk Ofertowy" 
+              label="Has Offer Kiosk" 
               sx={{ mt: 1 }}
             />
           </Grid>
@@ -209,7 +209,7 @@ const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
               fullWidth 
               multiline 
               rows={4} 
-              label="Opis Restauracji" 
+              label="Description" 
               name="description" 
               value={formData.description} 
               onChange={handleInputChange} 
@@ -223,16 +223,16 @@ const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField fullWidth label="Miasto" name="city" value={formData.city} onChange={handleInputChange} />
+            <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleInputChange} />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField fullWidth label="Kod Pocztowy" name="postal_code" value={formData.postal_code} onChange={handleInputChange} placeholder="00-000"/>
+            <TextField fullWidth label="Postal Code" name="postal_code" value={formData.postal_code} onChange={handleInputChange} placeholder="00-000"/>
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
-            <TextField fullWidth label="Ulica" name="street" value={formData.street} onChange={handleInputChange} />
+            <TextField fullWidth label="Street" name="street" value={formData.street} onChange={handleInputChange} />
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
-            <TextField fullWidth label="Numer Budynku" name="building_number" value={formData.building_number} onChange={handleInputChange} />
+            <TextField fullWidth label="Building Number" name="building_number" value={formData.building_number} onChange={handleInputChange} />
           </Grid>
 
           {/* Godziny Otwarcia*/}
@@ -251,7 +251,7 @@ const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
                   <TextField 
                     fullWidth 
                     type="time" 
-                    label="Otwarcie" 
+                    label="Opening" 
                     slotProps={{
                         inputLabel: { shrink: true },
                         htmlInput: { step: 300 }
@@ -264,7 +264,7 @@ const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
                   <TextField 
                     fullWidth 
                     type="time" 
-                    label="Zamknięcie" 
+                    label="Closing" 
                     slotProps={{
                         inputLabel: { shrink: true },
                         htmlInput: { step: 300 }
