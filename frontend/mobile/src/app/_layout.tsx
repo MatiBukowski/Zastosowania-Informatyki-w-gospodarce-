@@ -7,13 +7,14 @@ import { type ErrorBoundaryProps } from "expo-router";
 
 import { posthogClient } from '@/analitics/analitics';
 import { AuthProvider } from '@/services/providers/AuthProvider';
+import { reportApplicationError } from '@/services/errorReporting';
 
 const queryClient = new QueryClient();
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   useEffect(() => {
     console.error("Uncaught error caught by mobile ErrorBoundary:", error);
-    posthogClient.captureException(error, {
+    reportApplicationError(error, {
       platform: 'mobile',
     });
   }, [error]);

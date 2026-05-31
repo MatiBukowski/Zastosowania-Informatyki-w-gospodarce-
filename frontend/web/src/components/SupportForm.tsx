@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { colors } from '../../theme/palette';
 import { submitSupportRequest, SupportRequestType } from '../api/Support';
+import { getUserFacingErrorMessage } from '../services/errorReporting';
 
 const REQUEST_TYPE_OPTIONS: { value: SupportRequestType; label: string }[] = [
   { value: 'account_creation', label: 'New manager account' },
@@ -62,10 +63,8 @@ export const SupportForm = ({
       setRestaurantName('');
       posthog.capture('support_form_submitted', { request_type: requestType });
     } catch (err: unknown) {
-      const detail =
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-        'Failed to send your request. Please try again.';
-      setError(typeof detail === 'string' ? detail : 'Failed to send your request. Please try again.');
+      const detail = getUserFacingErrorMessage(err, 'Failed to send your request. Please try again.');
+      setError(detail);
       posthog.capture('support_form_failed', { request_type: requestType, error: detail });
     } finally {
       setLoading(false);

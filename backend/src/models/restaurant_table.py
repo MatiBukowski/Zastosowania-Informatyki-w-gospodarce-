@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import (
     Uuid,
     ForeignKey,
+    String,
     UniqueConstraint,
     CheckConstraint,
     Enum as SAEnum
@@ -26,7 +27,7 @@ class RestaurantTable(Base):
 
     table_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     restaurant_id: Mapped[int] = mapped_column(ForeignKey("restaurant.restaurant_id", ondelete="CASCADE"), nullable=False)
-    table_number: Mapped[int] = mapped_column(nullable=False)
+    table_number: Mapped[str] = mapped_column(String(80), nullable=False)
     qr_code_token: Mapped[uuid.UUID] = mapped_column(
         Uuid,
         nullable=False,

@@ -2,8 +2,32 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from posthog import Posthog
 from ..config import settings
+import logging
+import traceback
 
 posthog = Posthog(settings.POSTHOG_API_KEY, host=settings.POSTHOG_HOST)
+GENERIC_ERROR_DETAIL = "An unexpected error occurred. Please try again later."
+logger = logging.getLogger("fastapi")
+
+
+def report_exception(request: Request, exc: Exception, context: dict | None = None) -> None:
+    logger.error(
+        "Unhandled exception during %s %s: %s\n%s",
+        request.method,
+        request.url.path,
+        exc,
+        traceback.format_exc(),
+    )
+
+    properties = {
+        "path": request.url.path,
+        "method": request.method,
+    }
+    if context:
+        properties.update(context)
+
+    distinct_id = request.headers.get("x-posthog-distinct-id", "anonymous")
+    posthog.capture_exception(exc, distinct_id=distinct_id, properties=properties)
 
 async def posthog_middleware(request: Request, call_next):
     # Skip health checks for PostHog
@@ -30,29 +54,10 @@ async def posthog_middleware(request: Request, call_next):
     )
     return response
 
-import logging
-import traceback
-
-logger = logging.getLogger("fastapi")
-
 async def http_exception_handler(request: Request, exc: Exception):
-    # Log the full exception traceback on the server
-    logger.error(f"Unhandled exception during {request.method} {request.url.path}: {exc}\n{traceback.format_exc()}")
-    
-    # Capture the exception in PostHog with request details
-    distinct_id = request.headers.get("x-posthog-distinct-id", "anonymous")
-    posthog.capture_exception(
-        exc,
-        distinct_id=distinct_id,
-        properties={
-            "path": request.url.path,
-            "method": request.method,
-        }
-    )
-    
-    # Return a generic error message, standardizing on the 'detail' key
+    report_exception(request, exc)
     return JSONResponse(
         status_code=500,
-        content={"detail": "An unexpected error occurred. Please try again later."}
+        content={"detail": GENERIC_ERROR_DETAIL}
     )
 

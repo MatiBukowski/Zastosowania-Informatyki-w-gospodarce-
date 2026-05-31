@@ -76,14 +76,14 @@ export enum TableStatus {
 export interface ITable {
   table_id: number;
   restaurant_id: number;
-  table_number: number;
+  table_number: string;
   capacity: number;
   qr_code_token: string;
   status: TableStatus;
 }
 
 export interface ICreateTable {
-  table_number: number;
+  table_number: string;
   capacity: number;
 }
 

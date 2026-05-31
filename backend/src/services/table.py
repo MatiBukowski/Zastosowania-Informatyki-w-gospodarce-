@@ -14,7 +14,7 @@ class TableService:
         if existing_table:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, 
-                detail=f"Table number {table_data.table_number} already exists in this restaurant"
+                detail=f"Table {table_data.table_number} already exists in this restaurant"
             )
 
         data_dict = table_data.model_dump()
@@ -36,6 +36,15 @@ class TableService:
             )
 
         update_table_data = table_data.model_dump(exclude_unset=True)
+        new_table_number = update_table_data.get("table_number")
+        if new_table_number and new_table_number != db_table.table_number:
+            existing_table = self.repo.get_table_by_number(new_table_number, db_table.restaurant_id)
+            if existing_table and existing_table.table_id != db_table.table_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Table {new_table_number} already exists in this restaurant"
+                )
+
         for key, value in update_table_data.items():
             setattr(db_table, key, value) 
 

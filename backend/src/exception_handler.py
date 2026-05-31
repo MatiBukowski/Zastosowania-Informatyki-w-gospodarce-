@@ -10,11 +10,7 @@ from src.exceptions import (
     ForecastGeneratingException
 )
 
-import logging
-import traceback
-from src.middleware import posthog
-
-logger = logging.getLogger("fastapi")
+from src.middleware import GENERIC_ERROR_DETAIL, report_exception
 
 def register_exception_handlers(app):
     @app.exception_handler(UserAlreadyExistsException)
@@ -40,16 +36,10 @@ def register_exception_handlers(app):
     
     @app.exception_handler(JWTHandlingException)
     async def jwt_handling_exception_handler(request: Request, exc: JWTHandlingException):
-        logger.error(f"JWT Handling exception: {exc}\n{traceback.format_exc()}")
-        distinct_id = request.headers.get("x-posthog-distinct-id", "anonymous")
-        posthog.capture_exception(
-            exc,
-            distinct_id=distinct_id,
-            properties={"path": request.url.path, "method": request.method}
-        )
+        report_exception(request, exc, {"type": "jwt_handling"})
         return JSONResponse(
                 status_code=500,
-                content={"detail": "An unexpected error occurred. Please try again later."}
+                content={"detail": GENERIC_ERROR_DETAIL}
         )
 
     @app.exception_handler(UnauthorisedUserException)
@@ -62,14 +52,8 @@ def register_exception_handlers(app):
 
     @app.exception_handler(ForecastGeneratingException)
     async def forecast_generating_exception(request: Request, exc: ForecastGeneratingException):
-        logger.error(f"Forecast Generating exception: {exc}\n{traceback.format_exc()}")
-        distinct_id = request.headers.get("x-posthog-distinct-id", "anonymous")
-        posthog.capture_exception(
-            exc,
-            distinct_id=distinct_id,
-            properties={"path": request.url.path, "method": request.method}
-        )
+        report_exception(request, exc, {"type": "forecast_generating"})
         return JSONResponse(
                 status_code=500,
-                content={"detail": "An unexpected error occurred. Please try again later."}
+                content={"detail": GENERIC_ERROR_DETAIL}
         )

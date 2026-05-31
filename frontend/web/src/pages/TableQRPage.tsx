@@ -120,7 +120,7 @@ export const TableQRPage = () => {
       posthog.capture('qr_code_reset', { table_id: confirmTable.table_id });
       setSnackbar({
         open: true,
-        message: `QR code for Table #${confirmTable.table_number} has been reset.`,
+        message: `QR code for Table ${confirmTable.table_number} has been reset.`,
         severity: 'success',
       });
       const id = isAdmin ? (selectedRestaurantId as number) : parseInt(urlRestaurantId!, 10);
@@ -217,7 +217,7 @@ export const TableQRPage = () => {
                                 }
                                 label={
                                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                    Table #{table.table_number}
+                                    Table {table.table_number}
                                   </Typography>
                                 }
                                 sx={{ margin: 0 }}
@@ -269,7 +269,7 @@ export const TableQRPage = () => {
           <DialogTitle>Reset QR Code</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to reset the QR code for <strong>Table #{confirmTable?.table_number}</strong>?
+              Are you sure you want to reset the QR code for <strong>Table {confirmTable?.table_number}</strong>?
               The old QR code will stop working immediately.
             </DialogContentText>
           </DialogContent>

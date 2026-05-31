@@ -15,6 +15,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../services/AuthProvider';
 import { colors } from '../../theme/palette';
+import { getUserFacingErrorMessage } from '../services/errorReporting';
 
 export const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -43,15 +44,11 @@ export const LoginPage = () => {
             posthog.capture('login_success', { email });
         } catch (err: any) {
             console.error('Login error:', err);
-            const errorMessage = err.response?.data?.detail || (err.response?.status === 401 ? 'Invalid email or password' : 'Login failed. Please try again.');
+            const errorMessage = err.response?.status === 401
+                ? 'Invalid email or password'
+                : getUserFacingErrorMessage(err, 'Login failed. Please try again.');
             posthog.capture('login_failed', { email, error: errorMessage });
-            if (err.response?.data?.detail) {
-                setError(err.response.data.detail);
-            } else if (err.response?.status === 401) {
-                setError('Invalid email or password');
-            } else {
-                setError('Login failed. Please try again.');
-            }
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }

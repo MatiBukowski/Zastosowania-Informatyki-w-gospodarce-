@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchAll } from '@/services/api/PaginationHelper';
 import { getReservationsByTableId, createReservation, getReservationById, updateReservation, getMyReservations } from '@/services/api/ReservationAPI';
 import { IReservation, ICreateReservation, IUpdateReservation } from '@/services/interfaces/interfaces';
-import {apiClient} from "@/services/api/API";
+import { getUserFacingErrorMessage } from '@/services/errorReporting';
 
 export function useGetReservationsByTableId(tableId: number) {
     const [reservations, setReservations] = useState<IReservation[]>([]);
@@ -18,7 +18,7 @@ export function useGetReservationsByTableId(tableId: number) {
                 setError(null);
             } catch (err: any) {
                 console.error('useGetReservationsByTableId - error:', err);
-                setError(err.message || 'Failed to fetch table reservations');
+                setError(getUserFacingErrorMessage(err, 'Could not load table reservations.'));
             } finally {
                 setLoading(false);
             }
@@ -44,7 +44,7 @@ export function useCreateReservation() {
             return result;
         } catch (err: any) {
             console.error('useCreateReservation - error:', err);
-            setError(err.message || 'Failed to create reservation');
+            setError(getUserFacingErrorMessage(err, 'Could not create reservation.'));
             setLoading(false);
             return null;
         }
@@ -67,9 +67,8 @@ export function useGetReservationById(reservationId: number) {
             setReservation(data);
             setError(null);
         } catch (err: any) {
-            setError(err.message);
             console.error('useGetReservationById - error:', err);
-            setError(err.message || 'Failed to fetch reservation');
+            setError(getUserFacingErrorMessage(err, 'Could not load this reservation.'));
         } finally {
             setLoading(false);
         }
@@ -95,7 +94,7 @@ export function useUpdateReservation() {
             return result;
         } catch (err: any) {
             console.error('useUpdateReservation - error:', err);
-            setError(err.message || 'Failed to update reservation');
+            setError(getUserFacingErrorMessage(err, 'Could not update reservation.'));
             setLoading(false);
             return null;
         }
@@ -117,7 +116,7 @@ export function useGetMyReservations() {
             setError(null);
         } catch (err: any) {
             console.error('useGetMyReservations - error:', err);
-            setError(err.message || 'Failed to fetch reservations');
+            setError(getUserFacingErrorMessage(err, 'Could not load reservations.'));
         } finally {
             setLoading(false);
         }

@@ -39,8 +39,8 @@ export default function LoginModal({
         if (field === "password") return "Please enter your password.";
       }
 
-      if (typeof detail === "string" && detail.trim()) {
-        return detail;
+      if (error.response?.status === 401) {
+        return "We could not log you in. Check your email and password and try again.";
       }
     }
 

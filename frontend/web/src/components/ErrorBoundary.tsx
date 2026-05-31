@@ -1,7 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Box, Typography, Button, Paper, Container } from '@mui/material';
-import posthog from 'posthog-js';
 import { colors } from '../../theme/palette';
+import { reportApplicationError } from '../services/errorReporting';
 
 interface Props {
   children: ReactNode;
@@ -24,8 +24,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error caught by React ErrorBoundary:', error, errorInfo);
-    // Send standard structured exception to PostHog
-    posthog.captureException(error, {
+    reportApplicationError(error, {
       component_stack: errorInfo.componentStack,
       location: window.location.href,
     });
