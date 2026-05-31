@@ -7,7 +7,9 @@ from src.models import (
     AppUser,
     RestaurantTable,
     Reservation,
-    RestaurantSchedule
+    RestaurantSchedule,
+    Order,
+    OrderItem
 )
 from src.services import (
     seed_restaurants,
