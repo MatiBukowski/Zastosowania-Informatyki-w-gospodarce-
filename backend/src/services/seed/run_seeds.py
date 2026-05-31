@@ -5,6 +5,7 @@ from .seed_menu_items import seed_menu_items
 from .seed_users import seed_users
 from .seed_tables import seed_tables
 from .seed_reservations import seed_reservations
+from .seed_orders import seed_orders
 from .seed_schedules import seed_schedules
 
 
@@ -14,5 +15,6 @@ def run_seed():
         seed_menu_items(session)
         seed_users(session)
         seed_tables(session)
-        seed_reservations(session)
         seed_schedules(session)
+        seed_reservations(session)
+        seed_orders(session)

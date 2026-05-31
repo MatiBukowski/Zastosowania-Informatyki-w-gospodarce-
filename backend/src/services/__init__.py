@@ -4,6 +4,7 @@ from .seed.seed_menu_items import seed_menu_items
 from .seed.seed_users import seed_users
 from .seed.seed_tables import seed_tables
 from .seed.seed_reservations import seed_reservations
+from .seed.seed_orders import seed_orders
 from .seed.seed_schedules import seed_schedules
 from .restaurant import RestaurantService
 from .menu import MenuService
@@ -11,3 +12,4 @@ from .table import TableService
 from .reservation import ReservationService
 from .forecast import ForecastService
 from .user import UserService
+from .order import OrderService
