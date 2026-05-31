@@ -5,4 +5,5 @@ from .reservation import ReservationResponse, ReservationCreate, ReservationUpda
 from .forecast import ForecastBase
 from .user import UserRegisterRequest, UserLoginRequest
 from .pagination import PaginatedResponse
+from .order import OrderCreate, OrderUpdate, OrderResponse, OrderItemResponse
 from .schedules import RestaurantScheduleBase

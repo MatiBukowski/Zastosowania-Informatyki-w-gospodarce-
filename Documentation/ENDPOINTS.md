@@ -59,7 +59,7 @@
 15. **POST /api/auth/login/{user}**
     - Returns: {"access_token"} with HTTP only cookie with refresh token in it set.
 
-165. **POST /api/auth/refresh**
+16. **POST /api/auth/refresh**
     - Returns: {"access_token"}
 
 17. **POST /api/auth/logout**
@@ -71,3 +71,21 @@
 19. **POST /api/support/contact**
     - Body: {"name", "email", "request_type", "message", "restaurant_name"?, "source"?}
     - Returns: {"message"}
+
+20. **POST /api/orders**
+    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
+
+21. **GET /api/orders/my**
+    - Returns a list: List[{"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}]
+
+22. **GET /api/orders/restaurant/{restaurant_id}**
+    - Returns a list: List[{"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}]
+
+23. **GET /api/orders/{order_id}**
+    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
+
+24. **PATCH /api/orders/{order_id}**
+    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
+
+25. **PATCH /api/orders/{order_id}/cancel**
+    - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
