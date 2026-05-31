@@ -11,6 +11,8 @@ import { useAuth } from '@/services/providers/AuthProvider';
 import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
 import StyledButton from '@/ui/components/buttons/StyledButton';
+import LoginModal from '@/ui/components/authModals/LoginModal';
+import RegisterModal from '@/ui/components/authModals/RegisterModal';
 
 const reservation_duration_in_min = 120;
 const durationMs = reservation_duration_in_min * 60 * 1000;
@@ -39,6 +41,8 @@ const RestaurantCreateReservationView = () => {
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [allRelevantReservations, setAllRelevantReservations] = useState<IReservation[]>([]);
     const [activeSection, setActiveSection] = useState<'calendar' | 'guests' | 'time'>('calendar');
+    const [isLoginVisible, setIsLoginVisible] = useState(false);
+    const [isRegisterVisible, setIsRegisterVisible] = useState(false);
 
     const { tables, loading: loadingTables } = useGetTablesByRestaurantId(Number(id));
     const posthog = usePostHog();
@@ -120,7 +124,7 @@ const RestaurantCreateReservationView = () => {
         }
 
         if (!accessToken || !userId) {
-            router.push('/user/login');
+            setIsLoginVisible(true);
             return;
         }
 
@@ -301,6 +305,20 @@ const RestaurantCreateReservationView = () => {
                     {isComplete ? "Confirm Reservation" : "Complete Selections"}
                 </StyledButton>
             </View>
+
+            <LoginModal
+                visible={isLoginVisible}
+                onClose={() => setIsLoginVisible(false)}
+                showRegisterLink
+                onRegisterPress={() => {
+                    setIsLoginVisible(false);
+                    setIsRegisterVisible(true);
+                }}
+            />
+            <RegisterModal
+                visible={isRegisterVisible}
+                onClose={() => setIsRegisterVisible(false)}
+            />
         </View>
     );
 };

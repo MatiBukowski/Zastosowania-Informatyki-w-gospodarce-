@@ -3,5 +3,6 @@ export const colors = {
   tangerineDream: "#FFA987",
   seashell: "#F7EBE8",
   carbonBlack: "#222217",
-  fern: "#487551"
+  fern: "#487551",
+  light_gray: "#888888"
 };
