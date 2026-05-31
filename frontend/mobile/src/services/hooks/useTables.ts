@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { resolveTableByToken } from '@/services/api/TablesAPI';
 import { ITable } from '@/services/interfaces/interfaces';
+import { getUserFacingErrorMessage } from '@/services/errorReporting';
 
 export function useResolveTableByToken(token: string) {
   const [table, setTable] = useState<ITable | null>(null);
@@ -26,7 +27,7 @@ export function useResolveTableByToken(token: string) {
       })
       .catch(err => {
         console.error('useResolveTableByToken - error:', err);
-        const msg = err.response?.data?.detail || err.message || 'Failed to resolve table';
+        const msg = getUserFacingErrorMessage(err, 'Could not open this table. Please scan the code again.');
         setError(msg);
         setLoading(false);
       });

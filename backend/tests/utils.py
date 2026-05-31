@@ -49,7 +49,7 @@ def create_menu(db):
 def create_tables(db, restaurant_id: int = 1):
     table = RestaurantTable(
         restaurant_id=restaurant_id,
-        table_number=1,
+        table_number="1",
         capacity=4,
         status="FREE"
     )

@@ -47,7 +47,7 @@ function TableCard({ table, onReserve }: { table: ITable; onReserve: () => void 
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text style={theme.typography.h6}>Table #{table.table_number}</Text>
+        <Text style={theme.typography.h6}>Table {table.table_number}</Text>
         <View style={[styles.statusBadge, { backgroundColor: statusColor(table.status) }]}>
           <Text style={styles.statusText}>{statusLabel(table.status)}</Text>
         </View>

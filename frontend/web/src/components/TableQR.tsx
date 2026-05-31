@@ -11,7 +11,7 @@ export const TableQR = ({ token, table_number }: ITableQRProps) => {
       const pngUrl = canvas.toDataURL("image/png", 1.0);
       const downloadLink = document.createElement("a");
       downloadLink.href = pngUrl;
-      downloadLink.download = `table_${table_number}_qr.png`;
+      downloadLink.download = `table_${table_number.replace(/[^a-z0-9_-]+/gi, '_')}_qr.png`;
       downloadLink.click();
     }
   };
@@ -19,7 +19,7 @@ export const TableQR = ({ token, table_number }: ITableQRProps) => {
   return (
     <Paper elevation={3} sx={qrStyles.paper}>
       <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-        Table #{table_number}
+        Table {table_number}
       </Typography>
 
       <Box sx={qrStyles.qrWrapper}>

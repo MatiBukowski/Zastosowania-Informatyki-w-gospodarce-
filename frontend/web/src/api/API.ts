@@ -1,5 +1,6 @@
 import axios from 'axios';
 import posthog from "posthog-js";
+import { reportApplicationError } from '../services/errorReporting';
 
 // Use one Axios API for all request's.
 export const apiClient = axios.create({
@@ -18,16 +19,7 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Capture 500+ and connection/network errors to PostHog
-    if (!error.response || error.response.status >= 500) {
-      posthog.captureException(error, {
-        type: 'api_error',
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response?.status,
-        message: error.message,
-      });
-    }
+    reportApplicationError(error);
     return Promise.reject(error);
   }
 );

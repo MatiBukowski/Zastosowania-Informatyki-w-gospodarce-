@@ -15,7 +15,7 @@ export default function QrLandingScreen() {
     const table: ITable = {
         table_id: Number(tableId),
         restaurant_id: Number(id),
-        table_number: Number(tableNumber),
+        table_number: tableNumber ?? '',
         capacity: Number(capacity),
         qr_code_token: token ?? '',
         status: TableStatus.FREE,

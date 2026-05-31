@@ -7,7 +7,7 @@ class TestTableDataflow:
     def test_create_update_table(self, client, db):
         restaurant_id = 1
         create_payload = {
-            "table_number": 15,
+            "table_number": "Floor 1",
             "capacity": 4,
             "status": "FREE"
         }
@@ -26,13 +26,13 @@ class TestTableDataflow:
             assert "qr_code_token" in table
             assert "capacity" in table
             assert "status" in table
-            assert table["table_number"] == 15
+            assert table["table_number"] == "Floor 1"
             assert table["capacity"] == 4
             assert table["restaurant_id"] == restaurant_id
             table_id = created_data["table_id"]
 
         update_payload = {
-            "table_number": 10,
+            "table_number": "Terrace A",
             "capacity": 5
         }
         update_response = client.patch(f"/api/tables/{table_id}", json=update_payload)
@@ -43,7 +43,7 @@ class TestTableDataflow:
         assert isinstance(updated_data, dict)
         if len(updated_data) > 0:
             table = updated_data
-            assert table["table_number"] == 10
+            assert table["table_number"] == "Terrace A"
             assert table["capacity"] == 5
             assert table["restaurant_id"] == restaurant_id
             assert table["status"] == TableStatusEnum.FREE
@@ -51,7 +51,7 @@ class TestTableDataflow:
     def test_regenerate_resolve_qr_code_token(self, client, db):
         restaurant_id = 1
         create_payload = {
-            "table_number": 15,
+            "table_number": "VIP Room",
             "capacity": 4,
             "status": "FREE"
         }
@@ -70,7 +70,7 @@ class TestTableDataflow:
         assert isinstance(regenerated_data, dict)
         assert new_qr_code_token != old_qr_code_token
         assert regenerated_data["table_id"] == table_id
-        assert regenerated_data["table_number"] == 15
+        assert regenerated_data["table_number"] == "VIP Room"
 
         resolve_response = client.get(f"/api/tables/resolve/{new_qr_code_token}")
         assert resolve_response.status_code == 200

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { posthogClient } from '@/analitics/analitics'
+import { reportApplicationError } from '@/services/errorReporting';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -24,16 +25,7 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Capture 500+ and connection/network errors to PostHog
-    if (!error.response || error.response.status >= 500) {
-      posthogClient.captureException(error, {
-        type: 'api_error',
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response?.status,
-        message: error.message,
-      });
-    }
+    reportApplicationError(error);
     return Promise.reject(error);
   }
-);
+);

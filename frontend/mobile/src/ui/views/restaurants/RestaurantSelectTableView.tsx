@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getReservationsByTableId, createReservation } from '@/services/api/ReservationAPI';
 import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
+import { getUserFacingErrorMessage } from '@/services/errorReporting';
  import StyledButton from "@/ui/components/buttons/StyledButton";
 
 const RestaurantSelectTableView = () => {
@@ -112,7 +113,7 @@ const RestaurantSelectTableView = () => {
             router.dismissAll();
             router.replace('/');
         } catch (error: any) {
-            const errorMessage = error.response?.data?.detail || error.message || "Unknown error";
+            const errorMessage = getUserFacingErrorMessage(error, "Could not create reservation.");
             posthog.capture('restaurant_reservation_failed', {
                 restaurant_id: id,
                 restaurant_name: name,
@@ -121,7 +122,7 @@ const RestaurantSelectTableView = () => {
                 guest_count: guests
             });
             console.error("Reservation error details:", error.response?.data || error.message);
-            alert("Error creating reservation. Check console for details.");
+            alert(errorMessage);
         }
     };
 

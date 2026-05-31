@@ -5,6 +5,7 @@ import { getRestaurants, getRestaurantById, getMenuByRestaurantId, getTablesByRe
 import { IRestaurant, IMenuItem, ITable, ICreateTable } from '@/services/interfaces/interfaces';
 import { IRestaurantFilters } from '@/services/interfaces/restaurants';
 import { fetchNext, fetchAll } from '@/services/api/PaginationHelper';
+import { getUserFacingErrorMessage } from '@/services/errorReporting';
 
 export function useGetRestaurants(params: { search: string | null } & IRestaurantFilters) {
   return useInfiniteQuery({
@@ -33,7 +34,7 @@ export function useGetRestaurantById(restaurantId: number) {
       })
       .catch(err => {
         console.error('useGetRestaurantById - error:', err);
-        setError(err.message);
+        setError(getUserFacingErrorMessage(err, 'Could not load this restaurant.'));
         setLoading(false);
       });
   }, [restaurantId]);
@@ -57,7 +58,7 @@ export function useGetRestaurantMenu(restaurantId: number) {
       })
       .catch(err => {
         //console.error('useGetRestaurantMenu - error:', err);
-        setError(err.message);
+        setError(getUserFacingErrorMessage(err, 'Could not load the menu.'));
         setLoading(false);
       });
   }, [restaurantId]);
@@ -78,7 +79,7 @@ export function useGetTablesByRestaurantId(restaurantId: number) {
         })
         .catch(err => {
           console.error('useGetTablesByRestaurantId - error:', err);
-          setError(err.message);
+          setError(getUserFacingErrorMessage(err, 'Could not load tables.'));
           setLoading(false);
         });
   }, [restaurantId]);
@@ -99,7 +100,7 @@ export function usePostTable() {
       setLoading(false);
       return data;
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail?.[0]?.msg || err.message;
+      const errorMessage = getUserFacingErrorMessage(err, 'Could not create table.');
       setError(errorMessage);
       setLoading(false);
       throw err;
