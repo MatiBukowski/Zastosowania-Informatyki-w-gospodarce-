@@ -1,5 +1,6 @@
 import { Pressable, TextInput, View, Text, Modal } from "react-native";
 import { useState } from "react";
+import axios from "axios";
 
 import { useAuth } from "@/services/providers/AuthProvider";
 import { IRegisterRequest } from "@/services/interfaces/user";
@@ -150,6 +151,11 @@ export default function RegisterModal({ visible, description = "Please enter you
                 await register(registerRequest);
                 onClose();
               } catch (error) {
+                if (axios.isAxiosError(error) && error.response?.status === 409) {
+                  setErrorMessage("A user with the same email already exists. Please use a different email.");
+                  return;
+                }
+
                 setErrorMessage("We could not create your account. Please check your details and try again.");
               }
             }}
