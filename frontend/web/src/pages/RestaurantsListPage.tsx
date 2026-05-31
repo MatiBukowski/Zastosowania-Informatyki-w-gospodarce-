@@ -1,17 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthProvider';
 import { getRestaurants, getRestaurantsByUser } from '../api/RestaurantAPI';
 import { fetchAll } from '../api/PaginationHelper';
 import { IRestaurant } from '../context/interfaces';
-import { Button, Box, Typography, Divider } from '@mui/material';
+import {
+  Box, Typography, Select,
+  MenuItem, FormControl, InputLabel
+} from '@mui/material';
 import { usePostHog } from '@posthog/react';
+import RestaurantModifyPanel from '../components/RestaurantModifyPanel';
 
 export const RestaurantListPage = () => {
   const { role, isAxiosReady } = useAuth();
-  const navigate = useNavigate();
   const posthog = usePostHog();
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | "">("");
 
   const isAdmin = role === "ADMIN";
 
@@ -41,50 +44,39 @@ export const RestaurantListPage = () => {
     fetchRestaurantsData();
   }, [isAdmin, isAxiosReady, posthog]);
 
-  const handleModifyClick = (restaurantId: number) => {
-    posthog.capture('restaurant_modify_clicked', { restaurant_id: restaurantId });
-    navigate(`/restaurants/modify/${restaurantId}`);
+  const handleClosePanel = () => {
+    setSelectedRestaurantId("");
   };
 
   return (
     <Box sx={pageStyles.container}>
       <Typography variant="h4" sx={pageStyles.header}>
-        Zarządzanie Restauracjami
+        Restaurant Management
       </Typography>
 
-      {restaurants.length === 0 ? (
-        <Typography sx={pageStyles.noDataText}>Brak restauracji do wyświetlenia</Typography>
-      ) : (
-        <>
-          <Typography variant="h6" sx={{ color: 'text.secondary', mb: 2 }}>
-            Lista restauracji ({restaurants.length})
-          </Typography>
-          <Divider sx={{ mb: 4 }} />
+      {isAdmin && (
+            <>
+              <FormControl fullWidth sx={pageStyles.selectWrapper}>
+                <InputLabel id="restaurant-select-label">Select Restaurant to modify</InputLabel>
+                <Select
+                    labelId="restaurant-select-label"
+                    value={selectedRestaurantId}
+                    label="Select Restaurant to modify"
+                    onChange={(e) => setSelectedRestaurantId(e.target.value as number)}
+                >
+                  {restaurants.map((r) => (
+                      <MenuItem key={r.restaurant_id} value={r.restaurant_id}>{r.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </>
+        )}
 
-          <Box sx={pageStyles.grid}>
-            {restaurants.map((restaurant) => (
-              <Box key={restaurant.restaurant_id} sx={pageStyles.restaurantCard}>     
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2, zIndex: 1, width: '100%' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', textAlign: 'center', mb: 0.5 }}>
-                    {restaurant.name}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ mt: 'auto', zIndex: 1, width: '100%' }}>
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    fullWidth 
-                    onClick={() => handleModifyClick(restaurant.restaurant_id)}
-                  >
-                    Modyfikuj
-                  </Button>
-                </Box>
-                
-              </Box>
-            ))}
-          </Box>
-        </>
+        {selectedRestaurantId !== "" && (
+          <RestaurantModifyPanel 
+            restaurantId={selectedRestaurantId as number} 
+            onClose={handleClosePanel} 
+          />
       )}
     </Box>
   );
@@ -95,52 +87,5 @@ const pageStyles = {
   header: { mb: 4, fontWeight: 'bold', color: 'primary.main' },
   noDataText: { mt: 2, color: 'text.secondary' },
   grid: { display: 'flex', flexWrap: 'wrap', gap: 3 },
-  restaurantCard: {
-    p: 3,
-    border: '1px solid #e0e0e0',
-    borderRadius: 2,
-    bgcolor: 'background.paper',
-    width: 320,
-    minHeight: 280, // Zwiększono, aby pomieścić zdjęcie
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center', // Pomaga w wyrównaniu elementów
-    position: 'relative',
-    overflow: 'hidden',
-    transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
-    '&:hover': {
-      boxShadow: 3,
-      borderColor: 'primary.light',
-    }
-  },
-  restaurantImage: {
-    width: '100%',
-    height: 140,
-    objectFit: 'cover',
-    borderRadius: 1,
-    mb: 2,
-  },
-  placeholderImage: {
-    width: '100%',
-    height: 140,
-    bgcolor: 'grey.100',
-    borderRadius: 1,
-    mb: 2,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'text.secondary',
-  },
-  backgroundNumber: {
-    position: 'absolute',
-    right: 16,
-    top: '50%',
-    transform: 'translateY(-50%)',
-    fontWeight: 900,
-    color: 'text.primary',
-    opacity: 0.05,
-    lineHeight: 1,
-    pointerEvents: 'none',
-    zIndex: 0,
-  }
+  selectWrapper: { mb: 4, maxWidth: 600 }
 };

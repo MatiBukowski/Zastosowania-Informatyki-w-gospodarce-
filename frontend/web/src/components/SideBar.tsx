@@ -278,13 +278,15 @@ useEffect(() => {
             </Collapse>
           )}
 
-          <SideBarMenuItem
-            href="/restaurants"
-            icon={<StorefrontIcon sx={{ fontSize: '28px' }} />} 
-            label="Restaurants" 
-            collapsed={isCollapsed} 
-            isActive={isRestaurantsActive} 
-          />
+          {isAdmin && (
+            <SideBarMenuItem
+              href="/restaurants"
+              icon={<StorefrontIcon sx={{ fontSize: '28px' }} />} 
+              label="Restaurants" 
+              collapsed={isCollapsed} 
+              isActive={isRestaurantsActive} 
+            />
+          )}
 
         </Stack>
       </Box>
