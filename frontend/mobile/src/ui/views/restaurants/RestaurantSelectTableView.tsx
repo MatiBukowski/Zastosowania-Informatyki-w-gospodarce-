@@ -8,6 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { getReservationsByTableId, createReservation } from '@/services/api/ReservationAPI';
 import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
+import { getUserFacingErrorMessage } from '@/services/errorReporting';
+ import StyledButton from "@/ui/components/buttons/StyledButton";
 
 const RestaurantSelectTableView = () => {
     const { id, date, time, guests, name } = useLocalSearchParams();
@@ -70,12 +72,9 @@ const RestaurantSelectTableView = () => {
 
     console.log(`- Reservations found in DB for this table: ${tableReservations.length}`);
 
-    const hasCollision = tableReservations.some(res => {
-        const utcString = res.reservation_time.endsWith('Z')
-            ? res.reservation_time
-            : `${res.reservation_time}Z`;
-        const resStart = new Date(utcString).getTime();
-        const resEnd = resStart + durationMs;
+        const hasCollision = tableReservations.some(res => {
+            const resStart = new Date(res.reservation_time).getTime();
+            const resEnd = resStart + durationMs;
 
         // collision condition
         const isColliding = selectedStart < resEnd && selectedEnd > resStart;
@@ -90,12 +89,11 @@ const RestaurantSelectTableView = () => {
         if (!selectedTableId) return alert("Please select a table!");
 
         try {
-            const localDateTime = new Date(`${date}T${time}:00`);
-            const formattedForBackend = localDateTime.toISOString().split('.')[0];
+            const localDateTime = `${date}T${time}:00`;
             const reservationData = {
                 restaurant_id: Number(id),
                 table_id: selectedTableId,
-                reservation_time: formattedForBackend,
+                reservation_time: localDateTime,
                 user_id: Number(userId),
             };
 
@@ -107,7 +105,7 @@ const RestaurantSelectTableView = () => {
                 restaurant_id: id,
                 restaurant_name: name,
                 table_id: selectedTableId,
-                reservation_time: localDateTime.toISOString(),
+                reservation_time: localDateTime,
                 guest_count: guests
             });
 
@@ -115,7 +113,7 @@ const RestaurantSelectTableView = () => {
             router.dismissAll();
             router.replace('/');
         } catch (error: any) {
-            const errorMessage = error.response?.data?.detail || error.message || "Unknown error";
+            const errorMessage = getUserFacingErrorMessage(error, "Could not create reservation.");
             posthog.capture('restaurant_reservation_failed', {
                 restaurant_id: id,
                 restaurant_name: name,
@@ -124,7 +122,7 @@ const RestaurantSelectTableView = () => {
                 guest_count: guests
             });
             console.error("Reservation error details:", error.response?.data || error.message);
-            alert("Error creating reservation. Check console for details.");
+            alert(errorMessage);
         }
     };
 
@@ -169,13 +167,13 @@ const RestaurantSelectTableView = () => {
                 </ScrollView>
 
                 <View style={styles.footerContainer}>
-                    <TouchableOpacity
-                        style={[styles.confirmButton, !selectedTableId && styles.disabledButton]}
+                    <StyledButton
                         onPress={handleConfirm}
                         disabled={!selectedTableId}
+                        accessibilityLabel="Confirm My Selection"
                     >
-                        <Text style={styles.buttonText}>Confirm My Selection</Text>
-                    </TouchableOpacity>
+                        Confirm My Selection
+                    </StyledButton>
                 </View>
             </>
             )}

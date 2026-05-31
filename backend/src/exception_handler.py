@@ -10,6 +10,8 @@ from src.exceptions import (
     ForecastGeneratingException
 )
 
+from src.middleware import GENERIC_ERROR_DETAIL, report_exception
+
 def register_exception_handlers(app):
     @app.exception_handler(UserAlreadyExistsException)
     async def user_already_exists_exception_handler(request: Request, exc: UserAlreadyExistsException):
@@ -34,9 +36,10 @@ def register_exception_handlers(app):
     
     @app.exception_handler(JWTHandlingException)
     async def jwt_handling_exception_handler(request: Request, exc: JWTHandlingException):
+        report_exception(request, exc, {"type": "jwt_handling"})
         return JSONResponse(
                 status_code=500,
-                content={"detail": str(exc)}
+                content={"detail": GENERIC_ERROR_DETAIL}
         )
 
     @app.exception_handler(UnauthorisedUserException)
@@ -49,7 +52,8 @@ def register_exception_handlers(app):
 
     @app.exception_handler(ForecastGeneratingException)
     async def forecast_generating_exception(request: Request, exc: ForecastGeneratingException):
+        report_exception(request, exc, {"type": "forecast_generating"})
         return JSONResponse(
                 status_code=500,
-                content={"detail": str(exc)},
+                content={"detail": GENERIC_ERROR_DETAIL}
         )

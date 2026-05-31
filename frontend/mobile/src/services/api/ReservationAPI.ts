@@ -23,11 +23,7 @@ export const updateReservation = async (reservationId: number, data: Partial<ICr
     return response.data;
 };
 
-export const getMyReservations = async (token: string): Promise<IReservation[]> => {
-  const response = await apiClient.get<IReservation[]>('/api/reservations/me', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-  return response.data;
+export const getMyReservations = async (): Promise<IReservation[]> => {
+    const response = await apiClient.get<IReservation[]>('/api/reservations/me');
+    return response.data;
 };

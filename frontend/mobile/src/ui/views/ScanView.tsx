@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Text, Dimensions, TouchableOpacity } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { useResolveTableByToken } from '@/services/hooks/useTables';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/ui/theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -161,6 +161,25 @@ const ScanOverlay = () => {
 
 type ScanStatus = 'default' | 'loading' | 'error';
 
+function normalizeRouteParam(value: string | string[] | undefined): string | undefined {
+  if (value == null) return undefined;
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function extractTokenFromQrData(data: string): string | null {
+  const trimmed = data.trim();
+  try {
+    const url = new URL(trimmed);
+    const fromQuery = url.searchParams.get('token');
+    if (fromQuery) return fromQuery;
+  } catch {
+    // Not a URL — fall through to raw token check.
+  }
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidPattern.test(trimmed) ? trimmed : null;
+}
+
 interface StatusDisplayProps {
   status: ScanStatus;
   error?: string;
@@ -209,12 +228,24 @@ export default function ScanView() {
   const { table, loading, error } = useResolveTableByToken(qrToken || '');
   const hasNavigatedRef = useRef(false);
 
+  const { token: rawToken } = useLocalSearchParams<{ token?: string | string[] }>();
+  const deepLinkToken = normalizeRouteParam(rawToken);
+  const lastHandledTokenRef = useRef<string | null>(null);
+
+  const applyToken = useCallback((token: string) => {
+    if (token === lastHandledTokenRef.current) return;
+    lastHandledTokenRef.current = token;
+    setQrToken(token);
+    setScanned(true);
+  }, []);
+
   const resetScan = useCallback(() => {
     setScanned(false);
     setQrToken(null);
     setScanStatus('default');
     setErrorMessage('');
     hasNavigatedRef.current = false;
+    lastHandledTokenRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -226,25 +257,41 @@ export default function ScanView() {
     getCameraPermissions();
   }, []);
 
+  useEffect(() => {
+    if (deepLinkToken) {
+      applyToken(deepLinkToken);
+    }
+  }, [deepLinkToken, applyToken]);
+
   useFocusEffect(
     useCallback(() => {
-      // When coming back from the menu (or refocusing this view), clear previous scan state
-      // so the camera callback is re-enabled and we don't stick in "loading".
-      resetScan();
-      return () => {};
-    }, [resetScan])
+      // Deep link (mobile://scan?token=...) must not be cleared on focus — that races with
+      // applyToken and leaves the UI stuck on "Processing" with no navigation.
+      if (deepLinkToken) {
+        applyToken(deepLinkToken);
+      } else {
+        resetScan();
+      }
+      return () => {
+        lastHandledTokenRef.current = null;
+      };
+    }, [deepLinkToken, applyToken, resetScan])
   );
 
   useEffect(() => {
+    if (error) return;
     if (qrToken || loading) {
       setScanStatus('loading');
+    } else {
+      setScanStatus('default');
     }
-  }, [qrToken, loading]);
+  }, [qrToken, loading, error]);
 
   useEffect(() => {
     if (table?.restaurant_id && qrToken && !hasNavigatedRef.current) {
       hasNavigatedRef.current = true;
-      router.push(`/restaurants/${table.restaurant_id}/menu`);
+      const tableName = encodeURIComponent(table.table_number);
+      router.push(`/restaurants/${table.restaurant_id}/qr-landing?tableId=${table.table_id}&tableNumber=${tableName}&capacity=${table.capacity}&token=${qrToken}`);
     }
   }, [table, qrToken]);
 
@@ -260,25 +307,16 @@ export default function ScanView() {
     }
   }, [error, resetScan]);
 
-  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+  const handleBarCodeScanned = ({ data }: { type: string; data: string }) => {
     setScanned(true);
     setScanStatus('loading');
-    try {
-      const url = new URL(data);
-      const token = url.searchParams.get('token');
+    const token = extractTokenFromQrData(data);
 
-      if (token) {
-        setQrToken(token);
-      } else {
-        setScanStatus('error');
-        setErrorMessage('No token found in QR code');
-        setTimeout(() => {
-          resetScan();
-        }, 2000);
-      }
-    } catch (error) {
+    if (token) {
+      applyToken(token);
+    } else {
       setScanStatus('error');
-      setErrorMessage('Invalid QR code format');
+      setErrorMessage('No token found in QR code');
       setTimeout(() => {
         resetScan();
       }, 2000);

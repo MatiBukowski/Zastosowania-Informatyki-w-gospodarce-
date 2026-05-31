@@ -16,6 +16,8 @@ import { usePostHog } from 'posthog-react-native';
 
 import { theme } from '@/ui/theme/theme';
 import { usePostTable } from '@/services/hooks/useRestaurants';
+import StyledButton from "@/ui/components/buttons/StyledButton";
+import { getUserFacingErrorMessage } from '@/services/errorReporting';
 
 export default function RestaurantAdminCreateTableView() {
   const posthog = usePostHog();
@@ -29,17 +31,17 @@ export default function RestaurantAdminCreateTableView() {
   const [tableNumber, setTableNumber] = useState('');
   const [capacity, setCapacity] = useState('');
 
-  const handleIntegerInput = (text: string, setter: (val: string) => void) => {
+  const handleCapacityInput = (text: string, setter: (val: string) => void) => {
     const cleaned = text.replace(/[^0-9]/g, '');
     setter(cleaned);
   };
 
   const onCreate = async () => {
-    const num = parseInt(tableNumber);
+    const tableName = tableNumber.trim();
     const cap = parseInt(capacity);
 
-    if (!tableNumber.trim()) {
-      Alert.alert('Error', 'Please enter a table number (integer).');
+    if (!tableName) {
+      Alert.alert('Error', 'Please enter a table name.');
       return;
     }
 
@@ -50,17 +52,17 @@ export default function RestaurantAdminCreateTableView() {
 
     try {
       const result = await handleCreateTable(restaurantId, {
-        table_number: num,
+        table_number: tableName,
         capacity: cap,
       });
 
       if (result) {
         posthog.capture('table_created_successfully', {
           restaurant_id: restaurantId,
-          table_number: num,
+          table_number: tableName,
           capacity: cap,
         });
-        Alert.alert('Success', `Table #${result.table_number} has been added successfully!`, [
+        Alert.alert('Success', `Table ${result.table_number} has been added successfully!`, [
           { text: 'OK', onPress: () => router.back() },
         ]);
       }
@@ -71,12 +73,7 @@ export default function RestaurantAdminCreateTableView() {
         error_message: error.response?.data?.detail || error.message,
       });
 
-      let displayError = 'Could not create table.';
-      if (error.response?.status === 400 || error.response?.status === 409) {
-        displayError = error.response?.data?.detail || 'This table number already exists.';
-      } else if (error.message === 'Network Error') {
-        displayError = 'Server is unreachable. Check your connection.';
-      }
+      const displayError = getUserFacingErrorMessage(error, 'Could not create table.');
 
       Alert.alert('Creation Failed', displayError);
     }
@@ -90,13 +87,13 @@ export default function RestaurantAdminCreateTableView() {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>Table Number</Text>
+          <Text style={styles.label}>Table Name</Text>
           <TextInput
             style={styles.input}
             placeholderTextColor={theme.colors.gray}
-            keyboardType="number-pad"
+            placeholder="Floor 1, VIP Room, Terrace A"
             value={tableNumber}
-            onChangeText={(text) => handleIntegerInput(text, setTableNumber)}
+            onChangeText={setTableNumber}
           />
 
           <Text style={styles.label}>Capacity</Text>
@@ -105,22 +102,27 @@ export default function RestaurantAdminCreateTableView() {
             placeholderTextColor={theme.colors.gray}
             keyboardType="number-pad"
             value={capacity}
-            onChangeText={(text) => handleIntegerInput(text, setCapacity)}
+            onChangeText={(text) => handleCapacityInput(text, setCapacity)}
           />
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[theme.common.button, styles.submitBtn, loading && styles.btnDisabled]}
-              onPress={onCreate}
-              disabled={loading}
-              activeOpacity={0.8}
+            <StyledButton
+                variant="primary"
+                onPress={onCreate}
+                disabled={loading}
+                accessibilityLabel="Create"
             >
-              {loading ? <ActivityIndicator color={theme.colors.white} /> : <Text style={styles.btnText}>Create</Text>}
-            </TouchableOpacity>
+              {loading ? <ActivityIndicator color={theme.colors.white} /> : "Create"}
+            </StyledButton>
 
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => router.back()} disabled={loading}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
+            <StyledButton
+                variant="secondary"
+                onPress={() => router.back()}
+                disabled={loading}
+                accessibilityLabel="Cancel"
+            >
+              Cancel
+            </StyledButton>
           </View>
 
           <Text style={styles.helperText}>Restaurant ID: {restaurantId}</Text>

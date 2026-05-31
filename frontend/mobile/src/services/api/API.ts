@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { posthogClient } from '@/analitics/analitics'
+import { reportApplicationError } from '@/services/errorReporting';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -20,3 +21,11 @@ apiClient.interceptors.request.use((config) => {
 
   return config
 })
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    reportApplicationError(error);
+    return Promise.reject(error);
+  }
+);

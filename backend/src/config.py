@@ -19,6 +19,10 @@ class Settings:
     POSTHOG_PAT_KEY: str = os.getenv("POSTHOG_PAT_KEY", "")
     POSTHOG_HOST: str = os.getenv("POSTHOG_HOST", "https://eu.i.posthog.com")
     POSTHOG_ID: int = int(os.getenv("POSTHOG_ID", 0))
+    RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
+    SUPPORT_FROM_EMAIL: str = os.getenv("SUPPORT_FROM_EMAIL", "ZIWG Support <onboarding@resend.dev>")
+    SUPPORT_TO_EMAIL: str = os.getenv("SUPPORT_TO_EMAIL", "")
+    SUPPORT_CONTACT_EMAIL: str = os.getenv("SUPPORT_CONTACT_EMAIL", "")
 
     @property
     def database_url(self) -> str:

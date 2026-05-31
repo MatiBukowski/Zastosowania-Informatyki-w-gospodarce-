@@ -3,8 +3,7 @@ import { ITableQRProps } from '../context/interfaces';
 import { Box, Typography, Button, Paper } from '@mui/material';
 
 export const TableQR = ({ token, table_number }: ITableQRProps) => {
-  const baseUrl = import.meta.env.VITE_API_URL;
-  const scanUrl = `${baseUrl}/api/qr?token=${token}`;
+  const scanUrl = `mobile://scan?token=${token}`;
 
   const downloadPNG = () => {
     const canvas = document.getElementById(`qr-${token}`) as HTMLCanvasElement;
@@ -12,7 +11,7 @@ export const TableQR = ({ token, table_number }: ITableQRProps) => {
       const pngUrl = canvas.toDataURL("image/png", 1.0);
       const downloadLink = document.createElement("a");
       downloadLink.href = pngUrl;
-      downloadLink.download = `table_${table_number}_qr.png`;
+      downloadLink.download = `table_${table_number.replace(/[^a-z0-9_-]+/gi, '_')}_qr.png`;
       downloadLink.click();
     }
   };
@@ -20,7 +19,7 @@ export const TableQR = ({ token, table_number }: ITableQRProps) => {
   return (
     <Paper elevation={3} sx={qrStyles.paper}>
       <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-        Table #{table_number}
+        Table {table_number}
       </Typography>
 
       <Box sx={qrStyles.qrWrapper}>

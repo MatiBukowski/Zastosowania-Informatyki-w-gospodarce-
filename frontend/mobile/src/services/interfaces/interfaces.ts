@@ -80,27 +80,18 @@ export enum TableStatus {
 export interface ITable {
   table_id: number;
   restaurant_id: number;
-  table_number: number;
+  table_number: string;
   capacity: number;
   qr_code_token: string;
   status: TableStatus;
 }
 
 export interface ICreateTable {
-  table_number: number;
+  table_number: string;
   capacity: number;
 }
 
-// for login purposes
-export interface ILoginRequest {
-    email: string;
-    password: string;
-}
 
-export interface ILoginResponse {
-    access_token: string;
-    token_type: string;
-}
 
 export interface IPaginatedResponse<T> {
   items: T[];

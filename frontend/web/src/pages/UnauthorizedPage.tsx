@@ -1,5 +1,6 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import BlockIcon from '@mui/icons-material/Block';
+import { Link as RouterLink } from 'react-router-dom';
 import { usePostHog } from "@posthog/react";
 import { useEffect } from "react";
 
@@ -30,7 +31,11 @@ export const UnauthorizedPage = () => {
           Access Denied
         </Typography>
         <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400 }}>
-          You don't have the required permissions to access this page. Please contact an administrator if you believe this is an error.
+          You don't have the required permissions to access this page.{' '}
+          <Link component={RouterLink} to="/support" sx={{ color: '#E54B4B', fontWeight: 600 }}>
+            Contact support
+          </Link>
+          {' '}if you believe this is an error.
         </Typography>
       </Box>
     </Box>

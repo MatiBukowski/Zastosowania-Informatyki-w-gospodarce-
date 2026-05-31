@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchAll } from '@/services/api/PaginationHelper';
 import { getReservationsByTableId, createReservation, getReservationById, updateReservation, getMyReservations } from '@/services/api/ReservationAPI';
 import { IReservation, ICreateReservation, IUpdateReservation } from '@/services/interfaces/interfaces';
-import { useAuth } from '@/services/providers/AuthProvider';
+import { getUserFacingErrorMessage } from '@/services/errorReporting';
+
 export function useGetReservationsByTableId(tableId: number) {
     const [reservations, setReservations] = useState<IReservation[]>([]);
     const [loading, setLoading] = useState(true);
@@ -17,7 +18,7 @@ export function useGetReservationsByTableId(tableId: number) {
                 setError(null);
             } catch (err: any) {
                 console.error('useGetReservationsByTableId - error:', err);
-                setError(err.message || 'Failed to fetch table reservations');
+                setError(getUserFacingErrorMessage(err, 'Could not load table reservations.'));
             } finally {
                 setLoading(false);
             }
@@ -43,7 +44,7 @@ export function useCreateReservation() {
             return result;
         } catch (err: any) {
             console.error('useCreateReservation - error:', err);
-            setError(err.message || 'Failed to create reservation');
+            setError(getUserFacingErrorMessage(err, 'Could not create reservation.'));
             setLoading(false);
             return null;
         }
@@ -66,9 +67,8 @@ export function useGetReservationById(reservationId: number) {
             setReservation(data);
             setError(null);
         } catch (err: any) {
-            setError(err.message);
             console.error('useGetReservationById - error:', err);
-            setError(err.message || 'Failed to fetch reservation');
+            setError(getUserFacingErrorMessage(err, 'Could not load this reservation.'));
         } finally {
             setLoading(false);
         }
@@ -94,7 +94,7 @@ export function useUpdateReservation() {
             return result;
         } catch (err: any) {
             console.error('useUpdateReservation - error:', err);
-            setError(err.message || 'Failed to update reservation');
+            setError(getUserFacingErrorMessage(err, 'Could not update reservation.'));
             setLoading(false);
             return null;
         }
@@ -108,39 +108,23 @@ export function useGetMyReservations() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const { accessToken } = useAuth();
-
-    const fetchMyReservations = useCallback(async () => {
-        if (!accessToken) {
-            setLoading(false);
-            return;
-        }
-
+    const fetchReservations = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await getMyReservations(accessToken);
-            console.log("Reservations from z API:", data);
-
-            const normalizedData = data.map(res => ({
-                ...res,
-                reservation_time: res.reservation_time.endsWith('Z')
-                    ? res.reservation_time
-                    : `${res.reservation_time}Z`
-            }));
-
-            setReservations(normalizedData);
+            const data = await getMyReservations();
+            setReservations(data);
             setError(null);
         } catch (err: any) {
             console.error('useGetMyReservations - error:', err);
-            setError(err.message || 'Failed to fetch user reservations');
+            setError(getUserFacingErrorMessage(err, 'Could not load reservations.'));
         } finally {
             setLoading(false);
         }
-    }, [accessToken]);
+    }, []);
 
     useEffect(() => {
-        fetchMyReservations();
-    }, [fetchMyReservations]);
+        fetchReservations();
+    }, [fetchReservations]);
 
-    return { reservations, loading, error, refresh: fetchMyReservations };
+    return { reservations, loading, error, refresh: fetchReservations };
 }

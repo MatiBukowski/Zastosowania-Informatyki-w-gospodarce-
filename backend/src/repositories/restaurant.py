@@ -1,8 +1,9 @@
 from fastapi import Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, func
 from ..db import get_session
 from ..models import Restaurant, AppUser
+from ..schemas import UpdateSingleRestaurant
 
 
 class RestaurantRepository:
@@ -16,7 +17,7 @@ class RestaurantRepository:
 
     def get_restaurants(self, skip: int = 0, limit: int = 10, search=None, filters=None):
         totalQuery = select(func.count(Restaurant.restaurant_id))
-        query = select(Restaurant)
+        query = select(Restaurant).options(selectinload(Restaurant.schedules))
 
         if search:
             query = query.where(Restaurant.name.ilike(f"%{search}%"))
@@ -35,7 +36,7 @@ class RestaurantRepository:
 
     def get_restaurant_by_id(self, restaurant_id: int) -> Restaurant | None:
         return self.db.execute(
-            select(Restaurant).where(Restaurant.restaurant_id == restaurant_id)
+            select(Restaurant).where(Restaurant.restaurant_id == restaurant_id).options(selectinload(Restaurant.schedules))
         ).scalar_one_or_none()
 
     def get_restaurants_by_user_id(self, user_id: int, skip: int = 0, limit: int = 10):
@@ -46,8 +47,13 @@ class RestaurantRepository:
         if not user:
             return [], 0
 
-        query = select(Restaurant).join(Restaurant.admins).where(AppUser.user_id == user_id)
+        query = select(Restaurant).join(Restaurant.admins).where(AppUser.user_id == user_id).options(selectinload(Restaurant.schedules))
         total = self.db.execute(select(func.count()).select_from(query.subquery())).scalar_one()
         items = self.db.execute(query.offset(skip).limit(limit)).scalars().all()
 
         return items, total
+    
+    def update_restaurant(self, restaurant: UpdateSingleRestaurant) -> UpdateSingleRestaurant:
+        self.db.commit()           
+        self.db.refresh(restaurant) 
+        return restaurant

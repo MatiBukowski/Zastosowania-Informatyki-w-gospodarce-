@@ -49,7 +49,7 @@ def create_menu(db):
 def create_tables(db, restaurant_id: int = 1):
     table = RestaurantTable(
         restaurant_id=restaurant_id,
-        table_number=1,
+        table_number="1",
         capacity=4,
         status="FREE"
     )
@@ -72,3 +72,8 @@ def assign_user_to_restaurant(db, user_id, restaurant_id):
     restaurant_user = RestaurantUser(user_id=user_id, restaurant_id=restaurant_id)
     db.add(restaurant_user)
     db.commit()
+def get_table_for_restaurant(db, restaurant_id):
+    return db.query(RestaurantTable).filter(RestaurantTable.restaurant_id == restaurant_id).first()
+
+def get_menu_item_for_restaurant(db, restaurant_id):
+    return db.query(MenuItem).filter(MenuItem.restaurant_id == restaurant_id).first()

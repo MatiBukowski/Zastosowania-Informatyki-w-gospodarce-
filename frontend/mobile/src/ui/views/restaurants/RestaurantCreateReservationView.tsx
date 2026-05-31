@@ -10,6 +10,9 @@ import { IReservation } from '@/services/interfaces/interfaces';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
+import StyledButton from '@/ui/components/buttons/StyledButton';
+import LoginModal from '@/ui/components/authModals/LoginModal';
+import RegisterModal from '@/ui/components/authModals/RegisterModal';
 
 const reservation_duration_in_min = 120;
 const durationMs = reservation_duration_in_min * 60 * 1000;
@@ -28,7 +31,8 @@ const generateTimeSlots = (startHour: number, endHour: number) => {
 
 const RestaurantCreateReservationView = () => {
     const { id, name } = useLocalSearchParams();
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const { userId, accessToken } = useAuth();
     const router = useRouter();
 
@@ -37,6 +41,8 @@ const RestaurantCreateReservationView = () => {
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [allRelevantReservations, setAllRelevantReservations] = useState<IReservation[]>([]);
     const [activeSection, setActiveSection] = useState<'calendar' | 'guests' | 'time'>('calendar');
+    const [isLoginVisible, setIsLoginVisible] = useState(false);
+    const [isRegisterVisible, setIsRegisterVisible] = useState(false);
 
     const { tables, loading: loadingTables } = useGetTablesByRestaurantId(Number(id));
     const posthog = usePostHog();
@@ -121,16 +127,16 @@ const RestaurantCreateReservationView = () => {
         }
 
         if (!accessToken || !userId) {
-            router.push('/tabs/profile/login');
+            setIsLoginVisible(true);
             return;
         }
 
         posthog.capture('restaurant_reservation_params_confirmed', {
-        restaurant_id: id,
-        restaurant_name: name,
-        selected_date: selectedDate,
-        selected_time: selectedTime,
-        guest_count: guests
+            restaurant_id: id,
+            restaurant_name: name,
+            selected_date: selectedDate,
+            selected_time: selectedTime,
+            guest_count: guests
         });
 
         router.push({
@@ -285,19 +291,28 @@ const RestaurantCreateReservationView = () => {
             </ScrollView>
 
             <View style={styles.footerContainer}>
-                <TouchableOpacity
-                    style={[
-                        styles.confirmButton,
-                        !isComplete && styles.disabledButton
-                    ]}
+                <StyledButton
                     onPress={handleReservationSubmit}
                     disabled={!isComplete}
+                    accessibilityLabel={isComplete ? "Confirm Reservation" : "Complete Selections"}
                 >
-                    <Text style={[styles.confirmButtonText, !isComplete]}>
-                        {isComplete ? "Confirm Reservation" : "Complete Selections"}
-                    </Text>
-                </TouchableOpacity>
+                    {isComplete ? "Confirm Reservation" : "Complete Selections"}
+                </StyledButton>
             </View>
+
+            <LoginModal
+                visible={isLoginVisible}
+                onClose={() => setIsLoginVisible(false)}
+                showRegisterLink
+                onRegisterPress={() => {
+                    setIsLoginVisible(false);
+                    setIsRegisterVisible(true);
+                }}
+            />
+            <RegisterModal
+                visible={isRegisterVisible}
+                onClose={() => setIsRegisterVisible(false)}
+            />
         </View>
     );
 };

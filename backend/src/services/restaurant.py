@@ -3,8 +3,14 @@ import math
 from fastapi import Depends, HTTPException, status
 
 from src.models.enums import CuisineTypeEnum
+from src.models import RestaurantSchedule
 from src.repositories import RestaurantRepository
-from src.schemas import RestaurantFilters, RestaurantFilterQuery, PaginatedResponse
+from src.schemas import (
+    RestaurantFilters,
+    RestaurantFilterQuery,
+    PaginatedResponse,
+    UpdateSingleRestaurant
+)
 
 class RestaurantService:
     def __init__(self, repo: RestaurantRepository = Depends()):
@@ -60,3 +66,33 @@ class RestaurantService:
             size=size,
             pages=math.ceil(total / size) if size > 0 else 1
         )
+
+    def patch_restaurant(self, restaurant_id: int, restaurant_data: UpdateSingleRestaurant):
+        restaurant = self.repo.get_restaurant_by_id(restaurant_id)
+        if not restaurant:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Restaurant with id={restaurant_id} not found"
+            )
+
+        if isinstance(restaurant_data, dict):
+            updated_restaurant_data = restaurant_data
+        else:
+            updated_restaurant_data = restaurant_data.model_dump(exclude_unset=True)
+
+        schedules_data = updated_restaurant_data.pop("schedules", None)
+
+        for key, value in updated_restaurant_data.items():
+            setattr(restaurant, key, value)
+
+        if schedules_data is not None:
+            new_schedules = []
+
+            for sched_dict in schedules_data:
+                new_schedule = RestaurantSchedule(**sched_dict)
+                new_schedule.restaurant_id = restaurant_id
+                new_schedules.append(new_schedule)
+
+            restaurant.schedules = new_schedules
+
+        return self.repo.update_restaurant(restaurant)

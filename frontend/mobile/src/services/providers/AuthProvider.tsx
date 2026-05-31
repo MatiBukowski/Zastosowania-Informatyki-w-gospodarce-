@@ -2,8 +2,8 @@ import React, { createContext, useContext, useEffect, useState, useRef } from "r
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 import { apiClient } from "@/services/api/API";
-import { loginUser, logoutUser } from "@/services/api/AuthAPI";
-import { ILoginRequest}  from '@/services/interfaces/interfaces';
+import { loginUser } from "@/services/api/AuthAPI";
+import { ILoginRequest, IRegisterRequest }  from '@/services/interfaces/user';
 import { usePostHog } from "posthog-react-native";
 
 export interface IJwtPayload {
@@ -14,17 +14,18 @@ export interface IJwtPayload {
     email: string;
 }
 
-interface IAuthContextType {
+interface AuthContextType {
     accessToken: string | null;
     userId: string | null;
     firstName: string | null;
     surname: string | null;
     login: (data: ILoginRequest) => Promise<void>;
-    logout: () => Promise<void>;
+    register: (data: IRegisterRequest) => Promise<void>;
+    logout: () => void;
     isAxiosReady: boolean;
 }
 
-const AuthContext = createContext<IAuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -75,18 +76,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    const register = async (data: IRegisterRequest) => {
+        try {
+            const response = await apiClient.post('/api/auth/register', data);
+            const token = response.data.access_token;
+
+            await AsyncStorage.setItem('user_token', token);
+
+            setAccessToken(token);
+            await decodeAndSetTokenData(token);
+            setIsAxiosReady(true);
+        } catch (error) {
+            console.error("Registration error:", error);
+            throw error;
+        }
+    };
+
     const logout = async () => {
         try {
-            await logoutUser();
             await AsyncStorage.multiRemove(['user_token', 'user_id']);
-        }catch (error){
-            console.error("Server logout error:", error);
-
         } finally {
-            delete apiClient.defaults.headers.common['Authorization'];
             posthog.reset();
             setAccessToken(null);
             setUserId(null);
+            setFirstName(null);
+            setSurname(null);
             setIsAxiosReady(false);
         }
     };
@@ -124,7 +138,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ accessToken, userId, firstName, surname, login, logout, isAxiosReady }}>
+        <AuthContext.Provider value={{ accessToken, userId, firstName, surname, login, register, logout, isAxiosReady }}>
             {children}
         </AuthContext.Provider>
     );

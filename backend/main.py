@@ -16,8 +16,9 @@ from src.controllers import (
     table_router,
     reservation_router,
     forecast_router,
-    reservation_router,
-    user_router
+    user_router,
+    support_router,
+    order_router,
 )
 
 @asynccontextmanager
@@ -63,4 +64,6 @@ prefix_router.include_router(table_router)
 prefix_router.include_router(reservation_router)
 prefix_router.include_router(user_router)
 prefix_router.include_router(forecast_router)
+prefix_router.include_router(support_router)
+prefix_router.include_router(order_router)
 app.include_router(prefix_router)
