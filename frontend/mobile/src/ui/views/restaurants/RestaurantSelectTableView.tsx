@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
@@ -22,77 +22,77 @@ const RestaurantSelectTableView = () => {
     const posthog = usePostHog();
 
     useEffect(() => {
-            const fetchRes = async () => {
-                try {
-                    setIsLoading(true);
+        const fetchRes = async () => {
+            try {
+                setIsLoading(true);
 
-                    const promises = tables.map(t =>
-                        fetchAll((page, size) => getReservationsByTableId(t.table_id, page, size))
-                            .then(data => {
+                const promises = tables.map(t =>
+                    fetchAll((page, size) => getReservationsByTableId(t.table_id, page, size))
+                        .then(data => {
 
-                                console.log(`Table ${t.table_id} API returned:`, data.length, "items");
-                                return data;
-                            })
-                            .catch(err => {
-                                console.warn(`Error for table ${t.table_id}:`, err);
-                                return [];
-                            })
-                    );
+                            console.log(`Table ${t.table_id} API returned:`, data.length, "items");
+                            return data;
+                        })
+                        .catch(err => {
+                            console.warn(`Error for table ${t.table_id}:`, err);
+                            return [];
+                        })
+                );
 
-                    const results = await Promise.all(promises);
-                    const flatResults = results.flat();
+                const results = await Promise.all(promises);
+                const flatResults = results.flat();
 
-                    setAllReservations(flatResults);
-                } catch (err) {
-                    console.error("Error fetching reservations:", err);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
+                setAllReservations(flatResults);
+            } catch (err) {
+                console.error("Error fetching reservations:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-            if (tables && tables.length > 0) fetchRes();
-        }, [tables]);
+        if (tables && tables.length > 0) fetchRes();
+    }, [tables]);
 
     //tables filter logic
     const availableTables = tables.filter(table => {
-    const hasEnoughCapacity = table.capacity >= Number(guests);
+        const hasEnoughCapacity = table.capacity >= Number(guests);
 
 
-    if (!hasEnoughCapacity) return false;
+        if (!hasEnoughCapacity) return false;
 
-    const selectedStart = new Date(`${date}T${time}:00Z`).getTime();
-    //const durationMs = 120 * 60 * 1000; // 2h
-    const selectedEnd = selectedStart + durationMs;
+        const selectedStart = new Date(`${date}T${time}:00`).getTime();
+        //const durationMs = 120 * 60 * 1000; // 2h
+        const selectedEnd = selectedStart + durationMs;
 
 
-    const tableReservations = allReservations.filter(res =>
-        Number(res.table_id) === Number(table.table_id)
-    );
+        const tableReservations = allReservations.filter(res =>
+            Number(res.table_id) === Number(table.table_id)
+        );
 
-    console.log(`- Reservations found in DB for this table: ${tableReservations.length}`);
+        console.log(`- Reservations found in DB for this table: ${tableReservations.length}`);
 
-    const hasCollision = tableReservations.some(res => {
-        const resStart = new Date(res.reservation_time).getTime();
-        const resEnd = resStart + durationMs;
+        const hasCollision = tableReservations.some(res => {
+            const resStart = new Date(res.reservation_time).getTime();
+            const resEnd = resStart + durationMs;
 
-        // collision condition
-        const isColliding = selectedStart < resEnd && selectedEnd > resStart;
-        return isColliding;
+            // collision condition
+            const isColliding = selectedStart < resEnd && selectedEnd > resStart;
+            return isColliding;
+        });
+
+
+        return !hasCollision;
     });
-
-
-    return !hasCollision;
-});
 
     const handleConfirm = async () => {
         if (!selectedTableId) return alert("Please select a table!");
 
         try {
-            const localDateTime = new Date(`${date}T${time}:00`);
+            const localDateTime = `${date}T${time}:00`;
             const reservationData = {
                 restaurant_id: Number(id),
                 table_id: selectedTableId,
-                reservation_time: localDateTime.toISOString(),
+                reservation_time: localDateTime,
                 user_id: Number(userId),
             };
 
@@ -104,7 +104,7 @@ const RestaurantSelectTableView = () => {
                 restaurant_id: id,
                 restaurant_name: name,
                 table_id: selectedTableId,
-                reservation_time: localDateTime.toISOString(),
+                reservation_time: localDateTime,
                 guest_count: guests
             });
 
@@ -138,32 +138,32 @@ const RestaurantSelectTableView = () => {
                 </View>
             ) : (
                 <>
-                <ScrollView contentContainerStyle={styles.tableGrid}>
-                    {availableTables.map(table => {
-                        const isSelected = selectedTableId === table.table_id;
-                        return (
-                            <TouchableOpacity
-                                key={table.table_id}
-                                activeOpacity={0.7}
-                                style={[
-                                    styles.tableCard,
-                                    isSelected ? styles.selectedCard : styles.defaultCard
-                                ]}
-                                onPress={() => setSelectedTableId(table.table_id)}
-                            >
-                                <Ionicons
-                                    name={isSelected ? "checkbox" : "square-outline"}
-                                    size={30}
-                                    color={isSelected ? theme.colors.primary : "#ccc"}
-                                />
-                                <Text style={[styles.tableNumber, isSelected && { color: theme.colors.primary }]}>
-                                    Table {table.table_number}
-                                </Text>
-                                <Text style={styles.capacityText}>Seats: {table.capacity}</Text>
-                            </TouchableOpacity>
-                        );
-                    })}
-                </ScrollView>
+                    <ScrollView contentContainerStyle={styles.tableGrid}>
+                        {availableTables.map(table => {
+                            const isSelected = selectedTableId === table.table_id;
+                            return (
+                                <TouchableOpacity
+                                    key={table.table_id}
+                                    activeOpacity={0.7}
+                                    style={[
+                                        styles.tableCard,
+                                        isSelected ? styles.selectedCard : styles.defaultCard
+                                    ]}
+                                    onPress={() => setSelectedTableId(table.table_id)}
+                                >
+                                    <Ionicons
+                                        name={isSelected ? "checkbox" : "square-outline"}
+                                        size={30}
+                                        color={isSelected ? theme.colors.primary : "#ccc"}
+                                    />
+                                    <Text style={[styles.tableNumber, isSelected && { color: theme.colors.primary }]}>
+                                        Table {table.table_number}
+                                    </Text>
+                                    <Text style={styles.capacityText}>Seats: {table.capacity}</Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </ScrollView>
 
                 <View style={styles.footerContainer}>
                     <StyledButton
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-         paddingHorizontal: 20,
+        paddingHorizontal: 20,
     },
     tableCard: {
         width: '48%',
