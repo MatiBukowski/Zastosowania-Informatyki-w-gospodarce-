@@ -1,5 +1,6 @@
-import { Pressable, TextInput, View, Text, Modal, Button } from "react-native";
+import { Pressable, TextInput, View, Text, Modal } from "react-native";
 import { useState } from "react";
+import axios from "axios";
 
 import { useAuth } from "@/services/providers/AuthProvider";
 import { ILoginRequest } from "@/services/interfaces/user";
@@ -10,12 +11,41 @@ type LoginModalProps = {
   visible: boolean;
   description?: string;
   onClose: () => void;
+  showRegisterLink?: boolean;
+  onRegisterPress?: () => void;
 };
 
-export default function LoginModal({ visible, description = "Please enter your credentials", onClose }: LoginModalProps) {
+export default function LoginModal({
+  visible,
+  description = "Please enter your credentials",
+  onClose,
+  showRegisterLink = false,
+  onRegisterPress,
+}: LoginModalProps) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const getLoginErrorMessage = (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+      const detail = error.response?.data?.detail;
+
+      if (Array.isArray(detail) && detail.length > 0) {
+        const firstError = detail[0];
+        const field = firstError?.loc?.[1];
+
+        if (field === "email") return "Please enter a valid email address.";
+        if (field === "password") return "Please enter your password.";
+      }
+
+      if (typeof detail === "string" && detail.trim()) {
+        return detail;
+      }
+    }
+
+    return "We could not log you in. Check your email and password and try again.";
+  };
 
   return (
     <Modal
@@ -29,16 +59,24 @@ export default function LoginModal({ visible, description = "Please enter your c
             <Text style={{ ...theme.typography.h4, marginBottom: 8 }}>
               Welcome Back!
             </Text>
-            <Text style={{ color: "gray", marginBottom: 12 }}>
+            <Text style={{ color: "gray", marginBottom: 12, textAlign: "center" }}>
               {description}
             </Text>
           </View>
+
+          {errorMessage ? (
+            <View style={{ backgroundColor: "#FEE2E2", borderRadius: 12, padding: 12, marginBottom: 16 }}>
+              <Text style={{ color: "#B91C1C", fontSize: 13, fontWeight: "600", textAlign: "center" }}>
+                {errorMessage}
+              </Text>
+            </View>
+          ) : null}
 
           <TextInput
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            style={{ borderWidth: 1, borderColor: theme.colors.light_gray,backgroundColor: theme.colors.giga_light_gray, borderRadius: 8, padding: 16, marginBottom: 16 }}
+            style={{ borderWidth: 1, borderColor: theme.colors.light_gray,backgroundColor: theme.colors.giga_light_gray, borderRadius: 8, padding: 16, marginBottom: 12 }}
           />
           <TextInput
             placeholder="Password"
@@ -50,19 +88,40 @@ export default function LoginModal({ visible, description = "Please enter your c
           
           <StyledButton
             onPress={async () => {
-              const loginRequest: ILoginRequest = {
-                email: email,
-                password: password
-              };
-              await login(loginRequest);
-              onClose();
+              try {
+                setErrorMessage(null);
+
+                const loginRequest: ILoginRequest = {
+                  email: email.trim(),
+                  password: password,
+                };
+
+                await login(loginRequest);
+                onClose();
+              } catch (error) {
+                setErrorMessage(getLoginErrorMessage(error));
+              }
             }}
           >
             <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Login</Text>
           </StyledButton>
-          <Pressable onPress={onClose} style={{ marginTop: 16, alignSelf: 'center' }}>
-            <Text style={{ color: "gray", fontSize: 14 }}>Cancel</Text>
-          </Pressable>
+            
+          <StyledButton variant="secondary" onPress={onClose} accessibilityLabel="Cancel">
+            Cancel
+          </StyledButton>
+
+          {showRegisterLink && onRegisterPress ? (
+            <View style={{ marginTop: 8, flexDirection: "row", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+              <Text style={{ color: "#666", fontSize: 13 }}>
+                Don&apos;t have an account? {" "}
+              </Text>
+              <Pressable onPress={onRegisterPress} hitSlop={8}>
+                <Text style={{ color: theme.colors.primary, fontSize: 13, fontWeight: "700", textDecorationLine: "underline" }}>
+                  Register
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
       </View>
     </Modal>

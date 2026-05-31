@@ -1,4 +1,4 @@
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, Pressable } from "react-native";
 import { useState } from "react";
 
 import { useAuth } from "@/services/providers/AuthProvider";
@@ -10,6 +10,7 @@ export default function SettingsView() {
   const { accessToken, userId, firstName, surname, logout } = useAuth();
   const [isLoginVisible, setIsLoginVisible] = useState(false);
   const [isRegisterVisible, setIsRegisterVisible] = useState(false);
+  const [isLogoutVisible, setIsLogoutVisible] = useState(false);
 
   const isSignedIn = Boolean(accessToken);
   const displayName = [firstName, surname].filter(Boolean).join(" ") || "Guest";
@@ -27,20 +28,12 @@ export default function SettingsView() {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      "Log out",
-      "You will need to sign in again to access your account features.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Log out",
-          style: "destructive",
-          onPress: () => {
-            void logout();
-          },
-        },
-      ]
-    );
+    setIsLogoutVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    setIsLogoutVisible(false);
+    await logout();
   };
 
   return (
@@ -137,6 +130,31 @@ export default function SettingsView() {
 
     <LoginModal visible={isLoginVisible} onClose={() => setIsLoginVisible(false)} />
     <RegisterModal visible={isRegisterVisible} onClose={() => setIsRegisterVisible(false)} />
+    <Modal
+      visible={isLogoutVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setIsLogoutVisible(false)}
+    >
+      <View style={styles.logoutOverlay}>
+        <View style={styles.logoutCard}>
+          <Text style={styles.logoutTitle}>Log out?</Text>
+          <Text style={styles.logoutCopy}>
+            You will need to sign in again to access your account features.
+          </Text>
+
+          <View style={styles.logoutActions}>
+            <Pressable style={styles.logoutSecondaryButton} onPress={() => setIsLogoutVisible(false)}>
+              <Text style={styles.logoutSecondaryText}>Cancel</Text>
+            </Pressable>
+
+            <Pressable style={styles.logoutPrimaryButton} onPress={() => void confirmLogout()}>
+              <Text style={styles.logoutPrimaryText}>Log out</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
     </>
   );
 }
@@ -286,5 +304,62 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 14,
     color: theme.colors.gray,
+  },
+  logoutOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.42)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  logoutCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(34, 34, 23, 0.08)',
+  },
+  logoutTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: theme.colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  logoutCopy: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: theme.colors.gray,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  logoutActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  logoutSecondaryButton: {
+    flex: 1,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 34, 23, 0.12)',
+    backgroundColor: 'transparent',
+  },
+  logoutSecondaryText: {
+    color: theme.colors.text,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  logoutPrimaryButton: {
+    flex: 1,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: theme.colors.primary,
+  },
+  logoutPrimaryText: {
+    color: theme.colors.white,
+    fontSize: 16,
+    fontWeight: '800',
   },
 });

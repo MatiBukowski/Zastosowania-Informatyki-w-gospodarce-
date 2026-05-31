@@ -58,9 +58,10 @@ export default function RegisterModal({ visible, description = "Please enter you
           >
             <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Register</Text>
           </StyledButton>
-          <Pressable onPress={onClose} style={{ marginTop: 16, alignSelf: 'center' }}>
-            <Text style={{ color: "gray", fontSize: 14 }}>Cancel</Text>
-          </Pressable>
+          
+          <StyledButton variant="secondary" onPress={onClose} accessibilityLabel="Cancel">
+            Cancel
+          </StyledButton>
         </View>
       </View>
     </Modal>

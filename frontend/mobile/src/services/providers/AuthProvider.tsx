@@ -99,6 +99,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             posthog.reset();
             setAccessToken(null);
             setUserId(null);
+            setFirstName(null);
+            setSurname(null);
             setIsAxiosReady(false);
         }
     };
