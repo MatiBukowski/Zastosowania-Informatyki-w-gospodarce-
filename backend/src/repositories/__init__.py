@@ -4,3 +4,5 @@ from .table import TableRepository
 from .reservation import ReservationRepository
 from .posthog import PosthogRepository
 from .user import UserRepository
+from .order import OrderRepository
+

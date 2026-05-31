@@ -5,3 +5,4 @@ from .reservation import router as reservation_router
 from .forecast import router as forecast_router
 from .user import router as user_router
 from .support import router as support_router
+from .order import router as order_router
