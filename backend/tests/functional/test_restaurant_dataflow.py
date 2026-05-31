@@ -80,3 +80,43 @@ class TestRestaurantDataflow:
         assert len(data["items"]) == 1
         assert data["items"][0]["restaurant_id"] == restaurant.restaurant_id
         assert data["items"][0]["name"] == restaurant.name
+
+    def test_patch_restaurant_flow(self, client, db):
+        restaurant = create_restaurants(db)
+        restaurant_id = restaurant.restaurant_id
+
+        update_payload = {
+            "name": "new_name",
+            "city": "new_city",
+            "description": "new_description"
+        }
+
+        response = client.patch(
+            f"/api/restaurants/{restaurant_id}", 
+            json=update_payload
+        )
+
+        assert response.status_code == 200
+        
+        data = response.json()
+        assert data["name"] == update_payload["name"]
+        assert data["city"] == update_payload["city"]
+        assert data["description"] == update_payload["description"]
+        
+        assert "street" in data
+
+        verify_response = client.get(f"/api/restaurants/{restaurant_id}")
+        verify_data = verify_response.json()
+        
+        assert verify_data["name"] == update_payload["name"]
+        assert verify_data["city"] == update_payload["city"]
+
+    def test_patch_restaurant_not_found_flow(self, client, db):
+        update_payload = {"name": "new_name"}
+
+        response = client.patch("/api/restaurants/9999999999", json=update_payload)
+
+        assert response.status_code == 404
+        
+        data = response.json()
+        assert data["detail"] == "Restaurant with id=9999999999 not found"

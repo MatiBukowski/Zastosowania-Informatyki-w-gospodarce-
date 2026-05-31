@@ -25,6 +25,20 @@ class SingleRestaurantPublicResponse(RestaurantPublicResponse):
     description: str
 
 
+class UpdateSingleRestaurant(BaseModel):
+    name: Optional[str] = None
+    city: Optional[str] = None
+    street: Optional[str] = None
+    building_number: Optional[str] = None
+    postal_code: Optional[str] = None
+    phone_number: Optional[str] = None
+    has_kiosk: Optional[bool] = None
+    cuisine: Optional[CuisineTypeEnum] = None
+    photo: Optional[str] = None
+    schedules: Optional[List[RestaurantScheduleBase]] = None
+    description: Optional[str] = None
+
+
 class RestaurantAdminResponse(SingleRestaurantPublicResponse):
     is_active: bool
 

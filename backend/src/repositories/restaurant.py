@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, func
 from ..db import get_session
 from ..models import Restaurant, AppUser
+from ..schemas import UpdateSingleRestaurant
 
 
 class RestaurantRepository:
@@ -51,3 +52,8 @@ class RestaurantRepository:
         items = self.db.execute(query.offset(skip).limit(limit)).scalars().all()
 
         return items, total
+    
+    def update_restaurant(self, restaurant: UpdateSingleRestaurant) -> UpdateSingleRestaurant:
+        self.db.commit()           
+        self.db.refresh(restaurant) 
+        return restaurant
