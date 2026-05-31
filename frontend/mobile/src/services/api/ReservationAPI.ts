@@ -22,3 +22,8 @@ export const updateReservation = async (reservationId: number, data: Partial<ICr
     const response = await apiClient.patch<IReservation>(`/api/reservations/${reservationId}`, data);
     return response.data;
 };
+
+export const getMyReservations = async (): Promise<IReservation[]> => {
+    const response = await apiClient.get<IReservation[]>('/api/reservations/me');
+    return response.data;
+};
