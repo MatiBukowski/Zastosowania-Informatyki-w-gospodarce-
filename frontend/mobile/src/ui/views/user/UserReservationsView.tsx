@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 import { useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { theme } from '@/ui/theme/theme';
@@ -104,7 +104,20 @@ export default function UserReservationsView() {
 
   return (
     <View style={styles.container}>
+    <Stack.Screen options={{ headerShown: false }} />
+
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={28} color={theme.colors.text} />
+        </TouchableOpacity>
       <Text style={styles.pageTitle}>My Reservations</Text>
+    </View>
 
       {isLoading ? (
         <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />
@@ -133,7 +146,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 40,
     backgroundColor: theme.colors.background,
   },
   center: {
@@ -142,10 +155,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: theme.colors.background,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    position: 'relative',
+    width: '100%',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    padding: 5,
+    marginRight: 10,
+  },
   pageTitle: {
     ...theme.typography.h4,
-    marginBottom: 20,
-    marginLeft: 4,
+  color: theme.colors.text,
   },
   cardLayoutOverride: {
   },

@@ -1,6 +1,6 @@
-import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
-
+import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useGetRestaurantMenu } from '@/services/hooks/useRestaurants';
 import { theme } from '@/ui/theme/theme';
 import { usePostHog } from 'posthog-react-native';
@@ -10,7 +10,7 @@ export default function RestaurantMenuView() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { menu, loading, error } = useGetRestaurantMenu(Number(id));
   const posthog = usePostHog();
-
+  const router = useRouter();
   useEffect(() => {
     if (menu && menu.length > 0) {
       posthog.capture('restaurant_menu_viewed', {
@@ -57,23 +57,37 @@ export default function RestaurantMenuView() {
     );
   }
 
-  return (
-    <View style={{ flex: 1, paddingVertical: 20, paddingHorizontal: 4, backgroundColor: theme.colors.background }}>
-      <Stack.Screen
-        options={{
-          headerStyle: { backgroundColor: theme.colors.background },
-          headerShadowVisible: false,
-        }}
-      />
+return (
+    <View style={{ flex: 1, backgroundColor: theme.colors.background, paddingTop: 50 }}>
 
-      <ScrollView
-        contentContainerStyle={{ paddingTop: 30, paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 20, color: theme.colors.text }}>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        marginBottom: 20
+      }}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          style={{ marginRight: 15, padding: 5 }}
+        >
+          <Ionicons name="arrow-back" size={28} color={theme.colors.text} />
+        </TouchableOpacity>
+
+        <Text style={{ fontSize: 28, fontWeight: 'bold', color: theme.colors.text }}>
           Menu
         </Text>
+      </View>
 
+
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         {menu.map((item) => (
           <View
             key={item.menu_item_id}
@@ -81,14 +95,20 @@ export default function RestaurantMenuView() {
               marginBottom: 20,
               paddingBottom: 15,
               borderBottomWidth: 1,
-              borderBottomColor: '#666',
+              borderBottomColor: 'rgba(0,0,0,0.1)',
             }}
           >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.text }}>{item.name}</Text>
-              <Text style={{ fontSize: 16, fontWeight: 'bold', color: theme.colors.primary }}>{item.price} zł</Text>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.text, flex: 1 }}>
+                {item.name}
+              </Text>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: theme.colors.primary, marginLeft: 10 }}>
+                {item.price} zł
+              </Text>
             </View>
-            <Text style={{ fontSize: 14, color: '#666', marginTop: 5, lineHeight: 20 }}>{item.description}</Text>
+            <Text style={{ fontSize: 14, color: '#666', marginTop: 5, lineHeight: 20 }}>
+              {item.description}
+            </Text>
           </View>
         ))}
       </ScrollView>

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'rea
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/ui/theme/theme';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useGetTablesByRestaurantId, useGetRestaurantById } from '@/services/hooks/useRestaurants';
 import { getReservationsByTableId } from '@/services/api/ReservationAPI';
 import { IReservation } from '@/services/interfaces/interfaces';
@@ -189,12 +189,22 @@ const RestaurantCreateReservationView = () => {
     };
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: theme.colors.background, }}>
+            <Stack.Screen options={{ headerShown: false }} />
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 120 }}>
 
                 <View style={styles.headerContainer}>
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        activeOpacity={0.8}
+                        accessibilityRole="button"
+                        accessibilityLabel="Go back"
+                        style={styles.backButton}
+                    >
+                        <Ionicons name="arrow-back" size={28} color={theme.colors.text} />
+                    </TouchableOpacity>
                     <Text style={styles.restaurantName}>{name || "Restaurant"}</Text>
                     <Text style={styles.subtitle}>Choose the reservation details</Text>
                 </View>
@@ -372,6 +382,15 @@ const styles = StyleSheet.create({
         marginBottom: 32,
         alignItems: 'center',
         paddingHorizontal: 30,
+        position: 'relative',
+        justifyContent: 'center',
+    },
+    backButton: {
+        position: 'absolute',
+        left: 10,
+        top: 0,
+        padding: 5,
+        zIndex: 10,
     },
     restaurantName: {
         fontSize: 24,
@@ -442,7 +461,7 @@ const styles = StyleSheet.create({
     },
     footerContainer: {
         padding: 16,
-        marginBottom: 20,
+        //marginBottom: 20,
         //backgroundColor: '#fff',
     },
     gridWrapper: {

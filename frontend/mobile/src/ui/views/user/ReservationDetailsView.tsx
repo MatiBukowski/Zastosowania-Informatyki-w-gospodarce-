@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -72,12 +72,17 @@ export default function ReservationDetailsView() {
 
   return (
     <ScreenLayout>
-      <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
 
-        {/* back button*/}
-        <View style={styles.headerRow}>
+        {/* close button*/}
+        <View style={styles.headerContainer}>
+        <Text style={styles.pageTitle}>Reservation Details</Text>
+
           <TouchableOpacity
-            style={styles.backButton}
+            style={styles.closeButton}
             onPress={() => router.back()}
             activeOpacity={0.8}
             accessibilityRole="button"
@@ -87,7 +92,6 @@ export default function ReservationDetailsView() {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.pageTitle}>Reservation Details</Text>
 
         {/* Reservation details */}
         <View style={theme.common.card}>
@@ -157,43 +161,41 @@ export default function ReservationDetailsView() {
           </TouchableOpacity>
         ) : null}
 
-        )}
-      </View>
+      </ScrollView>
     </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 10,
+    paddingBottom: 40 ,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    width: '100%',
-    marginBottom: 4,
-  },
-  backButton: {
+  headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'center',
+    marginBottom: 30,
+    position: 'relative',
+    width: '100%',
   },
-  backText: {
-    ...theme.typography.body,
-    marginLeft: 4,
-    color: theme.colors.text,
-  },
+
   pageTitle: {
     ...theme.typography.h4,
-    marginBottom: 20,
     textAlign: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    right: 0,
+    padding: 5,
+    zIndex: 10,
   },
   sectionTitle: {
     ...theme.typography.caption,

@@ -1,6 +1,6 @@
  import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { theme } from '@/ui/theme/theme';
@@ -127,10 +127,41 @@ const RestaurantSelectTableView = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.paddedSection}>
-                <Text style={styles.title}>Select Table at {name}</Text>
-                <Text style={styles.subtitle}>{date} at {time}</Text>
+            <View style={styles.container}>
+            <Stack.Screen options={{ headerShown: false }} />
+                        <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingHorizontal: 20,
+                marginTop: 50,
+                marginBottom: 20,
+                position: 'relative',
+                width: '100%'
+            }}>
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Go back"
+                    style={{
+                        position: 'absolute',
+                        left: 20,
+                        padding: 5,
+                        zIndex: 10
+                    }}
+                >
+                    <Ionicons name="arrow-back" size={28} color={theme.colors.text} />
+                </TouchableOpacity>
+
+                <View style={{ alignItems: 'center', paddingHorizontal: 50 }}>
+                    <Text style={[styles.title, { marginTop: 0, textAlign: 'center' }]}>
+                        Select Table at {name}
+                    </Text>
+                    <Text style={[styles.subtitle, { marginBottom: 0, textAlign: 'center' }]}>
+                        {date} at {time}
+                    </Text>
+                </View>
             </View>
             {isLoading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -268,7 +299,7 @@ const styles = StyleSheet.create({
     },
     footerContainer: {
         padding: 16,
-        marginBottom: 30,
+        //marginBottom: 20,
         //backgroundColor: '#fff',
     },
 });
