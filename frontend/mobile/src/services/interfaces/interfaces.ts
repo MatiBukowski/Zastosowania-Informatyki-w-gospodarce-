@@ -18,13 +18,35 @@ export enum CuisineType {
 }
 
 // base restaurant properties
+export enum DayOfWeek {
+  MONDAY = "MONDAY",
+  TUESDAY = "TUESDAY",
+  WEDNESDAY = "WEDNESDAY",
+  THURSDAY = "THURSDAY",
+  FRIDAY = "FRIDAY",
+  SATURDAY = "SATURDAY",
+  SUNDAY = "SUNDAY",
+}
+
+export interface IRestaurantSchedule {
+  day_of_week: DayOfWeek;
+  open_time: string;
+  close_time: string;
+}
+
 interface IRestaurantBase {
   name: string;
-  address: string;
+  address?: string;
+  city: string;
+  street: string;
+  building_number: string;
+  postal_code: string;
+  phone_number: string | null;
   has_kiosk: boolean;
   cuisine: CuisineType; 
   photo: string | null;
   description: string | null;
+  schedules: IRestaurantSchedule[];
 }
 
 // restaurant data including identifier
