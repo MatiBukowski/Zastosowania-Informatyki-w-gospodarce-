@@ -61,15 +61,7 @@ export default function TabsLayout() {
         }}
       />
 
-      <SwipeTabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-            tabBarIcon: ({ color }: { color: string }) => (
-              <Ionicons name="person-circle-outline" size={24} color={color} />
-          ),
-        }}
-      />
+
     </SwipeTabs>
 
   );

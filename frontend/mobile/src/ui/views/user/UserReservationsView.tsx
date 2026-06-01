@@ -44,7 +44,7 @@ import { useGetRestaurantById } from '@/services/hooks/useRestaurants';
         style={[theme.common.card, styles.cardLayoutOverride]}
         activeOpacity={0.7}
         onPress={() => router.push({
-                pathname: "/tabs/profile/reservationDetails",
+                pathname: "/tabs/home/reservationDetails",
                 params: {
                   id: item.reservation_id,
                   restaurantId: item.restaurant_id
