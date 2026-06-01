@@ -96,9 +96,6 @@ export default function HomeView() {
             r.status !== ReservationStatus.CANCELED &&
             r.status !== ReservationStatus.COMPLETED
         )
-        .sort((a, b) => {
-            return new Date(a.reservation_time).getTime() - new Date(b.reservation_time).getTime();
-        })
         .slice(0, 3);
 
 
@@ -150,7 +147,7 @@ export default function HomeView() {
             {/* My Reservations */}
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>My Reservations</Text>
-                <TouchableOpacity onPress={() => router.push('/tabs/profile/UserReservations')}>
+                <TouchableOpacity onPress={() => router.push('/tabs/home/UserReservations')}>
                     <Text style={styles.seeAll}>See all</Text>
                 </TouchableOpacity>
             </View>
@@ -175,7 +172,7 @@ export default function HomeView() {
                             reservation={r}
                             restaurantName={restaurantNames[r.restaurant_id] ?? null}
                             onPress={() => router.push({
-                                pathname: "/tabs/profile/reservationDetails",
+                                pathname: "/tabs/home/reservationDetails",
                                 params: {
                                 id: r.reservation_id,
                                 restaurantId: r.restaurant_id
