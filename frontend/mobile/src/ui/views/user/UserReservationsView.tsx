@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, Stack } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { theme } from '@/ui/theme/theme';
 import { useAuth } from '@/services/providers/AuthProvider';
@@ -81,12 +81,13 @@ import { useGetRestaurantById } from '@/services/hooks/useRestaurants';
     );
   };
 
-
 export default function UserReservationsView() {
   const router = useRouter();
   const { accessToken } = useAuth();
-
   const { reservations, loading: isLoading, refresh } = useGetMyReservations();
+
+  // Stan do przełączania zakładek
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
 
   useFocusEffect(
     useCallback(() => {
@@ -102,9 +103,37 @@ export default function UserReservationsView() {
     );
   }
 
+  const now = new Date().getTime();
+
+  // upcoming reservations
+  const upcomingReservations = (reservations || [])
+    .filter(res => {
+      const resDate = new Date(res.reservation_time.endsWith('Z') ? res.reservation_time : `${res.reservation_time}Z`).getTime();
+      return resDate >= now && res.status !== ReservationStatus.CANCELED && res.status !== ReservationStatus.COMPLETED;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.reservation_time.endsWith('Z') ? a.reservation_time : `${a.reservation_time}Z`).getTime();
+      const dateB = new Date(b.reservation_time.endsWith('Z') ? b.reservation_time : `${b.reservation_time}Z`).getTime();
+      return dateA - dateB;
+    });
+
+  // past reservations
+  const pastReservations = (reservations || [])
+    .filter(res => {
+      const resDate = new Date(res.reservation_time.endsWith('Z') ? res.reservation_time : `${res.reservation_time}Z`).getTime();
+      return resDate < now || res.status === ReservationStatus.CANCELED || res.status === ReservationStatus.COMPLETED;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.reservation_time.endsWith('Z') ? a.reservation_time : `${a.reservation_time}Z`).getTime();
+      const dateB = new Date(b.reservation_time.endsWith('Z') ? b.reservation_time : `${b.reservation_time}Z`).getTime();
+      return dateB - dateA;
+    });
+
+  const displayedReservations = activeTab === 'upcoming' ? upcomingReservations : pastReservations;
+
   return (
     <View style={styles.container}>
-    <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen options={{ headerShown: false }} />
 
       <View style={styles.headerRow}>
         <TouchableOpacity
@@ -116,14 +145,38 @@ export default function UserReservationsView() {
         >
           <Ionicons name="arrow-back" size={28} color={theme.colors.text} />
         </TouchableOpacity>
-      <Text style={styles.pageTitle}>My Reservations</Text>
-    </View>
+        <Text style={styles.pageTitle}>My Reservations</Text>
+      </View>
 
+      {/*upcoming and previous tabs */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'upcoming' && styles.activeTab]}
+          onPress={() => setActiveTab('upcoming')}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.tabText, activeTab === 'upcoming' && styles.activeTabText]}>
+            Upcoming
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'past' && styles.activeTab]}
+          onPress={() => setActiveTab('past')}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.tabText, activeTab === 'past' && styles.activeTabText]}>
+            Past
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Reservations list */}
       {isLoading ? (
         <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />
       ) : (
         <FlatList
-          data={reservations}
+          data={displayedReservations}
           keyExtractor={(item) => item.reservation_id.toString()}
           renderItem={({ item }) => <ReservationCard item={item} />}
           contentContainerStyle={{ paddingBottom: 40 }}
@@ -132,8 +185,16 @@ export default function UserReservationsView() {
           refreshing={isLoading}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Ionicons name="receipt-outline" size={48} color={theme.colors.gray}/>
-              <Text style={styles.emptyStateText}>You don't have any reservations yet.</Text>
+              <Ionicons
+                name={activeTab === 'upcoming' ? "calendar-clear-outline" : "receipt-outline"}
+                size={48}
+                color={theme.colors.gray}
+              />
+              <Text style={styles.emptyStateText}>
+                {activeTab === 'upcoming'
+                  ? "You don't have any upcoming reservations."
+                  : "You don't have any past reservations."}
+              </Text>
             </View>
           }
         />
@@ -222,5 +283,34 @@ const styles = StyleSheet.create({
     marginTop: 12,
     ...theme.typography.body,
     color: theme.colors.gray,
-  }
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: 10,
+    padding: 4,
+    marginBottom: 20,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  activeTab: {
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.gray,
+  },
+  activeTabText: {
+    color: theme.colors.primary,
+  },
 });
