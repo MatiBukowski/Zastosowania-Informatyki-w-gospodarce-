@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ export default function RestaurantDetailsView() {
   const router = useRouter();
   const posthog = usePostHog();
   const { restaurant, loading, error } = useGetRestaurantById(Number(id));
-
+  const [isSchedulesExpanded, setIsSchedulesExpanded] = useState(false);
   useEffect(() => {
     if (restaurant) {
       posthog.capture('restaurant_details_viewed', {
@@ -90,9 +90,9 @@ export default function RestaurantDetailsView() {
         </Text>
 
         {restaurant.phone_number && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+          <View style={styles.phoneRow}>
             <Ionicons name="call-outline" size={16} color={theme.colors.gray} />
-            <Text style={[theme.typography.body, { color: theme.colors.text, marginLeft: 6 }]}>
+            <Text style={[theme.typography.body, styles.phoneText]} numberOfLines={1}>
               {restaurant.phone_number}
             </Text>
           </View>
@@ -113,10 +113,52 @@ export default function RestaurantDetailsView() {
       </View>
 
       <View style={[theme.common.card, styles.descriptionCard]}>
-        <Text style={[theme.typography.h6, { color: theme.colors.text, marginBottom: 8 }]}>About</Text>
-        <Text style={[theme.typography.body, { color: theme.colors.text }]}>
-          {restaurant.description}
+
+        <Text style={[theme.typography.h6, styles.sectionTitle]}>About</Text>
+        <Text style={[theme.typography.body, styles.descriptionText]}>
+          {restaurant.description || "No description available."}
         </Text>
+
+        {restaurant.schedules && restaurant.schedules.length > 0 && (
+          <>
+            <View style={styles.divider} />
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setIsSchedulesExpanded(!isSchedulesExpanded)}
+              style={[
+                styles.schedulesHeader,
+                { marginBottom: isSchedulesExpanded ? 12 : 0 }
+              ]}
+            >
+              <View style={styles.schedulesTitleRow}>
+                <Ionicons name="time-outline" size={18} color={theme.colors.primary} style={styles.schedulesIcon} />
+                <Text style={styles.schedulesTitle}>Opening Hours</Text>
+              </View>
+
+              <Ionicons
+                name={isSchedulesExpanded ? "chevron-up" : "chevron-down"}
+                size={18}
+                color={theme.colors.gray}
+              />
+            </TouchableOpacity>
+
+            {isSchedulesExpanded && (
+              <View style={styles.schedulesListContainer}>
+                {restaurant.schedules.map((schedule, index) => (
+                  <View key={index} style={styles.scheduleRow}>
+                    <Text style={[theme.typography.body, styles.scheduleDay]}>
+                      {schedule.day_of_week.toLowerCase()}
+                    </Text>
+                    <Text style={[theme.typography.body, styles.scheduleTime]}>
+                      {schedule.open_time.slice(0, 5)} - {schedule.close_time.slice(0, 5)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </>
+        )}
       </View>
 
       <StyledButton
@@ -205,20 +247,60 @@ const styles = StyleSheet.create({
   descriptionCard: {
     marginBottom: 16,
   },
-  buttonPrimary: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 10,
-    padding: 16,
+sectionTitle: {
+    color: theme.colors.text,
+    marginBottom: 8
+  },
+  descriptionText: {
+    color: theme.colors.text
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    marginVertical: 16
+  },
+  schedulesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  schedulesTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  schedulesIcon: {
+    marginRight: 8
+  },
+  schedulesTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: theme.colors.text
+  },
+  schedulesListContainer: {
+    marginTop: 4
+  },
+  scheduleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8
+  },
+  scheduleDay: {
+    color: theme.colors.gray,
+    textTransform: 'capitalize'
+  },
+  scheduleTime: {
+    color: theme.colors.text,
+    fontWeight: '600'
+  },
+  phoneRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    width: '100%',
   },
-  buttonTextPrimary: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  buttonSecondary: {
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-    borderRadius: 10,
-    padding: 16,
-    alignItems: 'center',
+  phoneText: {
+    color: theme.colors.text,
+    marginLeft: 6,
+    flex: 1,
   },
-  buttonTextSecondary: { color: theme.colors.primary, fontSize: 16, fontWeight: '700' },
 });

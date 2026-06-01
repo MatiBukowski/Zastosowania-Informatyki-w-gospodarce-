@@ -17,6 +17,13 @@ export enum CuisineType {
   OTHER = "OTHER",
 }
 
+
+export interface IRestaurantSchedule {
+  day_of_week: string;
+  open_time: string;
+  close_time: string;
+}
+
 // base restaurant properties
 interface IRestaurantBase {
   name: string;
@@ -29,6 +36,7 @@ interface IRestaurantBase {
   cuisine: CuisineType; 
   photo: string | null;
   description: string | null;
+  schedules: IRestaurantSchedule[];
 }
 
 // restaurant data including identifier
@@ -42,7 +50,6 @@ export enum ReservationStatus {
   COMPLETED = "COMPLETED",
   CANCELED = "CANCELED",
 }
-
 
 // post
 export interface ICreateReservation {

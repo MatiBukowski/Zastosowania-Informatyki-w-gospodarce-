@@ -4,7 +4,7 @@ import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/ui/theme/theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
+import { useGetTablesByRestaurantId, useGetRestaurantById } from '@/services/hooks/useRestaurants';
 import { getReservationsByTableId } from '@/services/api/ReservationAPI';
 import { IReservation } from '@/services/interfaces/interfaces';
 import { useAuth } from '@/services/providers/AuthProvider';
@@ -45,6 +45,7 @@ const RestaurantCreateReservationView = () => {
     const [isRegisterVisible, setIsRegisterVisible] = useState(false);
 
     const { tables, loading: loadingTables } = useGetTablesByRestaurantId(Number(id));
+    const { restaurant } = useGetRestaurantById(Number(id));
     const posthog = usePostHog();
 
     // fetch all reservations for tables that fit the guest count
@@ -72,10 +73,43 @@ const RestaurantCreateReservationView = () => {
         fetchAllData();
     }, [id, selectedDate, guests, tables]);
 
+    const checkOpeningHours = (slotTime: string, dateStr: string) => {
+        if (!restaurant || !restaurant.schedules || restaurant.schedules.length === 0) return true;
+
+        const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        const dayName = daysOfWeek[new Date(dateStr).getDay()];
+
+        const schedule = restaurant.schedules.find((s: any) => s.day_of_week === dayName);
+        if (!schedule) return false;
+
+        const [slotH, slotM] = slotTime.split(':').map(Number);
+        const slotStartMin = slotH * 60 + slotM;
+        const slotEndMin = slotStartMin + reservation_duration_in_min;
+
+        const [openH, openM] = schedule.open_time.split(':').map(Number);
+        const openStartMin = openH * 60 + openM;
+
+        const [closeH, closeM] = schedule.close_time.split(':').map(Number);
+        const closeEndMin = closeH * 60 + closeM;
+
+        return slotStartMin >= openStartMin && slotEndMin <= closeEndMin;
+    };
+
+    const checkTodayTime = (slotTime: string, dateStr: string) => {
+        if (dateStr !== today) {
+            return true;
+        }
+
+        const slotDateTime = new Date(`${dateStr}T${slotTime}:00`);
+        const cutoffTime = new Date(now.getTime() + durationMs);
+
+        return slotDateTime > cutoffTime;
+    };
+
     // time slot availability check
     const checkIsAnyTableFree = (slotTime: string) => {
         if (!selectedDate || !guests || tables.length === 0) return false;
-
+        if (!checkOpeningHours(slotTime, selectedDate)) return false;
 
         const slotStart = new Date(`${selectedDate}T${slotTime}:00`).getTime();
         const slotEnd = slotStart + durationMs;
@@ -91,7 +125,9 @@ const RestaurantCreateReservationView = () => {
             if (tableRes.length === 0) return true;
 
             const hasCollision = tableRes.some(res => {
-                if (!res.reservation_time) return false;
+                if (res.status === 'CANCELED' || res.status === 3 || res.status === 'COMPLETED' || res.status === 2) {
+                    return false;
+                }
 
                 const utcString = res.reservation_time.endsWith('Z')
                     ? res.reservation_time
@@ -217,14 +253,22 @@ const RestaurantCreateReservationView = () => {
                                 <Ionicons name={direction === 'left' ? 'chevron-back' : 'chevron-forward'} size={24} color={theme.colors.primary} />
                             )}
                             dayComponent={({ date, state }) => {
+                                let isOpenThisDay = true;
+                                if (restaurant && restaurant.schedules && restaurant.schedules.length > 0 && date) {
+                                    const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+                                    const dayName = daysOfWeek[new Date(date.dateString).getDay()];
+                                    isOpenThisDay = restaurant.schedules.some((s: any) => s.day_of_week === dayName);
+                                }
                                 const isSelected = selectedDate === date?.dateString;
-                                const isDisabled = state === 'disabled';
+                                const isPast = state === 'disabled';
+                                const isActuallyDisabled = isPast || !isOpenThisDay;
                                 const isToday = date?.dateString === today;
 
                                 return (
                                     <TouchableOpacity
+                                        disabled={isActuallyDisabled}
                                         onPress={() => {
-                                            if (!isDisabled && date) {
+                                            if (!isActuallyDisabled && date) {
                                                 setSelectedDate(date.dateString);
                                                 setActiveSection('guests');
                                             }
@@ -233,7 +277,7 @@ const RestaurantCreateReservationView = () => {
                                             backgroundColor: isSelected ? theme.colors.primary : theme.colors.white,
                                             borderColor: isSelected ? theme.colors.primary : 'rgba(34, 34, 23, 0.1)',
                                             borderBottomWidth: isSelected ? 1 : 3,
-                                            opacity: isDisabled ? 0.3 : 1,
+                                            opacity: isActuallyDisabled ? 0.3 : 1,
                                         }]}
                                     >
                                         <Text style={{ color: isSelected ? theme.colors.white : (isToday ? theme.colors.primary : theme.colors.text), fontWeight: isSelected ? '800' : '500', fontSize: 15 }}>
@@ -265,26 +309,30 @@ const RestaurantCreateReservationView = () => {
                 {activeSection === 'time' && selectedDate && guests && (
                     <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
                         <View style={styles.gridWrapper}>
-                            {timeSlots.map(time => {
-                                const isAvailable = checkIsAnyTableFree(time);
-                                const isSelected = selectedTime === time;
-                                return (
-                                    <TouchableOpacity
-                                        key={time}
-                                        disabled={!isAvailable}
-                                        onPress={() => setSelectedTime(time)}
-                                        style={[
-                                            styles.gridItem,
-                                            isSelected && styles.selectedItem,
-                                            !isAvailable && styles.disabledItem
-                                        ]}
-                                    >
-                                        <Text style={[styles.gridItemText, isSelected && { color: theme.colors.primary }, !isAvailable && { color: '#ccc' }]}>
-                                            {time}
-                                        </Text>
-                                    </TouchableOpacity>
-                                );
-                            })}
+                            {timeSlots
+                                .filter(time => checkOpeningHours(time, selectedDate))
+                                .filter(time => checkTodayTime(time, selectedDate))
+                                .map(time => {
+                                    const isAvailable = checkIsAnyTableFree(time);
+                                    const isSelected = selectedTime === time;
+
+                                    return (
+                                        <TouchableOpacity
+                                            key={time}
+                                            disabled={!isAvailable}
+                                            onPress={() => setSelectedTime(time)}
+                                            style={[
+                                                styles.gridItem,
+                                                isSelected && styles.selectedItem,
+                                                !isAvailable && styles.disabledItem
+                                            ]}
+                                        >
+                                            <Text style={[styles.gridItemText, isSelected && { color: theme.colors.primary }, !isAvailable && { color: '#ccc' }]}>
+                                                {time}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    );
+                                })}
                         </View>
                     </View>
                 )}
@@ -394,7 +442,7 @@ const styles = StyleSheet.create({
     },
     footerContainer: {
         padding: 16,
-        marginBottom: 30,
+        marginBottom: 20,
         //backgroundColor: '#fff',
     },
     gridWrapper: {

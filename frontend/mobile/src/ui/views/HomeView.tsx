@@ -250,9 +250,8 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         textAlign: 'center',
     },
-    statLabel: {
-        fontSize: 11,
     scanDesc: {
+        fontSize: 14,
         color: theme.colors.gray,
         textAlign: 'center',
         lineHeight: 20,
@@ -321,10 +320,13 @@ const styles = StyleSheet.create({
         color: theme.colors.primary,
         lineHeight: 22,
     },
-    featuredBody: {
-        padding: 10,
     dateMonth: {
         fontSize: 10,
+        fontWeight: '700',
+        color: theme.colors.primary,
+    },
+    cardInfo: {
+        flex: 1,
         gap: 4,
     },
     restaurantName: {
