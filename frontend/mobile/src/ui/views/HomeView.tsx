@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 import ScanQrButton from '@/ui/components/buttons/ScanQrButton';
 import { useAuth } from '@/services/providers/AuthProvider';

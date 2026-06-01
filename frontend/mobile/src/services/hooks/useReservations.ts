@@ -3,7 +3,7 @@ import { fetchAll } from '@/services/api/PaginationHelper';
 import { getReservationsByTableId, createReservation, getReservationById, updateReservation, getMyReservations } from '@/services/api/ReservationAPI';
 import { IReservation, ICreateReservation, IUpdateReservation } from '@/services/interfaces/interfaces';
 import { getUserFacingErrorMessage } from '@/services/errorReporting';
-
+import { useAuth } from '@/services/providers/AuthProvider';
 export function useGetReservationsByTableId(tableId: number) {
     const [reservations, setReservations] = useState<IReservation[]>([]);
     const [loading, setLoading] = useState(true);
@@ -108,19 +108,29 @@ export function useGetMyReservations() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const { accessToken } = useAuth();
+
     const fetchReservations = useCallback(async () => {
-        setLoading(true);
-        try {
-            const data = await getMyReservations();
-            setReservations(data);
-            setError(null);
-        } catch (err: any) {
-            console.error('useGetMyReservations - error:', err);
-            setError(getUserFacingErrorMessage(err, 'Could not load reservations.'));
-        } finally {
+        if (!accessToken) {
+            setReservations([]);
             setLoading(false);
+            return;
         }
-    }, []);
+
+        setLoading(true);
+        setTimeout(async () => {
+            try {
+                const data = await getMyReservations();
+                setReservations(data);
+                setError(null);
+            } catch (err: any) {
+                console.error('useGetMyReservations - error:', err);
+                setError(getUserFacingErrorMessage(err, 'Could not load reservations.'));
+            } finally {
+                setLoading(false);
+            }
+        }, 100);
+    }, [accessToken]);
 
     useEffect(() => {
         fetchReservations();
