@@ -23,6 +23,8 @@ export default function RestaurantDetailsView() {
   const posthog = usePostHog();
   const { restaurant, loading, error } = useGetRestaurantById(Number(id));
   const [isSchedulesExpanded, setIsSchedulesExpanded] = useState(false);
+  const schedulesList = restaurant?.schedules || restaurant?.schedule;
+  const hasSchedule = Array.isArray(schedulesList) && schedulesList.length > 0;
   useEffect(() => {
     if (restaurant) {
       posthog.capture('restaurant_details_viewed', {
@@ -111,6 +113,14 @@ export default function RestaurantDetailsView() {
           )}
         </View>
       </View>
+      {!hasSchedule && (
+        <View style={styles.warningBox}>
+            <Ionicons name="lock-closed-outline" size={20} color="#D32F2F" />
+            <Text style={styles.warningText}>
+                Table reservations are currently disabled for this restaurant because opening hours are not defined.
+            </Text>
+        </View>
+      )}
 
       <View style={[theme.common.card, styles.descriptionCard]}>
 
@@ -119,7 +129,7 @@ export default function RestaurantDetailsView() {
           {restaurant.description || "No description available."}
         </Text>
 
-        {restaurant.schedules && restaurant.schedules.length > 0 && (
+        {hasSchedule && (
           <>
             <View style={styles.divider} />
 
@@ -145,7 +155,7 @@ export default function RestaurantDetailsView() {
 
             {isSchedulesExpanded && (
               <View style={styles.schedulesListContainer}>
-                {restaurant.schedules.map((schedule, index) => (
+                {schedulesList.map((schedule, index) => (
                   <View key={index} style={styles.scheduleRow}>
                     <Text style={[theme.typography.body, styles.scheduleDay]}>
                       {schedule.day_of_week.toLowerCase()}
@@ -162,9 +172,12 @@ export default function RestaurantDetailsView() {
       </View>
 
       <StyledButton
-          variant="primary"
-          accessibilityLabel="Reserve a table"
+          variant={hasSchedule ? "primary" : "disabled"}
+          disabled={!hasSchedule}
+          style={!hasSchedule && styles.disabledButtonOverride}
+          accessibilityLabel={hasSchedule ? "Reserve a table" : "Reservations unavailable"}
           onPress={() => {
+            if (!hasSchedule) return;
             posthog.capture('reservation_button_clicked', {
               restaurant_id: restaurant.restaurant_id,
               restaurant_name: restaurant.name,
@@ -175,7 +188,7 @@ export default function RestaurantDetailsView() {
             });
           }}
       >
-        Reserve a table
+        {hasSchedule ? "Reserve a table" : "Reservations unavailable"}
       </StyledButton>
 
       <StyledButton
@@ -302,5 +315,26 @@ sectionTitle: {
     color: theme.colors.text,
     marginLeft: 6,
     flex: 1,
+  },
+  warningBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    marginBottom: 16,
+    gap: 8,
+  },
+  warningText: {
+    color: theme.colors.gray,
+    fontSize: 13,
+    fontWeight: '600',
+    flex: 1,
+  },
+  disabledButtonOverride: {
+    backgroundColor: '#E0E0E0',
+    opacity: 0.6,
   },
 });

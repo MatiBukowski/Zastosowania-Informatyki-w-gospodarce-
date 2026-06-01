@@ -90,20 +90,14 @@ export default function HomeView() {
     const kioskCount = restaurants.filter(r => r.has_kiosk).length;
 
 
-    const safeReservations = reservations || [];
-    const now = new Date().getTime();
-
-    const upcomingReservations = safeReservations
-        .filter(r => {
-            const resDate = new Date(r.reservation_time.endsWith('Z') ? r.reservation_time : `${r.reservation_time}Z`).getTime();
-            return resDate >= now &&
-                   r.status !== ReservationStatus.CANCELED &&
-                   r.status !== ReservationStatus.COMPLETED;
-        })
+    const upcomingReservations = reservations
+        .filter(r =>
+            new Date(r.reservation_time) >= new Date() &&
+            r.status !== ReservationStatus.CANCELED &&
+            r.status !== ReservationStatus.COMPLETED
+        )
         .sort((a, b) => {
-            const dateA = new Date(a.reservation_time.endsWith('Z') ? a.reservation_time : `${a.reservation_time}Z`).getTime();
-            const dateB = new Date(b.reservation_time.endsWith('Z') ? b.reservation_time : `${b.reservation_time}Z`).getTime();
-            return dateA - dateB;
+            return new Date(a.reservation_time).getTime() - new Date(b.reservation_time).getTime();
         })
         .slice(0, 3);
 
@@ -193,7 +187,7 @@ export default function HomeView() {
             )}
 
             {/* Stats */}
-            {restaurantCount > 0 ?(
+             {restaurantCount > 0 && (
                 <View style={[theme.common.card, styles.statsCard]}>
                     <StatCard
                         icon={<MaterialCommunityIcons name="silverware-fork-knife" size={22} color={theme.colors.primary} />}
@@ -213,7 +207,7 @@ export default function HomeView() {
                         label="Restaurants With Kiosk"
                     />
                 </View>
-            ): null}
+            )}
 
             {/* Onboarding hint */}
             <View style={[theme.common.card, styles.hintCard]}>
