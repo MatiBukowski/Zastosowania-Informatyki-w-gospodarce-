@@ -1,13 +1,14 @@
+import { useEffect } from 'react';
 import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 
 import { useGetRestaurantMenu } from '@/services/hooks/useRestaurants';
 import { theme } from '@/ui/theme/theme';
 import { usePostHog } from 'posthog-react-native';
-import { useEffect } from 'react';
+import RestaurantMenuOrderingPanel from './RestaurantMenuOrderingPanel';
 
 export default function RestaurantMenuView() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, tableId, reservationId } = useLocalSearchParams<{ id: string; tableId?: string; reservationId?: string }>();
   const { menu, loading, error } = useGetRestaurantMenu(Number(id));
   const posthog = usePostHog();
 

@@ -67,6 +67,26 @@ export interface IMenuItem {
   is_available: boolean;
 }
 
+export enum OrderSource {
+  KIOSK = "KIOSK",
+  WEB_APP = "WEB_APP",
+  QR_TABLE = "QR_TABLE",
+}
+
+export interface IOrderItemCreate {
+  menu_item_id: number;
+  quantity: number;
+  customization_notes?: string | null;
+}
+
+export interface ICreateOrder {
+  restaurant_id: number;
+  table_id?: number | null;
+  reservation_id?: number | null;
+  order_source: OrderSource;
+  items: IOrderItemCreate[];
+}
+
 export enum TableStatus {
   FREE = "FREE",
   OCCUPIED = "OCCUPIED",
