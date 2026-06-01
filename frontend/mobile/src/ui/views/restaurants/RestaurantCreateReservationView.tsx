@@ -77,8 +77,8 @@ const RestaurantCreateReservationView = () => {
         if (!restaurant || !restaurant.schedules || restaurant.schedules.length === 0) return true;
 
         const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-        const dayName = daysOfWeek[new Date(dateStr).getDay()];
-
+        const [y, m, d] = dateStr.split('-');
+        const dayName = daysOfWeek[new Date(Number(y), Number(m) - 1, Number(d)).getDay()];
         const schedule = restaurant.schedules.find((s: any) => s.day_of_week === dayName);
         if (!schedule) return false;
 
@@ -125,6 +125,7 @@ const RestaurantCreateReservationView = () => {
             if (tableRes.length === 0) return true;
 
             const hasCollision = tableRes.some(res => {
+                if (!res.reservation_time) return false;
                 if (res.status === 'CANCELED' || res.status === 3 || res.status === 'COMPLETED' || res.status === 2) {
                     return false;
                 }

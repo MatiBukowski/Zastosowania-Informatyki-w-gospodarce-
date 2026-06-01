@@ -73,7 +73,14 @@ const RestaurantSelectTableView = () => {
     console.log(`- Reservations found in DB for this table: ${tableReservations.length}`);
 
         const hasCollision = tableReservations.some(res => {
-            const resStart = new Date(res.reservation_time).getTime();
+            if (!res.reservation_time) return false;
+            if (res.status === 'CANCELED' || res.status === 3 || res.status === 'COMPLETED' || res.status === 2) {
+                return false;
+            }
+            const utcString = res.reservation_time.endsWith('Z')
+                ? res.reservation_time
+                : `${res.reservation_time}Z`;
+            const resStart = new Date(utcString).getTime();
             const resEnd = resStart + durationMs;
 
         // collision condition
@@ -90,6 +97,9 @@ const RestaurantSelectTableView = () => {
 
         try {
             const localDateTime = `${date}T${time}:00`;
+            const localDateObj = new Date(localDateTime);
+            const utcDateTime = localDateObj.toISOString();
+
             const reservationData = {
                 restaurant_id: Number(id),
                 table_id: selectedTableId,
