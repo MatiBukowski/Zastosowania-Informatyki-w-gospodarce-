@@ -189,7 +189,7 @@ const RestaurantSelectTableView = () => {
                     }}
                     onPrimary={() => {
                         setShowOrderPrompt(false);
-                        router.replace(`/restaurants/${id}/menu?tableId=${selectedTableId}&reservationId=${createdReservation?.reservation_id}`);
+                        router.replace(`/restaurants/${id}/order?tableId=${selectedTableId}&reservationId=${createdReservation?.reservation_id}`);
                     }}
                 />
             </>

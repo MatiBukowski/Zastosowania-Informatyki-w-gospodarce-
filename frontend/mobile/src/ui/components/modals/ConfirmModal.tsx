@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
+import { Modal, View, Text, StyleSheet } from 'react-native';
+import StyledButton from '@/ui/components/buttons/StyledButton';
 import { theme } from '@/ui/theme/theme';
 
 interface ConfirmModalProps {
@@ -29,21 +30,25 @@ export default function ConfirmModal({
           {message ? <Text style={styles.message}>{message}</Text> : null}
 
           <View style={styles.actionsRow}>
-            <Pressable
-              style={[styles.btn, styles.secondaryBtn]}
-              onPress={onSecondary}
-              accessibilityRole="button"
-            >
-              <Text style={styles.secondaryText}>{secondaryLabel}</Text>
-            </Pressable>
+            <View style={styles.buttonWrapper}>
+              <StyledButton
+                variant="secondary"
+                onPress={onSecondary}
+                accessibilityLabel={secondaryLabel}
+              >
+                <Text style={styles.secondaryText}>{secondaryLabel}</Text>
+              </StyledButton>
+            </View>
 
-            <Pressable
-              style={[styles.btn, styles.primaryBtn]}
-              onPress={onPrimary}
-              accessibilityRole="button"
-            >
-              <Text style={styles.primaryText}>{primaryLabel}</Text>
-            </Pressable>
+            <View style={styles.buttonWrapper}>
+              <StyledButton
+                variant="primary"
+                onPress={onPrimary}
+                accessibilityLabel={primaryLabel}
+              >
+                <Text style={styles.primaryText}>{primaryLabel}</Text>
+              </StyledButton>
+            </View>
           </View>
         </View>
       </View>
@@ -87,17 +92,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  buttonWrapper: {
+    flex: 1,
+  },
   btn: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 14,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondaryBtn: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: 'rgba(34, 34, 23, 0.12)',
   },
   primaryBtn: {
     backgroundColor: theme.colors.primary,
