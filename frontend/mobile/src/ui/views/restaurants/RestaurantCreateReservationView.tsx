@@ -11,8 +11,8 @@ import { useAuth } from '@/services/providers/AuthProvider';
 import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
 import StyledButton from '@/ui/components/buttons/StyledButton';
-import LoginModal from '@/ui/components/authModals/LoginModal';
-import RegisterModal from '@/ui/components/authModals/RegisterModal';
+import LoginModal from '@/ui/components/modals/LoginModal';
+import RegisterModal from '@/ui/components/modals/RegisterModal';
 
 const reservation_duration_in_min = 120;
 const durationMs = reservation_duration_in_min * 60 * 1000;

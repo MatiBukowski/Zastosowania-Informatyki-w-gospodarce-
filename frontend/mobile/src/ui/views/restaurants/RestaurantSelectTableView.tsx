@@ -10,6 +10,7 @@ import { fetchAll } from '@/services/api/PaginationHelper';
 import { usePostHog } from 'posthog-react-native';
 import { getUserFacingErrorMessage } from '@/services/errorReporting';
  import StyledButton from "@/ui/components/buttons/StyledButton";
+import ConfirmModal from '../../components/modals/ConfirmModal';
 
 const RestaurantSelectTableView = () => {
     const { id, date, time, guests, name } = useLocalSearchParams();
@@ -19,6 +20,8 @@ const RestaurantSelectTableView = () => {
     const { tables } = useGetTablesByRestaurantId(Number(id));
     const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [showOrderPrompt, setShowOrderPrompt] = useState(false);
+    const [createdReservation, setCreatedReservation] = useState<any | null>(null);
     const durationMs = 120 * 60 * 1000; // should be somewhere
     const posthog = usePostHog();
 
@@ -109,9 +112,8 @@ const RestaurantSelectTableView = () => {
                 guest_count: guests
             });
 
-            alert("Reservation successful!");
-            router.dismissAll();
-            router.replace('/');
+            setCreatedReservation(response);
+            setShowOrderPrompt(true);
         } catch (error: any) {
             const errorMessage = getUserFacingErrorMessage(error, "Could not create reservation.");
             posthog.capture('restaurant_reservation_failed', {
@@ -175,6 +177,21 @@ const RestaurantSelectTableView = () => {
                         Confirm My Selection
                     </StyledButton>
                 </View>
+                <ConfirmModal
+                    visible={showOrderPrompt}
+                    title="Reservation successful!"
+                    message="Would you like to order food when you get to the restaurant?"
+                    secondaryLabel="Not now"
+                    primaryLabel="Order now"
+                    onSecondary={() => {
+                        setShowOrderPrompt(false);
+                        router.replace('/');
+                    }}
+                    onPrimary={() => {
+                        setShowOrderPrompt(false);
+                        router.replace(`/restaurants/${id}/order?tableId=${selectedTableId}&reservationId=${createdReservation?.reservation_id}`);
+                    }}
+                />
             </>
             )}
         </View>

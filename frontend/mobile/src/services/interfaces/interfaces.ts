@@ -18,13 +18,35 @@ export enum CuisineType {
 }
 
 // base restaurant properties
+export enum DayOfWeek {
+  MONDAY = "MONDAY",
+  TUESDAY = "TUESDAY",
+  WEDNESDAY = "WEDNESDAY",
+  THURSDAY = "THURSDAY",
+  FRIDAY = "FRIDAY",
+  SATURDAY = "SATURDAY",
+  SUNDAY = "SUNDAY",
+}
+
+export interface IRestaurantSchedule {
+  day_of_week: DayOfWeek;
+  open_time: string;
+  close_time: string;
+}
+
 interface IRestaurantBase {
   name: string;
-  address: string;
+  address?: string;
+  city: string;
+  street: string;
+  building_number: string;
+  postal_code: string;
+  phone_number: string | null;
   has_kiosk: boolean;
   cuisine: CuisineType; 
   photo: string | null;
   description: string | null;
+  schedules: IRestaurantSchedule[];
 }
 
 // restaurant data including identifier
@@ -65,6 +87,26 @@ export interface IMenuItem {
   price: string;
   menu_item_id: number;
   is_available: boolean;
+}
+
+export enum OrderSource {
+  KIOSK = "KIOSK",
+  WEB_APP = "WEB_APP",
+  QR_TABLE = "QR_TABLE",
+}
+
+export interface IOrderItemCreate {
+  menu_item_id: number;
+  quantity: number;
+  customization_notes?: string | null;
+}
+
+export interface ICreateOrder {
+  restaurant_id: number;
+  table_id?: number | null;
+  reservation_id?: number | null;
+  order_source: OrderSource;
+  items: IOrderItemCreate[];
 }
 
 export enum TableStatus {
