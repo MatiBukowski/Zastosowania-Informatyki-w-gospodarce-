@@ -1,6 +1,6 @@
  import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack, type Href } from 'expo-router';
 import { useGetTablesByRestaurantId } from '@/services/hooks/useRestaurants';
 import { useAuth } from '@/services/providers/AuthProvider';
 import { theme } from '@/ui/theme/theme';
@@ -230,7 +230,11 @@ const RestaurantSelectTableView = () => {
                     }}
                     onPrimary={() => {
                         setShowOrderPrompt(false);
-                        router.replace(`/restaurants/${id}/order?tableId=${selectedTableId}&reservationId=${createdReservation?.reservation_id}`);
+                        const orderPath =
+                            `/restaurants/${encodeURIComponent(String(id))}/order` +
+                            `?tableId=${encodeURIComponent(String(selectedTableId))}` +
+                            `&reservationId=${encodeURIComponent(String(createdReservation?.reservation_id))}`;
+                        router.replace(orderPath as Href);
                     }}
                 />
             </>
