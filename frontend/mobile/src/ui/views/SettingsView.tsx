@@ -1,10 +1,11 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, Pressable } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useState } from "react";
 
 import { useAuth } from "@/services/providers/AuthProvider";
 import { theme } from "@/ui/theme/theme";
-import LoginModal from "@/ui/components/authModals/LoginModal";
-import RegisterModal from "@/ui/components/authModals/RegisterModal";
+import LoginModal from "@/ui/components/modals/LoginModal";
+import RegisterModal from "@/ui/components/modals/RegisterModal";
+import ConfirmModal from '../components/modals/ConfirmModal';
 
 export default function SettingsView() {
   const { accessToken, userId, firstName, surname, logout } = useAuth();
@@ -130,31 +131,15 @@ export default function SettingsView() {
 
     <LoginModal visible={isLoginVisible} onClose={() => setIsLoginVisible(false)} />
     <RegisterModal visible={isRegisterVisible} onClose={() => setIsRegisterVisible(false)} />
-    <Modal
+    <ConfirmModal
       visible={isLogoutVisible}
-      transparent
-      animationType="fade"
-      onRequestClose={() => setIsLogoutVisible(false)}
-    >
-      <View style={styles.logoutOverlay}>
-        <View style={styles.logoutCard}>
-          <Text style={styles.logoutTitle}>Log out?</Text>
-          <Text style={styles.logoutCopy}>
-            You will need to sign in again to access your account features.
-          </Text>
-
-          <View style={styles.logoutActions}>
-            <Pressable style={styles.logoutSecondaryButton} onPress={() => setIsLogoutVisible(false)}>
-              <Text style={styles.logoutSecondaryText}>Cancel</Text>
-            </Pressable>
-
-            <Pressable style={styles.logoutPrimaryButton} onPress={() => void confirmLogout()}>
-              <Text style={styles.logoutPrimaryText}>Log out</Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    </Modal>
+      title="Log out?"
+      message="You will need to sign in again to access your account features."
+      secondaryLabel="Cancel"
+      primaryLabel="Log out"
+      onSecondary={() => setIsLogoutVisible(false)}
+      onPrimary={() => void confirmLogout()}
+    />
     </>
   );
 }

@@ -7,11 +7,21 @@ import { Image as ExpoImage } from 'expo-image';
 import { IRestaurant, CuisineType } from '@/services/interfaces/interfaces';
 import { theme } from '@/ui/theme/theme';
 
-function CuisineBox({cuisine}: {cuisine: CuisineType}) {
+function CuisineBox({cuisine, phone}: {cuisine: CuisineType; phone?: string | null}) {
   return (
     <View style={RestaurantCardStyles.common.cuisineBox}>
-      {getCuisineIcon(cuisine)}
-      <Text style={[theme.typography.body, { color: theme.colors.text, marginLeft: 4 }]}>{cuisine}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {getCuisineIcon(cuisine)}
+        <View style={{ marginLeft: 8 }}>
+          <Text style={[theme.typography.body, { color: theme.colors.text }]} numberOfLines={1} ellipsizeMode="tail">{cuisine}</Text>
+        </View>
+      </View>
+      {phone ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 'auto' }}>
+          <Text style={[theme.typography.body, { color: '#000', marginRight: 6 }]}>{phone}</Text>
+          <Ionicons name='call' style={[RestaurantCardStyles.icon, { fontSize: 16, color: '#000' }]} />
+        </View>
+      ) : null}
     </View>
   )
 }
@@ -41,6 +51,27 @@ function LocationBox({address}: {address: string}) {
     <View style={RestaurantCardStyles.common.locationBox}>
       <Ionicons name='location-outline' style={RestaurantCardStyles.icon} />
       <Text style={[theme.typography.body, { color: theme.colors.text, marginLeft: 4 }]}>{address}</Text>
+    </View>
+  )
+}
+
+
+
+function ScheduleBox({schedules}: {schedules?: any[]}) {
+  if (!schedules || schedules.length === 0) return null;
+  const s = schedules[0];
+  const openTime = s?.open_time ?? '';
+  const closeTime = s?.close_time ?? '';
+  return (
+    <View style={RestaurantCardStyles.common.scheduleBox}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Ionicons name='log-in-outline' style={[RestaurantCardStyles.icon, { fontSize: 16 }]} />
+        <Text style={[theme.typography.body, { color: theme.colors.text, marginLeft: 6 }]}>{openTime}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
+        <Ionicons name='log-out-outline' style={[RestaurantCardStyles.icon, { fontSize: 16 }]} />
+        <Text style={[theme.typography.body, { color: theme.colors.text, marginLeft: 6 }]}>{closeTime}</Text>
+      </View>
     </View>
   )
 }
@@ -84,8 +115,10 @@ function RestaurantCard({
           >
             {restaurant.name}
           </Text>
-          <LocationBox address={`${restaurant.street} ${restaurant.building_number}, ${restaurant.city}`} />
-          <CuisineBox cuisine={restaurant.cuisine} />
+          {/** build human readable address from fields when available */}
+          <LocationBox address={restaurant.street && restaurant.building_number ? `${restaurant.street} ${restaurant.building_number}, ${restaurant.postal_code || ''} ${restaurant.city || ''}` : (restaurant.address || '')} />
+          <ScheduleBox schedules={(restaurant as any).schedules} />
+          <CuisineBox cuisine={restaurant.cuisine} phone={(restaurant as any).phone_number ?? (restaurant as any).phone} />
         </View>
       </TouchableOpacity>
     </View>
@@ -120,6 +153,12 @@ const RestaurantCardStyles = {
       flexDirection: 'row', 
       alignItems: 'center', 
       marginTop: 8
+    },
+
+    scheduleBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 6,
     },
     cuisineBox: {
       flexDirection: 'row', 
