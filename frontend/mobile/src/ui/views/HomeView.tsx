@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 import ScanQrButton from '@/ui/components/buttons/ScanQrButton';
 import { useAuth } from '@/services/providers/AuthProvider';
@@ -89,6 +89,7 @@ export default function HomeView() {
     const cuisineCount = new Set(restaurants.map(r => r.cuisine)).size;
     const kioskCount = restaurants.filter(r => r.has_kiosk).length;
 
+
     const upcomingReservations = reservations
         .filter(r =>
             new Date(r.reservation_time) >= new Date() &&
@@ -96,6 +97,7 @@ export default function HomeView() {
             r.status !== ReservationStatus.COMPLETED
         )
         .slice(0, 3);
+
 
     // Fetch restaurant names for upcoming reservations
     useEffect(() => {
@@ -145,7 +147,7 @@ export default function HomeView() {
             {/* My Reservations */}
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>My Reservations</Text>
-                <TouchableOpacity /* onPress={() => router.push('') */>
+                <TouchableOpacity onPress={() => router.push('/tabs/home/UserReservations')}>
                     <Text style={styles.seeAll}>See all</Text>
                 </TouchableOpacity>
             </View>
@@ -169,14 +171,20 @@ export default function HomeView() {
                             key={r.reservation_id}
                             reservation={r}
                             restaurantName={restaurantNames[r.restaurant_id] ?? null}
-                            // onPress={() => router.push(``)}
+                            onPress={() => router.push({
+                                pathname: "/tabs/home/reservationDetails",
+                                params: {
+                                id: r.reservation_id,
+                                restaurantId: r.restaurant_id
+                                }
+                            })}
                         />
                     ))}
                 </View>
             )}
 
             {/* Stats */}
-            {restaurantCount > 0 && (
+             {restaurantCount > 0 && (
                 <View style={[theme.common.card, styles.statsCard]}>
                     <StatCard
                         icon={<MaterialCommunityIcons name="silverware-fork-knife" size={22} color={theme.colors.primary} />}

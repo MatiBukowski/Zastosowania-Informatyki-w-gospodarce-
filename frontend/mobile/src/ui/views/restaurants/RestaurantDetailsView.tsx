@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,9 @@ export default function RestaurantDetailsView() {
   const router = useRouter();
   const posthog = usePostHog();
   const { restaurant, loading, error } = useGetRestaurantById(Number(id));
-
+  const [isSchedulesExpanded, setIsSchedulesExpanded] = useState(false);
+  const schedulesList = restaurant?.schedules || restaurant?.schedule;
+  const hasSchedule = Array.isArray(schedulesList) && schedulesList.length > 0;
   useEffect(() => {
     if (restaurant) {
       posthog.capture('restaurant_details_viewed', {
@@ -84,7 +86,21 @@ export default function RestaurantDetailsView() {
         <Text style={[theme.typography.h4, { color: theme.colors.text }]} numberOfLines={3} ellipsizeMode="tail">
           {restaurant.name}
         </Text>
-        <Text style={[theme.typography.body, styles.address]}>{restaurant.address}</Text>
+
+        <Text style={[theme.typography.body, styles.address]}>
+          {`${restaurant.street} ${restaurant.building_number}, ${restaurant.postal_code} ${restaurant.city}`}
+        </Text>
+
+        {restaurant.phone_number && (
+          <View style={styles.phoneRow}>
+            <Ionicons name="call-outline" size={16} color={theme.colors.gray} />
+            <Text style={[theme.typography.body, styles.phoneText]} numberOfLines={1}>
+              {restaurant.phone_number}
+            </Text>
+          </View>
+        )}
+
+
 
         <View style={styles.tags}>
           <View style={[styles.tag, styles.tagPrimary]}>
@@ -97,26 +113,82 @@ export default function RestaurantDetailsView() {
           )}
         </View>
       </View>
+      {!hasSchedule && (
+        <View style={styles.warningBox}>
+            <Ionicons name="lock-closed-outline" size={20} color="#D32F2F" />
+            <Text style={styles.warningText}>
+                Table reservations are currently disabled for this restaurant because opening hours are not defined.
+            </Text>
+        </View>
+      )}
 
       <View style={[theme.common.card, styles.descriptionCard]}>
-        <Text style={[theme.typography.h6, { color: theme.colors.text, marginBottom: 8 }]}>About</Text>
-        <Text style={[theme.typography.body, { color: theme.colors.text }]}>
-          {restaurant.description}
+
+        <Text style={[theme.typography.h6, styles.sectionTitle]}>About</Text>
+        <Text style={[theme.typography.body, styles.descriptionText]}>
+          {restaurant.description || "No description available."}
         </Text>
+
+        {hasSchedule && (
+          <>
+            <View style={styles.divider} />
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setIsSchedulesExpanded(!isSchedulesExpanded)}
+              style={[
+                styles.schedulesHeader,
+                { marginBottom: isSchedulesExpanded ? 12 : 0 }
+              ]}
+            >
+              <View style={styles.schedulesTitleRow}>
+                <Ionicons name="time-outline" size={18} color={theme.colors.primary} style={styles.schedulesIcon} />
+                <Text style={styles.schedulesTitle}>Opening Hours</Text>
+              </View>
+
+              <Ionicons
+                name={isSchedulesExpanded ? "chevron-up" : "chevron-down"}
+                size={18}
+                color={theme.colors.gray}
+              />
+            </TouchableOpacity>
+
+            {isSchedulesExpanded && (
+              <View style={styles.schedulesListContainer}>
+                {schedulesList.map((schedule, index) => (
+                  <View key={index} style={styles.scheduleRow}>
+                    <Text style={[theme.typography.body, styles.scheduleDay]}>
+                      {schedule.day_of_week.toLowerCase()}
+                    </Text>
+                    <Text style={[theme.typography.body, styles.scheduleTime]}>
+                      {schedule.open_time.slice(0, 5)} - {schedule.close_time.slice(0, 5)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </>
+        )}
       </View>
 
       <StyledButton
-          variant="primary"
-          accessibilityLabel="Reserve a table"
+          variant={hasSchedule ? "primary" : "disabled"}
+          disabled={!hasSchedule}
+          style={!hasSchedule && styles.disabledButtonOverride}
+          accessibilityLabel={hasSchedule ? "Reserve a table" : "Reservations unavailable"}
           onPress={() => {
+            if (!hasSchedule) return;
             posthog.capture('reservation_button_clicked', {
               restaurant_id: restaurant.restaurant_id,
               restaurant_name: restaurant.name,
             });
-            router.push(`/restaurants/${restaurant.restaurant_id}/reservation`);
+            router.push({
+                  pathname: "/tabs/restaurants/[id]/reservation",
+                  params: { id: restaurant.restaurant_id }
+            });
           }}
       >
-        Reserve a table
+        {hasSchedule ? "Reserve a table" : "Reservations unavailable"}
       </StyledButton>
 
       <StyledButton
@@ -127,7 +199,10 @@ export default function RestaurantDetailsView() {
               restaurant_id: restaurant.restaurant_id,
               restaurant_name: restaurant.name,
             });
-            router.push(`/restaurants/${restaurant.restaurant_id}/menu`);
+            router.push({
+                  pathname: "/tabs/restaurants/[id]/menu",
+                  params: { id: restaurant.restaurant_id }
+            });
           }}
       >
         See menu
@@ -184,5 +259,82 @@ const styles = StyleSheet.create({
   tagText: { color: '#fff', fontSize: 12 },
   descriptionCard: {
     marginBottom: 16,
+  },
+sectionTitle: {
+    color: theme.colors.text,
+    marginBottom: 8
+  },
+  descriptionText: {
+    color: theme.colors.text
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    marginVertical: 16
+  },
+  schedulesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  schedulesTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  schedulesIcon: {
+    marginRight: 8
+  },
+  schedulesTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: theme.colors.text
+  },
+  schedulesListContainer: {
+    marginTop: 4
+  },
+  scheduleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8
+  },
+  scheduleDay: {
+    color: theme.colors.gray,
+    textTransform: 'capitalize'
+  },
+  scheduleTime: {
+    color: theme.colors.text,
+    fontWeight: '600'
+  },
+  phoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    width: '100%',
+  },
+  phoneText: {
+    color: theme.colors.text,
+    marginLeft: 6,
+    flex: 1,
+  },
+  warningBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    marginBottom: 16,
+    gap: 8,
+  },
+  warningText: {
+    color: theme.colors.gray,
+    fontSize: 13,
+    fontWeight: '600',
+    flex: 1,
+  },
+  disabledButtonOverride: {
+    backgroundColor: '#E0E0E0',
+    opacity: 0.6,
   },
 });

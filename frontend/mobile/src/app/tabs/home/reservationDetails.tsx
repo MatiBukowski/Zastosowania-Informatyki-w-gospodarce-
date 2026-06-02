@@ -1,10 +1,10 @@
-import LoginView  from '@/ui/views/user/LoginView';
+import ReservationDetailsView from '@/ui/views/user/ReservationDetailsView';
 import { ScreenLayout } from '@/ui/layouts/ScreenLayout';
 
 export default function ReservationsPage() {
   return (
     <ScreenLayout>
-      <LoginView/>
+      <ReservationDetailsView />
     </ScreenLayout>
   );
 }

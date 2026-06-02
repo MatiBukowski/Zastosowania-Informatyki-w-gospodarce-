@@ -61,7 +61,6 @@ export enum ReservationStatus {
   CANCELED = "CANCELED",
 }
 
-
 // post
 export interface ICreateReservation {
   reservation_time: string;
