@@ -4,6 +4,7 @@ from ..schemas import (
     RestaurantPublicResponse,
     SingleRestaurantPublicResponse,
     MenuItemResponse,
+    MenuItemCreate,
     TableResponse,
     TableCreate,
     PaginatedResponse,
@@ -83,6 +84,19 @@ def get_menu_endpoint(
     service: MenuService = Depends()
 ):
     return service.get_menu_for_restaurant(restaurant_id, **pagination)
+
+@router.post(
+    "/{restaurant_id}/menu",
+    summary="Add item to restaurant menu",
+    description="Add a new item to the menu of a specific restaurant",
+    response_model=MenuItemResponse
+)
+def post_menu_item_endpoint(
+    restaurant_id: int,
+    menu_item: MenuItemCreate,
+    service: MenuService = Depends()
+):
+    return service.post_new_menu_item(restaurant_id, menu_item)
 
 @router.post(
     "/{restaurant_id}/tables",

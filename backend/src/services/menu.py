@@ -1,7 +1,7 @@
 import math
 from fastapi import Depends, HTTPException, status
 from ..repositories import MenuRepository
-from ..schemas import PaginatedResponse
+from ..schemas import PaginatedResponse, MenuItemCreate, MenuItemResponse
 
 
 class MenuService:
@@ -17,3 +17,9 @@ class MenuService:
             size=size,
             pages=math.ceil(total / size) if size > 0 else 1
         )
+
+    def post_new_menu_item(self, restaurant_id: int, menu_item: MenuItemCreate) -> MenuItemResponse:
+        menu_item_data = menu_item.model_dump()
+        menu_item_data["restaurant_id"] = restaurant_id
+        
+        return self.repo.post_menu_item(menu_item_data)
