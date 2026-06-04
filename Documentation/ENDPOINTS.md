@@ -21,75 +21,85 @@
    - Returns: {"menu_item_id", "name", "description", "price", "is_available"}
      - Proposed schema name: **"MenuItemResponse"**
 
-6. **POST /api/restaurants/{restaurant_id}/tables**
+6. **POST /api/restaurants/{restaurant_id}/menu**
+   - Sends: {"name", "description", "price"}
+   - Returns: {"menu_item_id", "name", "description", "price", "is_available"}
+     - Proposed schema name: **"MenuItemResponse"**
+
+7. **PATCH /api/restaurants/{restaurant_id}/menu/{menu_item_id}**
+   - Sends: {"name" (Optional), "description" (Optional), "price" (Optional)}
+   - Returns: {"menu_item_id", "name", "description", "price", "is_available"}
+     - Proposed schema name: **"MenuItemResponse"**
+
+8. **POST /api/restaurants/{restaurant_id}/tables**
    - Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
      - Proposed schema name: **"TableResponse"**
 
-7. **PATCH /api/tables/{table_id}**
+9. **PATCH /api/tables/{table_id}**
    - Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
      - Proposed schema name: **"TableResponse"**
 
-8. **PATCH /api/tables/{table_id}/regenerate-qr-code**
+10. **PATCH /api/tables/{table_id}/regenerate-qr-code**
    - Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
      - Proposed schema name: **"TableResponse"**
 
-9. **GET /api/tables/resolve/{token}**
+11. **GET /api/tables/resolve/{token}**
    - Returns: {"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}
      - Proposed schema name: **"TableResponse"**
 
-10. **GET /api/restaurants/{restaurant_id}/tables**
+11. **GET /api/restaurants/{restaurant_id}/tables**
    - Returns a list: List[{"table_id", "restaurant_id", "table_number", "capacity", "qr_code_token", "status"}]
      - Proposed schema name: **"TableResponse"**
 
-11. **GET /api/tables/{table_id}/reservation**
+12. **GET /api/tables/{table_id}/reservation**
    - Returns a list: List[{"reservation_id", "restaurant_id", "table_id", "user_id", "reservation_time", "status"}]
      - Proposed schema name: **"ReservationResponse"**
 
-12. **POST /api/tables/{table_id}/reservation**
+13. **POST /api/tables/{table_id}/reservation**
     - Returns: {"reservation_id", "restaurant_id", "table_id", "user_id", "reservation_time", "status"}
       - Proposed schema name: **"ReservationResponse"**
 
-13. **GET /api/reservations/{reservation_id}**
+14. **GET /api/reservations/{reservation_id}**
     - Returns: {"reservation_id", "restaurant_id", "table_id", "user_id", "reservation_time", "status"}
       - Proposed schema name: **"ReservationResponse"**
 
-14. **PATCH /api/reservations/{reservation_id}**
+15. **PATCH /api/reservations/{reservation_id}**
     - Returns: {"reservation_id", "restaurant_id", "table_id", "user_id", "reservation_time", "status"}
       - Proposed schema name: **"ReservationResponse"**
 
-15. **POST /api/auth/register/{user}**
+16. **POST /api/auth/register/{user}**
     - Returns: {"access_token"} with HTTP only cookie with refresh token in it set.
 
-16. **POST /api/auth/login/{user}**
+17. **POST /api/auth/login/{user}**
     - Returns: {"access_token"} with HTTP only cookie with refresh token in it set.
 
-17. **POST /api/auth/refresh**
+18. **POST /api/auth/refresh**
     - Returns: {"access_token"}
 
-18. **POST /api/auth/logout**
+19. **POST /api/auth/logout**
     - Returns empty HTTP only cookie
 
-19. **GET /api/support/info**
+20. **GET /api/support/info**
     - Returns: {"contact_email", "onboarding_steps": string[]}
 
-12. **POST /api/support/contact**
+21. **POST /api/support/contact**
     - Body: {"name", "email", "request_type", "message", "restaurant_name"?, "source"?}
     - Returns: {"message"}
 
-20. **POST /api/orders**
+22. **POST /api/orders**
     - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
 
-21. **GET /api/orders/my**
+23. **GET /api/orders/my**
     - Returns a list: List[{"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}]
 
-22. **GET /api/orders/restaurant/{restaurant_id}**
+24. **GET /api/orders/restaurant/{restaurant_id}**
     - Returns a list: List[{"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}]
 
-23. **GET /api/orders/{order_id}**
+25. **GET /api/orders/{order_id}**
     - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
 
-24. **PATCH /api/orders/{order_id}**
+26. **PATCH /api/orders/{order_id}**
     - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
 
-25. **PATCH /api/orders/{order_id}/cancel**
+27. **PATCH /api/orders/{order_id}/cancel**
     - Returns: {"order_id", "restaurant_id", "user_id", "table_id", "reservation_id", "order_source", "status", "total_amount", "created_at", "items"}
