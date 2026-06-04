@@ -6,7 +6,7 @@ from .restaurant import (
     RestaurantFilterQuery,
     UpdateSingleRestaurant
 )
-from .menu import MenuItemResponse, MenuItemCreate
+from .menu import MenuItemResponse, MenuItemCreate, MenuItemUpdate
 from .table import TableResponse, TableCreate, TableUpdate
 from .reservation import ReservationResponse, ReservationCreate, ReservationUpdate
 from .forecast import ForecastBase

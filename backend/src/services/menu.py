@@ -1,7 +1,7 @@
 import math
 from fastapi import Depends, HTTPException, status
 from ..repositories import MenuRepository
-from ..schemas import PaginatedResponse, MenuItemCreate, MenuItemResponse
+from ..schemas import PaginatedResponse, MenuItemCreate, MenuItemResponse, MenuItemUpdate
 
 
 class MenuService:
@@ -23,3 +23,21 @@ class MenuService:
         menu_item_data["restaurant_id"] = restaurant_id
         
         return self.repo.post_menu_item(menu_item_data)
+
+    def update_menu_item(self, menu_item_id: int, menu_item_data: MenuItemUpdate) -> MenuItemResponse:
+        existing_menu_item = self.repo.get_menu_item_by_id(menu_item_id)
+        if not existing_menu_item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Menu item with id={menu_item_id} not found"
+            )
+
+        if isinstance(menu_item_data, dict):
+            updated_menu_item_data = menu_item_data
+        else:
+            updated_menu_item_data = menu_item_data.model_dump(exclude_unset=True)
+
+        for key, value in updated_menu_item_data.items():
+            setattr(existing_menu_item, key, value)
+
+        return self.repo.patch_menu_item(existing_menu_item)

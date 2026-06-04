@@ -115,3 +115,68 @@ class TestMenuService:
             "description": "test description",
             "restaurant_id": 99999999
         })
+
+    def test_update_menu_item_success(self):
+        mock_repo = MagicMock()
+        service = MenuService(repo=mock_repo)
+
+        test_menu_item_id = 1
+
+        class MockMenuItem:
+            pass
+
+        existing_item = MockMenuItem()
+        existing_item.name = "Old name"
+        existing_item.description = "Old description"
+        existing_item.price = 20.0
+
+        mock_repo.get_menu_item_by_id.return_value = existing_item
+
+        mock_update_data = MagicMock()
+        mock_update_data.model_dump.return_value = {
+            "name": "New name",
+            "description": "New description",
+            "price": 25.0
+        }
+
+        expected_response = {
+            "id": test_menu_item_id,
+            "name": "New name",
+            "description": "New description",
+            "price": 25.0
+        }
+        mock_repo.patch_menu_item.return_value = expected_response
+
+        result = service.update_menu_item(
+            menu_item_id=test_menu_item_id, 
+            menu_item_data=mock_update_data
+        )
+
+        assert result == expected_response
+        assert existing_item.name == "New name"
+        assert existing_item.description == "New description"
+        assert existing_item.price == 25.0
+
+        mock_repo.get_menu_item_by_id.assert_called_once_with(test_menu_item_id)
+        mock_repo.patch_menu_item.assert_called_once_with(existing_item)
+
+    def test_update_menu_item_error(self):
+        mock_repo = MagicMock()
+        service = MenuService(repo=mock_repo)
+
+        test_menu_item_id = 99999999
+
+        mock_repo.get_menu_item_by_id.return_value = None
+        mock_update_data = MagicMock()
+
+        with pytest.raises(HTTPException) as exc_info:
+            service.update_menu_item(
+                menu_item_id=test_menu_item_id, 
+                menu_item_data=mock_update_data
+            )
+
+        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+        assert exc_info.value.detail == f"Menu item with id={test_menu_item_id} not found"
+
+        mock_repo.get_menu_item_by_id.assert_called_once_with(test_menu_item_id)
+        mock_repo.patch_menu_item.assert_not_called()

@@ -1,4 +1,4 @@
-from tests.utils import create_menu
+from tests.utils import create_menu, create_restaurants
 
 
 class TestMenuDataflow:
@@ -60,3 +60,38 @@ class TestMenuDataflow:
         response = client.post("/api/restaurants/1/menu", json=bad_payload)
 
         assert response.status_code == 422
+
+    def test_patch_menu_item_flow(self, client, db):
+        restaurant = create_restaurants(db)
+        restaurant_id = restaurant.restaurant_id
+
+        menu = create_menu(db)
+        menu_item_id = menu[0].menu_item_id
+
+        update_payload = {
+            "name": "new_name",
+            "description": "new_description",
+            "price": 25.0
+        }
+
+        response = client.patch(
+            f"/api/restaurants/{restaurant_id}/menu/{menu_item_id}", 
+            json=update_payload
+        )
+
+        assert response.status_code == 200
+        
+        data = response.json()
+        assert data["name"] == update_payload["name"]
+        assert data["description"] == update_payload["description"]
+        assert float(data["price"]) == update_payload["price"]
+
+    def test_patch_menu_item_not_found_flow(self, client, db):
+        update_payload = {"name": "new_name"}
+
+        response = client.patch("/api/restaurants/1/menu/9999999999", json=update_payload)
+
+        assert response.status_code == 404
+        
+        data = response.json()
+        assert data["detail"] == "Menu item with id=9999999999 not found"
