@@ -27,8 +27,8 @@ function App() {
             <Route element={<Root isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>}>
               <Route path="/" element={<HomePage />} />
               <Route path="/qr" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><TableQRPage /></ProtectedRoute>} />
-              <Route path="/forecast" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><ForecastPage /></ProtectedRoute>} />
-              <Route path="/restaurants" element={<ProtectedRoute requiredRoles={["ADMIN"]}><RestaurantListPage /></ProtectedRoute>} />
+              <Route path="/forecasts" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><ForecastPage /></ProtectedRoute>} />
+              <Route path="/restaurants" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><RestaurantListPage /></ProtectedRoute>} />
             </Route>
           </Routes>
         </AuthProvider>

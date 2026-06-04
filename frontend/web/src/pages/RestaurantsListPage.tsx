@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../services/AuthProvider';
-import { getRestaurants, getRestaurantsByUser } from '../api/RestaurantAPI';
+import { getRestaurants } from '../api/RestaurantAPI';
 import { fetchAll } from '../api/PaginationHelper';
 import { IRestaurant } from '../context/interfaces';
 import {
@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { usePostHog } from '@posthog/react';
 import RestaurantModifyPanel from '../components/RestaurantModifyPanel';
+import { useSearchParams } from 'react-router-dom';
 
 export const RestaurantListPage = () => {
   const { role, isAxiosReady } = useAuth();
@@ -16,32 +17,34 @@ export const RestaurantListPage = () => {
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | "">("");
 
+  const [searchParams] = useSearchParams();
+  const urlRestaurantId = searchParams.get('restaurantId');
+
   const isAdmin = role === "ADMIN";
 
   useEffect(() => {
-    if (!isAxiosReady) return;
+    if (!role || isAdmin || !isAxiosReady) return;
 
-    const fetchRestaurantsData = async () => {
-      try {
-        let data;
-        if (isAdmin) {
-          data = await fetchAll((page, size) => getRestaurants(page, size));
-        } else {
-          data = await fetchAll((page, size) => getRestaurantsByUser(page, size));
-        }
-        setRestaurants(data);
-        
-        posthog.capture('restaurant_list_viewed', {
-          is_admin: isAdmin,
-          count: data.length
-        });
-      } catch (err) {
+    if (urlRestaurantId) {
+      const id = parseInt(urlRestaurantId, 10);
+      if (!isNaN(id)) {
+        setSelectedRestaurantId(id);
+      }
+    }
+  }, [role, isAdmin, urlRestaurantId, isAxiosReady]);
+
+  useEffect(() => {
+    if (!isAdmin || !isAxiosReady) return;
+
+    fetchAll((page, size) => getRestaurants(page, size))
+      .then((res) => {
+        setRestaurants(res);
+        posthog.capture('restaurant_list_viewed', { is_admin: true, count: res.length });
+      })
+      .catch((err) => {
         console.error(err);
         posthog.capture('failed_restaurant_list_view');
-      }
-    };
-
-    fetchRestaurantsData();
+      });
   }, [isAdmin, isAxiosReady, posthog]);
 
   const handleClosePanel = () => {
