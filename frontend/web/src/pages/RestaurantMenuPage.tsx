@@ -8,10 +8,10 @@ import {
   MenuItem, FormControl, InputLabel
 } from '@mui/material';
 import { usePostHog } from '@posthog/react';
-import RestaurantModifyPanel from '../components/RestaurantModifyPanel';
+import RestaurantMenuModifyPanel from '../components/RestaurantMenuModifyPanel';
 import { useSearchParams } from 'react-router-dom';
 
-export const RestaurantListPage = () => {
+export const RestaurantMenuPage = () => {
   const { role, isAxiosReady } = useAuth();
   const posthog = usePostHog();
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
@@ -39,11 +39,11 @@ export const RestaurantListPage = () => {
     fetchAll((page, size) => getRestaurants(page, size))
       .then((res) => {
         setRestaurants(res);
-        posthog.capture('restaurant_list_viewed', { is_admin: true, count: res.length });
+        posthog.capture('menu_list_viewed', { is_admin: true, count: res.length });
       })
       .catch((err) => {
         console.error(err);
-        posthog.capture('failed_restaurant_list_view');
+        posthog.capture('failed_menu_list_view');
       });
   }, [isAdmin, isAxiosReady, posthog]);
 
@@ -54,7 +54,7 @@ export const RestaurantListPage = () => {
   return (
     <Box sx={pageStyles.container}>
       <Typography variant="h4" sx={pageStyles.header}>
-        Restaurant Management
+        Menu Management
       </Typography>
 
       {isAdmin && (
@@ -76,8 +76,9 @@ export const RestaurantListPage = () => {
         )}
 
         {selectedRestaurantId !== "" && (
-          <RestaurantModifyPanel 
-            restaurantId={selectedRestaurantId as number} 
+          <RestaurantMenuModifyPanel 
+            restaurantId={selectedRestaurantId as number}
+            restaurantName={restaurants.find(r => r.restaurant_id === selectedRestaurantId)?.name || "Unknown"} 
             onClose={handleClosePanel} 
           />
       )}

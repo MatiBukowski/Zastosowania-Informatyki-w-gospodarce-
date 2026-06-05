@@ -1,5 +1,5 @@
 import { apiClient } from './API';
-import {IRestaurant, ITable, IPaginatedResponse, ISingleRestaurant} from '../context/interfaces';
+import {IRestaurant, ITable, IPaginatedResponse, ISingleRestaurant, ISingleRestaurantMenuItem, ISingleRestaurantMenuItemResponse } from '../context/interfaces';
 
 // Add restaurants API client functions: getRestaurants(), getRestaurantById(id).
 export const getRestaurants = async (page: number = 1, size: number = 10): Promise<IPaginatedResponse<IRestaurant>> => {
@@ -40,5 +40,22 @@ export const updateRestaurant = async (restaurant_id: number, data: Partial<ISin
 
 export const regenerateQrCode = async (tableId: number): Promise<ITable> => {
   const response = await apiClient.patch<ITable>(`/api/tables/${tableId}/regenerate-qr-code`);
+  return response.data;
+};
+
+export const getRestaurantMenu = async (restaurant_id: number, page: number = 1, size: number = 10): Promise<IPaginatedResponse<ISingleRestaurantMenuItemResponse>> => {
+  const response = await apiClient.get<IPaginatedResponse<ISingleRestaurantMenuItemResponse>>(`/api/restaurants/${restaurant_id}/menu`, {
+    params: { page, size }
+  });
+  return response.data;
+};
+
+export const addRestaurantMenuItem = async (restaurant_id: number, data: Omit<ISingleRestaurantMenuItem, 'menu_item_id'>): Promise<ISingleRestaurantMenuItem> => {
+  const response = await apiClient.post<ISingleRestaurantMenuItem>(`/api/restaurants/${restaurant_id}/menu`, data);
+  return response.data;
+};
+
+export const updateRestaurantMenuItem = async (restaurant_id: number, menu_item_id: number, data: Partial<ISingleRestaurantMenuItem>): Promise<ISingleRestaurantMenuItem> => {
+  const response = await apiClient.patch<ISingleRestaurantMenuItem>(`/api/restaurants/${restaurant_id}/menu/${menu_item_id}`, data);
   return response.data;
 };

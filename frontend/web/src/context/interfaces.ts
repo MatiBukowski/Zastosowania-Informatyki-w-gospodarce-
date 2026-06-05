@@ -54,6 +54,20 @@ export interface ISingleRestaurant extends IRestaurantBase {
   description: string;
 }
 
+export interface ISingleRestaurantMenuItemResponse {
+  menu_item_id: number;
+  name: string;
+  description: string;
+  price: number;
+  is_available: boolean;
+}
+
+export interface ISingleRestaurantMenuItem {
+  name: string;
+  description: string;
+  price: number;
+}
+
 export enum TableStatus {
   FREE = "FREE",
   OCCUPIED = "OCCUPIED",

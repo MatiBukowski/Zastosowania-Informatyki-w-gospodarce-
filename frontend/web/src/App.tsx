@@ -3,6 +3,7 @@ import { HomePage } from './pages/HomePage';
 import { TableQRPage } from './pages/TableQRPage'
 import { ForecastPage } from './pages/ForecastPage';
 import { RestaurantListPage } from './pages/RestaurantsListPage';
+import { RestaurantMenuPage } from './pages/RestaurantMenuPage';
 import { Routes, Route } from 'react-router-dom';
 import Root from './Root';
 import { LoginPage } from './pages/LoginPage';
@@ -29,6 +30,7 @@ function App() {
               <Route path="/qr" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><TableQRPage /></ProtectedRoute>} />
               <Route path="/forecasts" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><ForecastPage /></ProtectedRoute>} />
               <Route path="/restaurants" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><RestaurantListPage /></ProtectedRoute>} />
+              <Route path="/menu" element={<ProtectedRoute requiredRoles={["ADMIN", "MANAGER", "OWNER"]}><RestaurantMenuPage /></ProtectedRoute>} />
             </Route>
           </Routes>
         </AuthProvider>
