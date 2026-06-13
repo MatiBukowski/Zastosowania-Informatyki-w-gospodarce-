@@ -148,9 +148,13 @@ Here is a quick look at how the application looks and works.
 
 ### 3. Restaurants
 ![img_2.png](img/img_2.png)
+![add_item.png](img/add_item.png)
+![modify_item.png](img/modify_item.png)
 ![img_4.png](img/img_4.png)
 ![img_5.png](img/img_5.png)
 ![img_6.png](img/img_6.png)
+
+
 
 ### 4. Ordering
 ![img_7.png](img/img_7.png)
@@ -159,11 +163,15 @@ Here is a quick look at how the application looks and works.
 ![img_10.png](img/img_10.png)
 ![img_11.png](img/img_11.png)
 
+
+
 ### 5. Profile
 ![img_15.png](img/img_15.png)
 ![img_13.png](img/img_13.png)
 ![img_14.png](img/img_14.png)
 ![img_12.png](img/img_12.png)
+
+
 
 ### 6. Support
 ![img_16.png](img/img_16.png)
