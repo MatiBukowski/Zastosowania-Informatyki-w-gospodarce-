@@ -20,5 +20,10 @@ RUN pip install -r requirements.txt
 
 COPY ./src /app/src
 COPY ./main.py /app/main.py
+COPY ./alembic.ini /app/alembic.ini
+COPY ./migrations /app/migrations
+COPY ./entrypoint.sh /app/entrypoint.sh
 
-ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
