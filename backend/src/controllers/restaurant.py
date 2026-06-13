@@ -4,11 +4,13 @@ from ..schemas import (
     RestaurantPublicResponse,
     SingleRestaurantPublicResponse,
     MenuItemResponse,
+    MenuItemCreate,
     TableResponse,
     TableCreate,
     PaginatedResponse,
     RestaurantFilterQuery,
-    UpdateSingleRestaurant
+    UpdateSingleRestaurant,
+    MenuItemUpdate
 )
 from ..services import RestaurantService, MenuService, TableService
 from ..models import AppUser
@@ -69,7 +71,7 @@ def get_restaurant_endpoint(restaurant_id: int, service: RestaurantService = Dep
     response_model=UpdateSingleRestaurant
 )
 def patch_restaurant_endpoint(restaurant_id: int, restaurant_data: UpdateSingleRestaurant, service: RestaurantService = Depends()):
-    return service.patch_restaurant(restaurant_id, restaurant_data)
+    return service.update_restaurant(restaurant_id, restaurant_data)
 
 @router.get(
     "/{restaurant_id}/menu",
@@ -83,6 +85,32 @@ def get_menu_endpoint(
     service: MenuService = Depends()
 ):
     return service.get_menu_for_restaurant(restaurant_id, **pagination)
+
+@router.post(
+    "/{restaurant_id}/menu",
+    summary="Add item to restaurant menu",
+    description="Add a new item to the menu of a specific restaurant",
+    response_model=MenuItemResponse
+)
+def post_menu_item_endpoint(
+    restaurant_id: int,
+    menu_item: MenuItemCreate,
+    service: MenuService = Depends()
+):
+    return service.post_new_menu_item(restaurant_id, menu_item)
+
+@router.patch(
+    "/{restaurant_id}/menu/{menu_item_id}",
+    summary="Update menu item",
+    description="Update an existing menu item for a specific restaurant",
+    response_model=MenuItemResponse
+)
+def patch_menu_item_endpoint(
+    menu_item_id: int,
+    menu_item: MenuItemUpdate,
+    service: MenuService = Depends()
+):
+    return service.update_menu_item(menu_item_id, menu_item)
 
 @router.post(
     "/{restaurant_id}/tables",

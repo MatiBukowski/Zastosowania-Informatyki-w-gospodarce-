@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, func
 from ..db import get_session
 from ..models import Restaurant, AppUser
-from ..schemas import UpdateSingleRestaurant
+from ..schemas import SingleRestaurantPublicResponse
 
 
 class RestaurantRepository:
@@ -53,7 +53,7 @@ class RestaurantRepository:
 
         return items, total
     
-    def update_restaurant(self, restaurant: UpdateSingleRestaurant) -> UpdateSingleRestaurant:
+    def patch_restaurant(self, restaurant: Restaurant) -> SingleRestaurantPublicResponse:
         self.db.commit()           
         self.db.refresh(restaurant) 
         return restaurant

@@ -14,3 +14,15 @@ class MenuItemResponse(MenuItemBase):
     is_available: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class MenuItemCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: Decimal = Field(..., max_digits=10, decimal_places=2, ge=0)
+
+
+class MenuItemUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[Decimal] = Field(None, max_digits=10, decimal_places=2, ge=0)

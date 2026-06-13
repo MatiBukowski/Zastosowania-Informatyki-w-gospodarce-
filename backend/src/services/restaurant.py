@@ -67,7 +67,7 @@ class RestaurantService:
             pages=math.ceil(total / size) if size > 0 else 1
         )
 
-    def patch_restaurant(self, restaurant_id: int, restaurant_data: UpdateSingleRestaurant):
+    def update_restaurant(self, restaurant_id: int, restaurant_data: UpdateSingleRestaurant):
         restaurant = self.repo.get_restaurant_by_id(restaurant_id)
         if not restaurant:
             raise HTTPException(
@@ -95,4 +95,4 @@ class RestaurantService:
 
             restaurant.schedules = new_schedules
 
-        return self.repo.update_restaurant(restaurant)
+        return self.repo.patch_restaurant(restaurant)

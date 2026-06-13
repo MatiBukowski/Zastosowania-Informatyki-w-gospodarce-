@@ -45,6 +45,7 @@ def create_menu(db):
     ]
     db.add_all(menu)
     db.commit()
+    return menu
 
 def create_tables(db, restaurant_id: int = 1):
     table = RestaurantTable(

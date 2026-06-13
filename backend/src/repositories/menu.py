@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from ..db import get_session
 from ..models import MenuItem
+from ..schemas import MenuItemResponse
 
 
 class MenuRepository:
@@ -14,3 +15,19 @@ class MenuRepository:
         total = self.db.execute(select(func.count()).select_from(query.subquery())).scalar_one()
         items = self.db.execute(query.offset(skip).limit(limit)).scalars().all()
         return items, total
+
+    def get_menu_item_by_id(self, menu_item_id: int) -> MenuItem | None:
+        query = select(MenuItem).where(MenuItem.menu_item_id == menu_item_id)
+        return self.db.execute(query).scalar_one_or_none()
+
+    def post_menu_item(self, menu_item: dict) -> MenuItemResponse:
+        db_menu_item = MenuItem(**menu_item)
+        self.db.add(db_menu_item)
+        self.db.commit()
+        self.db.refresh(db_menu_item)
+        return db_menu_item
+
+    def patch_menu_item(self, menu_item: MenuItem) -> MenuItemResponse:
+        self.db.commit()
+        self.db.refresh(menu_item)
+        return menu_item

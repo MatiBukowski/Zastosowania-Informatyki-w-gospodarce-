@@ -21,7 +21,7 @@ interface ModifyPanelProps {
 }
 
 const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
-  const { isAxiosReady } = useAuth();
+  const { role, isAxiosReady } = useAuth();
   const posthog = usePostHog();
 
   const [loading, setLoading] = useState(true);
@@ -34,6 +34,8 @@ const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
     phone_number: '', has_kiosk: false, photo: '', cuisine: CuisineType.OTHER,
     schedules: [], description: ''
   });
+
+  const isAdmin = role === "ADMIN";
 
   useEffect(() => {
     if (!isAxiosReady || !restaurantId) return;
@@ -158,9 +160,12 @@ const RestaurantModifyPanel = ({ restaurantId, onClose }: ModifyPanelProps) => {
                 {formData.name}
             </Box>
         </Typography>
-        <Button variant="outlined" color="error" onClick={onClose}>
-            Close modification panel
-        </Button>
+
+        {isAdmin && (
+          <Button variant="outlined" color="error" onClick={onClose}>
+              Close modification panel
+          </Button>
+        )}
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}

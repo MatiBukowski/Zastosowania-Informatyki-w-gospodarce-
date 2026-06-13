@@ -10,6 +10,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import { colors } from '../../theme/palette';
 import { useAuth } from '../services/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -115,8 +116,10 @@ const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProp
   const { accessToken, role, firstName, surname, logout, isAxiosReady } = useAuth();
   const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   
-  const [isQrMenuOpen, setIsQrMenuOpen] = useState(false); 
-  const [isStatsMenuOpen, setIsStatsMenuOpen] = useState(false); 
+  const [isQrMenuOpen, setIsQrMenuOpen] = useState(false);
+  const [isStatsMenuOpen, setIsStatsMenuOpen] = useState(false);
+  const [isRestaurantsMenuOpen, setIsRestaurantsMenuOpen] = useState(false);
+  const [isMenuMenuOpen, setIsMenuMenuOpen] = useState(false); 
   
   const posthog = usePostHog();
   const location = useLocation();
@@ -125,8 +128,9 @@ const SideBar = ({ isCollapsed, setIsCollapsed, setRestaurantName }: SideBarProp
   const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Role";
   
   const isQrActive = location.pathname.startsWith('/qr');
-  const isStatsActive = location.pathname === '/' || location.pathname.startsWith('/forecast');
+  const isStatsActive = location.pathname.startsWith('/forecasts');
   const isRestaurantsActive = location.pathname.startsWith('/restaurants');
+  const isMenuActive = location.pathname.startsWith('/menu');
 
   const isAdmin = role === "ADMIN";
 
@@ -166,6 +170,8 @@ useEffect(() => {
       setIsCollapsed(false);
       setIsQrMenuOpen(true);
       setIsStatsMenuOpen(false);
+      setIsRestaurantsMenuOpen(false);
+      setIsMenuMenuOpen(false);
     } else {
       setIsQrMenuOpen(!isQrMenuOpen);
     }
@@ -173,13 +179,43 @@ useEffect(() => {
 
   const handleStatsMenuClick = () => {
     if (isAdmin) return;
-    posthog.capture('sidebar_nav_clicked', { destination: '/qr' })
+    posthog.capture('sidebar_nav_clicked', { destination: '/forecasts' })
     if (isCollapsed) {
       setIsCollapsed(false);
       setIsStatsMenuOpen(true);
       setIsQrMenuOpen(false);
+      setIsRestaurantsMenuOpen(false);
+      setIsMenuMenuOpen(false);
     } else {
       setIsStatsMenuOpen(!isStatsMenuOpen);
+    }
+  };
+
+  const handleRestaurantsMenuClick = () => {
+    if (isAdmin) return;
+    posthog.capture('sidebar_nav_clicked', { destination: '/restaurants' })
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      setIsStatsMenuOpen(true);
+      setIsQrMenuOpen(false);
+      setIsRestaurantsMenuOpen(true);
+      setIsMenuMenuOpen(false);
+    } else {
+      setIsRestaurantsMenuOpen(!isRestaurantsMenuOpen);
+    }
+  };
+
+  const handleMenuMenuClick = () => {
+    if (isAdmin) return;
+    posthog.capture('sidebar_nav_clicked', { destination: '/menu' })
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      setIsStatsMenuOpen(true);
+      setIsQrMenuOpen(false);
+      setIsRestaurantsMenuOpen(false);
+      setIsMenuMenuOpen(true);
+    } else {
+      setIsMenuMenuOpen(!isMenuMenuOpen);
     }
   };
 
@@ -243,7 +279,7 @@ useEffect(() => {
           )}
 
           <SideBarMenuItem
-            href={isAdmin ? '/forecast' : undefined}
+            href={isAdmin ? '/forecasts' : undefined}
             icon={<BarChartIcon sx={{ fontSize: '28px' }} />} 
             label='Forecast' 
             collapsed={isCollapsed} 
@@ -255,8 +291,8 @@ useEffect(() => {
             <Collapse in={isStatsMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
               <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {restaurants.map((r) => {
-                  const targetHref = `/forecast?restaurantId=${r.restaurant_id}`; 
-                  const isItemActive = location.pathname === '/forecast' && location.search.includes(`restaurantId=${r.restaurant_id}`);
+                  const targetHref = `/forecasts?restaurantId=${r.restaurant_id}`; 
+                  const isItemActive = location.pathname === '/forecasts' && location.search.includes(`restaurantId=${r.restaurant_id}`);
                   
                   return (
                     <SideBarMenuItem 
@@ -278,14 +314,76 @@ useEffect(() => {
             </Collapse>
           )}
 
-          {isAdmin && (
-            <SideBarMenuItem
-              href="/restaurants"
-              icon={<StorefrontIcon sx={{ fontSize: '28px' }} />} 
-              label="Restaurants" 
-              collapsed={isCollapsed} 
-              isActive={isRestaurantsActive} 
-            />
+          <SideBarMenuItem
+            href={isAdmin ? '/restaurants' : undefined}
+            icon={<StorefrontIcon sx={{ fontSize: '28px' }} />} 
+            label='Restaurants' 
+            collapsed={isCollapsed} 
+            isActive={isRestaurantsActive && !isRestaurantsMenuOpen} 
+            onClick={handleRestaurantsMenuClick}
+            rightIcon={!isCollapsed && !isAdmin ? (isRestaurantsMenuOpen ? <ExpandLess /> : <ExpandMore />) : undefined}
+          />
+          {!isAdmin && (
+            <Collapse in={isRestaurantsMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {restaurants.map((r) => {
+                  const targetHref = `/restaurants?restaurantId=${r.restaurant_id}`; 
+                  const isItemActive = location.pathname === '/restaurants' && location.search.includes(`restaurantId=${r.restaurant_id}`);
+                  
+                  return (
+                    <SideBarMenuItem 
+                      key={r.restaurant_id}
+                      href={targetHref} 
+                      icon={<ShowChartIcon sx={{ fontSize: '22px' }} />} 
+                      label={r.name} 
+                      collapsed={false} 
+                      isActive={isItemActive}
+                      isSubItem={true}
+                      onClick={() => setRestaurantName(r.name)}
+                    />
+                  );
+                })}
+                {restaurants.length === 0 && (
+                  <Typography variant="caption" sx={{ pl: 4, pt: 1, color: 'text.secondary' }}>No restaurants found</Typography>
+                )}
+              </List>
+            </Collapse>
+          )}
+
+          <SideBarMenuItem
+            href={isAdmin ? '/menu' : undefined}
+            icon={<RestaurantMenuIcon sx={{ fontSize: '28px' }} />} 
+            label='Menu' 
+            collapsed={isCollapsed} 
+            isActive={isMenuActive && !isMenuMenuOpen} 
+            onClick={handleMenuMenuClick}
+            rightIcon={!isCollapsed && !isAdmin ? (isMenuMenuOpen ? <ExpandLess /> : <ExpandMore />) : undefined}
+          />
+          {!isAdmin && (
+            <Collapse in={isMenuMenuOpen && !isCollapsed} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {restaurants.map((r) => {
+                  const targetHref = `/menu?restaurantId=${r.restaurant_id}`; 
+                  const isItemActive = location.pathname === '/menu' && location.search.includes(`restaurantId=${r.restaurant_id}`);
+                  
+                  return (
+                    <SideBarMenuItem 
+                      key={r.restaurant_id}
+                      href={targetHref} 
+                      icon={<ShowChartIcon sx={{ fontSize: '22px' }} />} 
+                      label={r.name} 
+                      collapsed={false} 
+                      isActive={isItemActive}
+                      isSubItem={true}
+                      onClick={() => setRestaurantName(r.name)}
+                    />
+                  );
+                })}
+                {restaurants.length === 0 && (
+                  <Typography variant="caption" sx={{ pl: 4, pt: 1, color: 'text.secondary' }}>No restaurants found</Typography>
+                )}
+              </List>
+            </Collapse>
           )}
 
         </Stack>
