@@ -33,6 +33,7 @@ Projekt z przedmiotu: Zastosowania Informatyki w gospodarce polegający na uspra
 
 ## Documentation
 
+- [Local Setup Guide](Documentation/LOCAL_SETUP.md)
 - [Architecture](Documentation/ARCHITECTURE.md)
 - [Endpoints](Documentation/ENDPOINTS.md)
 - [Development Guide (Migrations, Tests, OpenAPI)](Documentation/DEVELOPMENT.md)
