@@ -1,4 +1,5 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { posthogClient } from '@/analitics/analitics'
 import { reportApplicationError } from '@/services/errorReporting';
 
@@ -12,12 +13,16 @@ export const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(async (config) => {
   const sessionId = posthogClient.getSessionId()
   const distinctId = posthogClient.getDistinctId()
 
   if (sessionId) config.headers['X-POSTHOG-SESSION-ID'] = sessionId
   if (distinctId) config.headers['X-POSTHOG-DISTINCT-ID'] = distinctId
+  if (!config.headers.Authorization) {
+    const token = await AsyncStorage.getItem('user_token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
 
   return config
 })

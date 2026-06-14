@@ -3,7 +3,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { withLayoutContext } from 'expo-router';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 const { Navigator } = createMaterialTopTabNavigator();
 
 export const SwipeTabs = withLayoutContext(Navigator);
@@ -28,6 +27,7 @@ export default function TabsLayout() {
 
         tabBarIndicatorStyle: {
           display: 'none',
+          flex: 1,
         },
       }}
     >
@@ -60,6 +60,9 @@ export default function TabsLayout() {
           ),
         }}
       />
+
+
     </SwipeTabs>
+
   );
 }

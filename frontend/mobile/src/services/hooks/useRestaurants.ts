@@ -74,6 +74,7 @@ export function useGetTablesByRestaurantId(restaurantId: number) {
   useEffect(() => {
     fetchAll((page, size) => getTablesByRestaurantId(restaurantId, page, size))
         .then(data => {
+            console.log(`[DEBUG tables] for restaurant id: ${restaurantId}:`, data);
           setTables(data);
           setLoading(false);
         })
